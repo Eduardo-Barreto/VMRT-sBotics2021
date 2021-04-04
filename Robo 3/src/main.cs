@@ -1,4 +1,4 @@
-bool debug = false;
+bool debug = true;
 
 bc.actuatorSpeed(150);
 bc.actuatorUp(100);
@@ -18,6 +18,5 @@ while(!debug){
 
 
 while(debug){
-    print(1, "DEBUG");
-    print(2, bc.angleActuator());
+    print(1, tem_azul(0));
 }

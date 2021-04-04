@@ -61,22 +61,17 @@ Func <byte, bool> tem_azul = (sensor) => {
    float valAzul = bc.returnBlue(sensor);
    byte mediaVermelho = 31, mediaVerde = 40, mediaAzul = 35;
    int RGB = (int)(valVermelho + valVerde + valAzul);
-   sbyte R = (sbyte)(constrain(map(valVermelho, 0, RGB, 0, 100), 0, 100));
-   sbyte G = (sbyte)(constrain(map(valVerde, 0, RGB, 0, 100), 0, 100));
-   sbyte B = (sbyte)(constrain(map(valAzul, 0, RGB, 0, 100), 0, 100));
-   return ((R < mediaVermelho) && (G < mediaVerde) && (B > mediaAzul));
+   sbyte vermelho = (sbyte)(map(valVermelho, 0, RGB, 0, 100));
+   sbyte verde = (sbyte)(map(valVerde, 0, RGB, 0, 100));
+   sbyte azul = (sbyte)(map(valAzul, 0, RGB, 0, 100));
+   return ((vermelho < mediaVermelho) && (verde < mediaVerde) && (azul > mediaAzul));
 };
 
 Action<int> girar_esquerda = (graus) => {
 	float objetivo = converter_graus(eixo_x() - graus);
 
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-      	else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(-1000, 1000);
-		}
 	}
 	parar();
 };
@@ -84,43 +79,31 @@ Action<int> girar_esquerda = (graus) => {
 Action<int> girar_direita = (graus) => {
 	float objetivo = converter_graus(eixo_x() + graus);
 
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-    	else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(1000, -1000);
-		}
 	}
 	parar();
 };
 
 
 Action<int> objetivo_esquerda = (objetivo) => {
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-		else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(-1000, 1000);
-		}
 	}
 	parar();
 };
 
 Action<int> objetivo_direita = (objetivo) => {
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-		else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(1000, -1000);
-		}
 	}
 	parar();
 };
 
 Action alinhar_angulo = () => {
+	led(255, 255, 0);
+	print(2, "Alinhando robô");
+
 	int alinhamento = 0;
 	float gyro = eixo_x();
 
@@ -145,9 +128,6 @@ Action alinhar_angulo = () => {
 		alinhamento = 270;
 	}
 
-	print(2, $"ALINHANDO");
-	print(3, $"de {gyro} para {alinhamento}");
-
 	gyro = eixo_x();
 
 	if((alinhamento == 0) && (gyro > 180)){
@@ -159,7 +139,9 @@ Action alinhar_angulo = () => {
 	}else if(gyro > alinhamento){
 		objetivo_esquerda(alinhamento);
 	}
-	limpar_console();
+
+	print(2, "");
+	led(0, 0, 0);
 };
 
 Func <int, bool> preto = (sensor) => {

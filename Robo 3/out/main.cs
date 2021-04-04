@@ -1,17 +1,20 @@
-/*Last change: 03/04/2021 | 00:38:44
+/*Last change: 04/04/2021 | 19:31:23
 ----------------------------------------------------------------------------------------------------*/
 
 // Funções de cálculo
 
-Func<float, float, float, float> constrain = delegate(float amt,float low,float high){
-   return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
+Func<float, float, float, float> constrain = delegate(float val, float minimo, float maximo){
+	// Limita um val(val) para não exceder um val mínimo(minimo) e máximo(maximo).
+	return ((val)<(minimo)?(minimo):((val)>(maximo)?(maximo):(val)));
 };
 
-Func<float, float, float, float, float, int> map = delegate(float value, float min, float max, float minTo, float maxTo) {
-  return (int)( (((value - min) * (maxTo - minTo)) / (max - min)) + minTo);
+Func<float, float, float, float, float, int> map = delegate(float val, float minimo, float maximo, float minimoSaida, float maximoSaida) {
+	// "mapeia" ou reescala um val(val), de uma escala (minimo~maximo) para outra (minimoSaida~maximoSaida)
+	return (int)( (((val - minimo) * (maximoSaida - minimoSaida)) / (maximo - minimo)) + minimoSaida);
 };
 
 Func<float, float> converter_graus= (graus) => {
+	// converte os graus pra sempre se manterem entre 0~360, uso em calculos para curvas
 	float graus_convertidos = graus;
 	graus_convertidos = (graus_convertidos < 0) ? 360 + graus_convertidos : graus_convertidos;
 	graus_convertidos = (graus_convertidos > 360) ? (graus_convertidos - 360) : graus_convertidos;
@@ -19,6 +22,7 @@ Func<float, float> converter_graus= (graus) => {
 	return graus_convertidos;
 };
 
+// Verifica se um val(val) esta entre um val mínimo(minimo) e máximo(maximo)
 Func <float, float, float, bool> intervalo = (val, minimo, maximo) => (val > minimo && val < maximo);
 
 float   saida1 = 0,
@@ -84,10 +88,10 @@ Func <byte, bool> tem_azul = (sensor) => {
    float valAzul = bc.returnBlue(sensor);
    byte mediaVermelho = 31, mediaVerde = 40, mediaAzul = 35;
    int RGB = (int)(valVermelho + valVerde + valAzul);
-   sbyte R = (sbyte)(constrain(map(valVermelho, 0, RGB, 0, 100), 0, 100));
-   sbyte G = (sbyte)(constrain(map(valVerde, 0, RGB, 0, 100), 0, 100));
-   sbyte B = (sbyte)(constrain(map(valAzul, 0, RGB, 0, 100), 0, 100));
-   return ((R < mediaVermelho) && (G < mediaVerde) && (B > mediaAzul));
+   sbyte vermelho = (sbyte)(map(valVermelho, 0, RGB, 0, 100));
+   sbyte verde = (sbyte)(map(valVerde, 0, RGB, 0, 100));
+   sbyte azul = (sbyte)(map(valAzul, 0, RGB, 0, 100));
+   return ((vermelho < mediaVermelho) && (verde < mediaVerde) && (azul > mediaAzul));
 };
 
 Action<int> girar_esquerda = (graus) => {
@@ -290,6 +294,7 @@ Action seguir_linha = () =>{
             bc.wait(350);
             tempo_correcao = millis() + 1750;
             while(tempo_correcao > millis()){
+                //TODO: microverificacoes com curvas
                 if(!branco(0) || !branco(1) || !branco(2) || !branco(3)){
                     ultima_correcao = millis();
                     return;
@@ -298,8 +303,8 @@ Action seguir_linha = () =>{
             }
 
             ajustar_linha();
-
-            travar();
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
         }
     }
 
@@ -338,14 +343,14 @@ Action seguir_linha = () =>{
 };
 
 Action verifica_curva = () =>{
-    if(tem_linha(0) || cor(0) == "PRETO"){
+    if(tem_linha(0) || cor(0) == "PRETO" || preto(0)){
         parar();
         led(0, 0, 0);
         print(1, "curva direita!");
-        // verificar verde
+        //TODO: verificar verde
         encoder(-250, 2f);
         ajustar_linha();
-        // verificar verde
+        //TODO: verificar verde
         encoder(250, 8);
         float objetivo = converter_graus(eixo_x() + 15);
         while(!intervalo(eixo_x(), (objetivo-1), (objetivo+1))){
@@ -364,14 +369,15 @@ Action verifica_curva = () =>{
         ajustar_linha();
         calibrar();
         ultima_correcao = millis();
-    }else if(tem_linha(3) || cor(3) == "PRETO"){
+        velocidade = 150;
+    }else if(tem_linha(3) || cor(3) == "PRETO" || preto(3)){
         parar();
         led(0, 0, 0);
         print(1, "curva esquerda!");
-        // verificar verde
+        //TODO: verificar verde
         encoder(-250, 2f);
         ajustar_linha();
-        // verificar verde
+        //TODO: verificar verde
         encoder(250, 8);
         float objetivo = converter_graus(eixo_x() - 15);
         while(!intervalo(eixo_x(), (objetivo-1), (objetivo+1))){
@@ -390,11 +396,12 @@ Action verifica_curva = () =>{
         ajustar_linha();
         calibrar();
         ultima_correcao = millis();
+        velocidade = 150;
     }
 };
 
 
-bool debug = false;
+bool debug = true;
 
 bc.actuatorSpeed(150);
 bc.actuatorUp(100);
@@ -414,8 +421,7 @@ while(!debug){
 
 
 while(debug){
-    print(1, "DEBUG");
-    print(2, bc.angleActuator());
+    print(1, tem_azul(0));
 }
 
 
