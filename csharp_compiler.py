@@ -1,6 +1,7 @@
 import os
 import datetime
 
+os.system('cls')
 
 directory_rc = ['utils', 'base', 'seguir_linha', 'main']
 directory_robo3 = ['utils', 'base', 'seguir_linha', 'main']
