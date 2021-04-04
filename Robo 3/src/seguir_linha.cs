@@ -33,6 +33,7 @@ Action seguir_linha = () =>{
             bc.wait(350);
             tempo_correcao = millis() + 1750;
             while(tempo_correcao > millis()){
+                //TODO: microverificacoes com curvas
                 if(!branco(0) || !branco(1) || !branco(2) || !branco(3)){
                     ultima_correcao = millis();
                     return;
@@ -41,8 +42,8 @@ Action seguir_linha = () =>{
             }
 
             ajustar_linha();
-
-            travar();
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
         }
     }
 
@@ -81,14 +82,14 @@ Action seguir_linha = () =>{
 };
 
 Action verifica_curva = () =>{
-    if(tem_linha(0) || cor(0) == "PRETO"){
+    if(tem_linha(0) || cor(0) == "PRETO" || preto(0)){
         parar();
         led(0, 0, 0);
         print(1, "curva direita!");
-        // verificar verde
+        //TODO: verificar verde
         encoder(-250, 2f);
         ajustar_linha();
-        // verificar verde
+        //TODO: verificar verde
         encoder(250, 8);
         float objetivo = converter_graus(eixo_x() + 15);
         while(!intervalo(eixo_x(), (objetivo-1), (objetivo+1))){
@@ -107,14 +108,15 @@ Action verifica_curva = () =>{
         ajustar_linha();
         calibrar();
         ultima_correcao = millis();
-    }else if(tem_linha(3) || cor(3) == "PRETO"){
+        velocidade = 150;
+    }else if(tem_linha(3) || cor(3) == "PRETO" || preto(3)){
         parar();
         led(0, 0, 0);
         print(1, "curva esquerda!");
-        // verificar verde
+        //TODO: verificar verde
         encoder(-250, 2f);
         ajustar_linha();
-        // verificar verde
+        //TODO: verificar verde
         encoder(250, 8);
         float objetivo = converter_graus(eixo_x() - 15);
         while(!intervalo(eixo_x(), (objetivo-1), (objetivo+1))){
@@ -133,5 +135,6 @@ Action verifica_curva = () =>{
         ajustar_linha();
         calibrar();
         ultima_correcao = millis();
+        velocidade = 150;
     }
 };
