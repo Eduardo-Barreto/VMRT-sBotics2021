@@ -67,6 +67,18 @@ Func <byte, bool> tem_azul = (sensor) => {
    return ((vermelho < mediaVermelho) && (verde < mediaVerde) && (azul > mediaAzul));
 };
 
+Func <int, bool> tem_verde = (sensor) => {
+    float valVermelho = bc.returnRed(sensor);
+    float valVerde = bc.returnGreen(sensor);
+    float valAzul = bc.returnBlue(sensor);
+    byte mediaVermelho = 20, mediaVerde = 65, mediaAzul = 14;
+    int RGB = (int)(valVermelho + valVerde + valAzul);
+    sbyte vermelho = (sbyte)(map(valVermelho, 0, RGB, 0, 100));
+	sbyte verde = (sbyte)(map(valVerde, 0, RGB, 0, 100));
+	sbyte azul = (sbyte)(map(valAzul, 0, RGB, 0, 100));
+    return ((vermelho < mediaVermelho) && (verde > mediaVerde) && (verde < 95) && (azul < mediaAzul));
+};
+
 Action<int> girar_esquerda = (graus) => {
 	float objetivo = converter_graus(eixo_x() - graus);
 
@@ -175,21 +187,20 @@ Func <int, bool> branco = (sensor) => {
 Action ajustar_linha = () => {
     bc.turnLedOn(255, 255, 0);
 
-	while(preto(0)){
+	while(cor(0) == "PRETO"){
 		bc.onTF(-1000, 1000);
 	}
-	while(preto(1)){
+	while(cor(1) == "PRETO"){
 		bc.onTF(-1000, 1000);
 	}
-	while(preto(3)){
+	while(cor(3) == "PRETO"){
 		bc.onTF(1000, -1000);
 	}
-	while(preto(2)){
+	while(cor(2) == "PRETO"){
 		bc.onTF(1000, -1000);
 	}
 
 	parar();
-    bc.turnLedOff();
 };
 
 Action calibrar = () =>{
