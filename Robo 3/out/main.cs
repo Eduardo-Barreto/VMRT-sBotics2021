@@ -1,12 +1,7 @@
-/*Last change: 04/04/2021 | 19:31:23
+/*Last change: 10/04/2021 | 16:56:45
 ----------------------------------------------------------------------------------------------------*/
 
 // Funções de cálculo
-
-Func<float, float, float, float> constrain = delegate(float val, float minimo, float maximo){
-	// Limita um val(val) para não exceder um val mínimo(minimo) e máximo(maximo).
-	return ((val)<(minimo)?(minimo):((val)>(maximo)?(maximo):(val)));
-};
 
 Func<float, float, float, float, float, int> map = delegate(float val, float minimo, float maximo, float minimoSaida, float maximoSaida) {
 	// "mapeia" ou reescala um val(val), de uma escala (minimo~maximo) para outra (minimoSaida~maximoSaida)
@@ -94,16 +89,23 @@ Func <byte, bool> tem_azul = (sensor) => {
    return ((vermelho < mediaVermelho) && (verde < mediaVerde) && (azul > mediaAzul));
 };
 
+Func <int, bool> tem_verde = (sensor) => {
+    float valVermelho = bc.returnRed(sensor);
+    float valVerde = bc.returnGreen(sensor);
+    float valAzul = bc.returnBlue(sensor);
+    byte mediaVermelho = 20, mediaVerde = 65, mediaAzul = 14;
+    int RGB = (int)(valVermelho + valVerde + valAzul);
+    sbyte vermelho = (sbyte)(map(valVermelho, 0, RGB, 0, 100));
+	sbyte verde = (sbyte)(map(valVerde, 0, RGB, 0, 100));
+	sbyte azul = (sbyte)(map(valAzul, 0, RGB, 0, 100));
+    return ((vermelho < mediaVermelho) && (verde > mediaVerde) && (verde < 95) && (azul < mediaAzul));
+};
+
 Action<int> girar_esquerda = (graus) => {
 	float objetivo = converter_graus(eixo_x() - graus);
 
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-      	else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(-1000, 1000);
-		}
 	}
 	parar();
 };
@@ -111,43 +113,31 @@ Action<int> girar_esquerda = (graus) => {
 Action<int> girar_direita = (graus) => {
 	float objetivo = converter_graus(eixo_x() + graus);
 
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-    	else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(1000, -1000);
-		}
 	}
 	parar();
 };
 
 
 Action<int> objetivo_esquerda = (objetivo) => {
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-		else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(-1000, 1000);
-		}
 	}
 	parar();
 };
 
 Action<int> objetivo_direita = (objetivo) => {
-	while(true){
-		if(intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
-			break;
-		}
-		else{
+	while(!intervalo(eixo_x(), (objetivo - 1), (objetivo + 1))){
 			mover(1000, -1000);
-		}
 	}
 	parar();
 };
 
 Action alinhar_angulo = () => {
+	led(255, 255, 0);
+	print(2, "Alinhando robô");
+
 	int alinhamento = 0;
 	float gyro = eixo_x();
 
@@ -172,9 +162,6 @@ Action alinhar_angulo = () => {
 		alinhamento = 270;
 	}
 
-	print(2, $"ALINHANDO");
-	print(3, $"de {gyro} para {alinhamento}");
-
 	gyro = eixo_x();
 
 	if((alinhamento == 0) && (gyro > 180)){
@@ -186,7 +173,9 @@ Action alinhar_angulo = () => {
 	}else if(gyro > alinhamento){
 		objetivo_esquerda(alinhamento);
 	}
-	limpar_console();
+
+	print(2, "");
+	led(0, 0, 0);
 };
 
 Func <int, bool> preto = (sensor) => {
@@ -220,21 +209,20 @@ Func <int, bool> branco = (sensor) => {
 Action ajustar_linha = () => {
     bc.turnLedOn(255, 255, 0);
 
-	while(preto(0)){
+	while(cor(0) == "PRETO"){
 		bc.onTF(-1000, 1000);
 	}
-	while(preto(1)){
+	while(cor(1) == "PRETO"){
 		bc.onTF(-1000, 1000);
 	}
-	while(preto(3)){
+	while(cor(3) == "PRETO"){
 		bc.onTF(1000, -1000);
 	}
-	while(preto(2)){
+	while(cor(2) == "PRETO"){
 		bc.onTF(1000, -1000);
 	}
 
 	parar();
-    bc.turnLedOff();
 };
 
 Action calibrar = () =>{
@@ -268,90 +256,121 @@ uint    tempo_correcao = 0,
         ultima_correcao = 0;
 
 
-Action seguir_linha = () =>{
-    print(1, $"seguindo linha: {velocidade}");
-
-    if((millis() > update_time) && (velocidade < velocidade_max)){
-		update_time = millis() + 16;
-		velocidade++;
-	}
-
-    if(millis() - ultima_correcao > 1750){
-        bc.onTF(1000, -1000);
-        bc.wait(50);
-        if(branco(0) && branco(1) && branco(2) && branco(3)){
-            limpar_console();
-            print(1, "SAÍ DA LINHA !@!21!");
-            tempo_correcao = millis() + 350;
-            while(tempo_correcao > millis()){
-                if(preto(0) || preto(1) || preto(2) || preto(3)){
-                    ultima_correcao = millis();
-                    return;
-                }
-                bc.onTF(1000, -1000);
-            }
-            bc.onTF(-1000, 1000);
-            bc.wait(350);
-            tempo_correcao = millis() + 1750;
-            while(tempo_correcao > millis()){
-                //TODO: microverificacoes com curvas
-                if(!branco(0) || !branco(1) || !branco(2) || !branco(3)){
-                    ultima_correcao = millis();
-                    return;
-                }
-                bc.onTF(-1000, -1000);
-            }
-
-            ajustar_linha();
-            ultima_correcao = millis();
-            velocidade = velocidade_padrao;
-        }
-    }
-
-    if(preto(1)){
-        velocidade = velocidade_padrao;
-        tempo_correcao = millis() + 190;
-        while(tempo_correcao > millis()){
-            if(branco(1) || preto(2)){
-                break;
-            }
-            bc.onTF(-1000, 1000);
-        }
-        mover(velocidade, velocidade);
-        delay(16);
-        ultima_correcao = millis();
-    }
-    else if(preto(2)){
-        velocidade = velocidade_padrao;
-        tempo_correcao = millis() + 190;
-        while(tempo_correcao > millis()){
-            if(branco(2) || preto(1)){
-                break;
-            }
-            bc.onTF(1000, -1000);
-        }
-        mover(velocidade, velocidade);
-        delay(16);
-        ultima_correcao = millis();
-    }
-    else{
-        mover(velocidade, velocidade);
-        if(preto(0) || preto(1) || preto(2) || preto(3)){
-            ultima_correcao = millis();
-        }
+Action levantar_atuador = () => {
+    bc.actuatorSpeed(150);
+    bc.actuatorUp(100);
+    if(bc.angleActuator() >= 0 && bc.angleActuator() < 88){
+        bc.actuatorSpeed(150);
+        bc.actuatorUp(600);
     }
 };
 
+
+Func<bool> beco = () => {
+    if((tem_verde(0) || tem_verde(1)) && (tem_verde(3) || tem_verde(4))){
+        print(1, "BECO");
+        ajustar_linha();
+        if((tem_verde(0) || tem_verde(1)) && (tem_verde(3) || tem_verde(4))){
+            print(2, "CONFIRMADO");
+            led(0, 255, 0);
+            girar_direita(170);
+            float objetivo = converter_graus(eixo_x() + 15);
+            while(!intervalo(eixo_x(), objetivo-1, objetivo+1)){
+                bc.onTF(-1000, 1000);
+                if(tem_linha(1)){
+                    delay(150);
+                    break;
+                }
+            }
+            encoder(-250, 3);
+            ajustar_linha();
+            calibrar();
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
+            update_time = millis() + 300;
+            print(2, "");
+            return true;
+        }
+    }
+    print(2, "");
+    return false;
+};
+
+
+Func<bool> verifica_verde = () =>{
+
+    if(beco()){return true;}
+
+    if(tem_verde(0) || tem_verde(1)){
+        if(beco()){return true;}
+        print(1, "CURVA VERDE - Direita");
+        ajustar_linha();
+        if(tem_verde(0) || tem_verde(1)){
+            if(beco()){return true;}
+            print(2, "CONFIRMADA");
+            led(0, 255, 0);
+            encoder(250, 14);
+            girar_direita(15);
+            float objetivo = converter_graus(eixo_x() + 75);
+            while(!intervalo(eixo_x(), objetivo-1, objetivo+1)){
+                bc.onTF(-1000, 1000);
+                if(tem_linha(1)){
+                    delay(150);
+                    break;
+                }
+            }
+            encoder(-250, 3);
+            ajustar_linha();
+            calibrar();
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
+            update_time = millis() + 300;
+            print(2, "");
+            return true;
+        }
+    }
+    if(tem_verde(3) || tem_verde(4)){
+        if(beco()){return true;}
+        print(1, "CURVA VERDE - Esquerda");
+        ajustar_linha();
+        if(tem_verde(3) || tem_verde(4)){
+            if(beco()){return true;}
+            print(2, "CONFIRMADA");
+            led(0, 255, 0);
+            encoder(250, 14);
+            girar_esquerda(15);
+            float objetivo = converter_graus(eixo_x() - 75);
+            while(!intervalo(eixo_x(), objetivo-1, objetivo+1)){
+                bc.onTF(1000, -1000);
+                if(tem_linha(2)){
+                    delay(150);
+                    break;
+                }
+            }
+            encoder(-250, 3);
+            ajustar_linha();
+            calibrar();
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
+            update_time = millis() + 300;
+            print(2, "");
+            return true;
+        }
+    }
+    return false;
+};
+
 Action verifica_curva = () =>{
+
     if(tem_linha(0) || cor(0) == "PRETO" || preto(0)){
         parar();
-        led(0, 0, 0);
         print(1, "curva direita!");
-        //TODO: verificar verde
+        if(verifica_verde()){return;}
         encoder(-250, 2f);
         ajustar_linha();
-        //TODO: verificar verde
-        encoder(250, 8);
+        led(0, 0, 0);
+        if(verifica_verde()){return;}
+        encoder(250, 9);
         float objetivo = converter_graus(eixo_x() + 15);
         while(!intervalo(eixo_x(), (objetivo-1), (objetivo+1))){
             mover(1000, -1000);
@@ -369,16 +388,17 @@ Action verifica_curva = () =>{
         ajustar_linha();
         calibrar();
         ultima_correcao = millis();
-        velocidade = 150;
+        velocidade = velocidade_padrao;
+        update_time = millis() + 300;
     }else if(tem_linha(3) || cor(3) == "PRETO" || preto(3)){
         parar();
-        led(0, 0, 0);
         print(1, "curva esquerda!");
-        //TODO: verificar verde
+        if(verifica_verde()){return;}
         encoder(-250, 2f);
         ajustar_linha();
-        //TODO: verificar verde
-        encoder(250, 8);
+        led(0, 0, 0);
+        if(verifica_verde()){return;}
+        encoder(250, 9);
         float objetivo = converter_graus(eixo_x() - 15);
         while(!intervalo(eixo_x(), (objetivo-1), (objetivo+1))){
             mover(-1000, 1000);
@@ -396,22 +416,116 @@ Action verifica_curva = () =>{
         ajustar_linha();
         calibrar();
         ultima_correcao = millis();
-        velocidade = 150;
+        velocidade = velocidade_padrao;
+        update_time = millis() + 300;
     }
 };
 
 
-bool debug = true;
+Action seguir_linha = () =>{
+    print(1, $"seguindo linha: {velocidade}");
+    bc.turnLedOff();
 
-bc.actuatorSpeed(150);
-bc.actuatorUp(100);
+    if((millis() > update_time) && (velocidade < velocidade_max)){
+		update_time = millis() + 32;
+		velocidade++;
+	}
+
+    if((millis() - ultima_correcao > 1500)){
+        bc.onTF(1000, -1000);
+        bc.wait(50);
+        if(branco(0) && branco(1) && branco(2) && branco(3)){
+            limpar_console();
+            print(1, "SAÍ DA LINHA !@!21!");
+            tempo_correcao = millis() + 350;
+            while(tempo_correcao > millis()){
+                if(preto(0) || preto(1) || preto(2) || preto(3)){
+                    ajustar_linha();
+                    ultima_correcao = millis();
+                    return;
+                }
+                bc.onTF(1000, -1000);
+            }
+            bc.onTF(-1000, 1000);
+            bc.wait(350);
+            tempo_correcao = millis() + 1750;
+            while(tempo_correcao > millis()){
+                //TODO: microverificacoes com curvas
+                if(preto(0) || preto(1) || preto(2) || preto(3)){
+                    ultima_correcao = millis();
+                    return;
+                }
+                bc.onTF(-1000, -1000);
+            }
+            delay(150);
+
+            ajustar_linha();
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
+            update_time = millis() + 300;
+        }
+    }
+
+    if(tem_azul(1) || tem_azul(2)){
+        while(tem_azul(0) || tem_azul(1) || tem_azul(2) || tem_azul(3)){
+            bc.onTF(-1000, -1000);
+        }
+        tempo_correcao = millis() - ultima_correcao;
+        while(tempo_correcao > millis()){
+            //TODO: microverificacoes com curvas
+            if(preto(0) || preto(1) || preto(2) || preto(3)){
+                ultima_correcao = millis();
+                return;
+            }
+            bc.onTF(-1000, -1000);
+        }
+        delay(150);
+
+        ajustar_linha();
+        ultima_correcao = millis();
+        velocidade = velocidade_padrao;
+        update_time = millis() + 300;
+    }
+
+    if(preto(1)){
+        verifica_curva();
+        velocidade = velocidade_padrao;
+        tempo_correcao = millis() + 190;
+        while(tempo_correcao > millis()){
+            if(branco(1) || preto(2)){
+                break;
+            }
+            bc.onTF(-1000, 1000);
+        }
+        mover(velocidade, velocidade);
+        delay(16);
+        ultima_correcao = millis();
+    }
+    else if(preto(2)){
+        verifica_curva();
+        velocidade = velocidade_padrao;
+        tempo_correcao = millis() + 190;
+        while(tempo_correcao > millis()){
+            if(branco(2) || preto(1)){
+                break;
+            }
+            bc.onTF(1000, -1000);
+        }
+        mover(velocidade, velocidade);
+        delay(16);
+        ultima_correcao = millis();
+    }
+    else{
+        mover(velocidade, velocidade);
+        verifica_curva();
+    }
+};
+
+
+bool debug = false;
 
 calibrar();
 
-if(bc.angleActuator() >= 0 && bc.angleActuator() < 88){
-    bc.actuatorSpeed(150);
-    bc.actuatorUp(600);
-}
 
 while(!debug){
     verifica_calibrar();
@@ -421,7 +535,7 @@ while(!debug){
 
 
 while(debug){
-    print(1, tem_azul(0));
+    print(1, $"{tem_azul(0)} | {tem_azul(1)} | {tem_azul(2)} | {tem_azul(3)}");
 }
 
 
