@@ -1,14 +1,7 @@
-bool debug = true;
-
-bc.actuatorSpeed(150);
-bc.actuatorUp(100);
+bool debug = false;
 
 calibrar();
 
-if(bc.angleActuator() >= 0 && bc.angleActuator() < 88){
-    bc.actuatorSpeed(150);
-    bc.actuatorUp(600);
-}
 
 while(!debug){
     verifica_calibrar();
@@ -18,5 +11,5 @@ while(!debug){
 
 
 while(debug){
-    print(1, tem_azul(0));
+    print(1, $"{tem_azul(0)} | {tem_azul(1)} | {tem_azul(2)} | {tem_azul(3)}");
 }
