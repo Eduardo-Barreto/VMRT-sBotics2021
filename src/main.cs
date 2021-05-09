@@ -1,6 +1,8 @@
+import("variaveis");
 import("utils");
-import("base");
+import("leituras");
+import("movimentacao");
 
 void Main(){
-    bc.PrintConsole(1, millis().ToString());
+    levantar_atuador();
 }
