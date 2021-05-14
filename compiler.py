@@ -90,10 +90,7 @@ class ImporterManager():
 # Instances ----------------------------------------------------------------
 MainFile = MainFileManager()
 MainFile.checkExtension(
-	input(
-		'Enter the name of the final file' +
-		'(with the extension, such as "main.cs"): '
-	)
+	'main.cs'
 )
 MainFile.diretory()
 MainFile.language()
