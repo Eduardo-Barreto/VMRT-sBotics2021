@@ -1,4 +1,4 @@
-uint millis() => (uint) bc.Timer();
+int millis() => (int)(bc.Timer());
 string cor(int sensor) => bc.ReturnColor(sensor);
 int luz(byte sensor) => (int) bc.Lightness(sensor);
 int ultra(byte sensor) => (int) bc.Distance(sensor);
@@ -37,8 +37,7 @@ bool verde(int sensor){
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
-    print(1, $"{vermelho} | {verde} | {azul}");
-    return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 95));
+    return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 96));
 }
 
 bool preto(int sensor){
@@ -90,3 +89,17 @@ void verifica_calibrar(){
     }
 }
 
+void ler_cor(){
+    preto0 = preto(0);
+    preto1 = preto(1);
+    preto2 = preto(2);
+    preto3 = preto(3);
+
+    verde0 = verde(0);
+    verde1 = verde(1);
+    verde2 = verde(2);
+    verde3 = verde(3);
+
+    preto_curva_dir = (tem_linha(0) || cor(0) == "PRETO" || preto(0));
+    preto_curva_esq = (tem_linha(3) || cor(3) == "PRETO" || preto(3));
+}

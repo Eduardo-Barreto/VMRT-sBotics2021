@@ -1,18 +1,43 @@
-float   saida1 = 0,
+float saida1 = 0,
         saida2 = 0,
-		media_meio = 0,
+        media_meio = 0,
         media_fora = 0;
-float map(float val, float minimo, float maximo, float minimoSaida, float maximoSaida){
-    // "mapeia" ou reescala um val (val), de uma escala (minimo~maximo) para outra (minimoSaida~maximoSaida)
+
+int velocidade_padrao = 190,
+        velocidade = 200,
+        velocidade_max = 300,
+        update_time = 16,
+        tempo_correcao = 0,
+        ultima_correcao = 0;
+
+bool preto0 = false,
+        preto1 = false,
+        preto2 = false,
+        preto3 = false,
+
+        verde0 = false,
+        verde1 = false,
+        verde2 = false,
+        verde3 = false,
+
+        preto_curva_dir = false,
+        preto_curva_esq = false;
+
+int[] angulos_retos = {0, 45, 90, 135, 180, 225, 270};
+float map(float val, float minimo, float maximo, float minimoSaida, float maximoSaida)
+{
+    //"mapeia" ou reescala um val (val), de uma escala (minimo~maximo) para outra (minimoSaida~maximoSaida)
     return (val - minimo) * (maximoSaida - minimoSaida) / (maximo - minimo) + minimoSaida;
 }
 
-bool proximo(float atual, float objetivo){
+bool proximo(float atual, float objetivo)
+{
     // Verifica se um val (atual) esta próximo de um objetivo (objetivo)
-    return (atual > objetivo-1 && atual < objetivo+1);
+    return (atual > objetivo - 1 && atual < objetivo + 1);
 }
 
-float converter_graus(float graus){
+float converter_graus(float graus)
+{
     // converte os graus pra sempre se manterem entre 0~360, uso em calculos para curvas
     float graus_convertidos = graus;
     graus_convertidos = (graus_convertidos < 0) ? (360 + graus_convertidos) : graus_convertidos;
@@ -21,14 +46,17 @@ float converter_graus(float graus){
     return graus_convertidos;
 }
 
-void levantar_atuador(){
+void levantar_atuador()
+{
     bc.actuatorSpeed(150);
     bc.actuatorUp(100);
-    if(bc.angleActuator() >= 0 && bc.angleActuator() < 88){
+    if (bc.angleActuator() >= 0 && bc.angleActuator() < 88)
+    {
         bc.actuatorSpeed(150);
         bc.actuatorUp(600);
     }
-}uint millis() => (uint) bc.Timer();
+}
+int millis() => (int)(bc.Timer());
 string cor(int sensor) => bc.ReturnColor(sensor);
 int luz(byte sensor) => (int) bc.Lightness(sensor);
 int ultra(byte sensor) => (int) bc.Distance(sensor);
@@ -67,8 +95,7 @@ bool verde(int sensor){
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
-    print(1, $"{vermelho} | {verde} | {azul}");
-    return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 95));
+    return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 96));
 }
 
 bool preto(int sensor){
@@ -120,6 +147,20 @@ void verifica_calibrar(){
     }
 }
 
+void ler_cor(){
+    preto0 = preto(0);
+    preto1 = preto(1);
+    preto2 = preto(2);
+    preto3 = preto(3);
+
+    verde0 = verde(0);
+    verde1 = verde(1);
+    verde2 = verde(2);
+    verde3 = verde(3);
+
+    preto_curva_dir = (tem_linha(0) || cor(0) == "PRETO" || preto(0));
+    preto_curva_esq = (tem_linha(3) || cor(3) == "PRETO" || preto(3));
+}
 void mover(int esquerda, int direita) => bc.MoveFrontal(direita, esquerda);
 void rotacionar(int velocidade, int graus) => bc.MoveFrontalAngles(velocidade, graus);
 void encoder(int velocidade, int rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
@@ -221,7 +262,219 @@ void ajustar_linha(){
 	parar();
     bc.TurnLedOff();
 }
+void seguir_linha(){
+    print(1, $"Seguindo linha: {velocidade}");
+    bc.TurnLedOff();
+    ler_cor();
 
-void Main(){
-    levantar_atuador();
+    if((millis() > update_time) && (velocidade < velocidade_max)){
+        update_time = millis() + 32;
+        velocidade++;
+    }
+
+    if(preto1){
+        velocidade = velocidade_padrao;
+        tempo_correcao = millis() + 210;
+
+        while(tempo_correcao > millis()){
+            if(branco(1) || preto(2)){
+                break;
+            }
+            mover(1000, -1000);
+        }
+        mover(velocidade, velocidade);
+        delay(5);
+        ultima_correcao = millis();
+    }
+
+    else if(preto2){
+        velocidade = velocidade_padrao;
+        tempo_correcao = millis() + 210;
+
+        while(tempo_correcao > millis()){
+            if(branco(2) || preto(1)){
+                break;
+            }
+            mover(-1000, 1000);
+        }
+        mover(velocidade, velocidade);
+        delay(5);
+        ultima_correcao = millis();
+    }
+
+    else{
+        mover(velocidade, velocidade);
+    }
+}
+bool verifica_verde()
+{
+    ler_cor();
+    if (verde0 || verde1)
+    {
+        print(1, "CURVA VERDE - Direita");
+        encoder(-300, 2);
+        ajustar_linha();
+        encoder(300, 2);
+        delay(64);
+        ler_cor();
+        if (verde0 || verde1)
+        {
+            led(0, 255, 0);
+            som("SOL", 100);
+            while (!(tem_linha(3)))
+            {
+                mover(190, 190);
+            }
+            som("LÁ", 100);
+            while (cor(3) == "PRETO")
+            {
+                mover(190, 190);
+            }
+            parar();
+            som("SI", 100);
+            encoder(300, 9);
+            girar_direita(20);
+            while(!tem_linha(1)){
+                mover(1000, -1000);
+                if(Array.IndexOf(angulos_retos, eixo_x()) != -1){
+                    break;
+                }
+            }
+            delay(200);
+            ajustar_linha();
+            encoder(-300, 2);
+            ajustar_linha();
+            velocidade = velocidade_padrao;
+            ultima_correcao = millis();
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    else if (verde2 || verde3)
+    {
+        print(1, "CURVA VERDE - Esquerda");
+        encoder(-300, 2);
+        ajustar_linha();
+        encoder(300, 2);
+        delay(64);
+        ler_cor();
+        if (verde2 || verde3)
+        {
+            led(0, 255, 0);
+            som("SOL", 100);
+            while (!(tem_linha(0)))
+            {
+                mover(190, 190);
+            }
+            som("LÁ", 100);
+            while (cor(0) == "PRETO")
+            {
+                mover(190, 190);
+            }
+            parar();
+            som("SI", 100);
+            encoder(300, 9);
+            girar_esquerda(20);
+            while(!tem_linha(2)){
+                mover(-1000, 1000);
+                if(Array.IndexOf(angulos_retos, eixo_x()) != -1){
+                    break;
+                }
+            }
+            delay(200);
+            ajustar_linha();
+            encoder(-300, 2);
+            ajustar_linha();
+            velocidade = velocidade_padrao;
+            ultima_correcao = millis();
+            return true;
+        }else{
+            return false;
+        }
+    }
+    else{
+        return false;
+    }
+}
+
+/*
+bool verifica_curva()
+{
+    ler_cor();
+
+    if (verifica_verde()) { return true; }
+
+    else if (preto_curva_dir)
+    {
+        // curva direita
+    }
+
+    else if (preto_curva_dir)
+    {
+        // curva direita
+    }
+}
+*/
+bool debug = false;
+
+void Main()
+{
+    calibrar();
+    while (!debug)
+    {
+        verifica_calibrar();
+        seguir_linha();
+        verifica_verde();
+    }
+
+    float menor = 100;
+    while (debug)
+    {
+        ler_cor();
+        if (verde2 || verde3)
+        {
+            print(1, "CURVA VERDE - Esquerda");
+            encoder(-300, 2);
+            ajustar_linha();
+            encoder(300, 2);
+            delay(64);
+            ler_cor();
+            if (verde2 || verde3)
+            {
+                led(0, 255, 0);
+                som("SOL", 100);
+                while (!(tem_linha(0)))
+                {
+                    mover(190, 190);
+                }
+                som("LÁ", 100);
+                while (cor(0) == "PRETO")
+                {
+                    mover(190, 190);
+                }
+                parar();
+                som("SI", 100);
+                encoder(300, 9);
+                girar_esquerda(20);
+                while(!tem_linha(2)){
+                    mover(-1000, 1000);
+                    if(Array.IndexOf(angulos_retos, eixo_x()) != -1){
+                        break;
+                    }
+                }
+                delay(200);
+                ajustar_linha();
+                encoder(-300, 2);
+                ajustar_linha();
+                velocidade = velocidade_padrao;
+                ultima_correcao = millis();
+            }
+        }
+        else
+        {
+            mover(200, 200);
+        }
+    }
 }
