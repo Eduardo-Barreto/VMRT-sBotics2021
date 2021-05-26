@@ -1,3 +1,4 @@
+import("texto");
 import("setup/variaveis");
 import("setup/utils");
 import("setup/leituras");
