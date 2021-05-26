@@ -1,3 +1,4 @@
+// Declaração das variáveis principais de todo o projeto, separadas por tipos
 float saida1 = 0,
         saida2 = 0,
         media_meio = 0,
@@ -23,4 +24,4 @@ bool preto0 = false,
         preto_curva_dir = false,
         preto_curva_esq = false;
 
-int[] angulos_retos = {0, 90, 180, 270};
+int[] angulos_retos = { 0, 90, 180, 270 };

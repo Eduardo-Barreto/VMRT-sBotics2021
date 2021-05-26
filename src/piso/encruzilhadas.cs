@@ -1,42 +1,60 @@
+// Verificação do beco sem saída
 bool beco()
 {
+    // Para, lê as cores e verifica se está na condição do beco
     parar();
     delay(64);
     ler_cor();
     if ((verde0 || verde1) && (verde2 || verde3))
     {
-        print(1, "BECO SEM SAÍDA");
-        led(0, 255, 0);
-        som("F#", 100);
-        som("D", 100);
-        som("F#", 100);
-        som("D", 100);
-        encoder(300, 12);
-        girar_direita(170);
-        while (!tem_linha(1))
-        {
-            mover(1000, -1000);
-            if (angulo_reto())
-            {
-                break;
-            }
-        }
-        delay(200);
+        // Ajusta na linha, para e confirma a leitura
         ajustar_linha();
-        velocidade = velocidade_padrao;
-        ultima_correcao = millis();
-        calibrar();
-        return true;
+        delay(64);
+        ler_cor();
+        if ((verde0 || verde1) && (verde2 || verde3))
+        {
+            // Feedback visual e sonoro para indicar que entrou na condição
+            print(1, "BECO SEM SAÍDA");
+            led(0, 255, 0);
+            som("F#", 100);
+            som("D", 100);
+            som("F#", 100);
+            som("D", 100);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
+            encoder(300, 12);
+            girar_direita(170);
+            while (!tem_linha(1))
+            {
+                mover(1000, -1000);
+                if (angulo_reto())
+                {
+                    break;
+                }
+            }
+            // Se ajusta na linha e atualiza os valores de correção e velocidade
+            delay(200);
+            ajustar_linha();
+            velocidade = velocidade_padrao;
+            ultima_correcao = millis();
+            calibrar();
+            return true;
+        }
+        // Tratamento de falsos positivos
+        return false;
     }
     return false;
 }
 
+// Verificação das condições de verde
 bool verifica_verde()
 {
+    // Atualiza os valores de cor e verifica os sensores da direita
     ler_cor();
     if (verde0 || verde1)
     {
+        // Verificação do beco sem saída
         if (beco()) { return true; }
+        // Se alinha na linha atrás e verifica novamente
         print(1, "CURVA VERDE - Direita");
         encoder(-300, 2);
         ajustar_linha();
@@ -45,20 +63,23 @@ bool verifica_verde()
         ler_cor();
         if (verde0 || verde1)
         {
+            // Nova verificação do beco
             if (beco()) { return true; }
+            // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("G", 100);
+            som("F", 100);
             while (!(tem_linha(1)))
             {
                 mover(190, 190);
             }
-            som("A", 100);
+            som("G", 100);
             while (cor(1) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("B", 100);
+            som("A", 100);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_direita(20);
             while (!tem_linha(1))
@@ -69,6 +90,7 @@ bool verifica_verde()
                     break;
                 }
             }
+            // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
             ajustar_linha();
             encoder(-300, 2);
@@ -78,15 +100,19 @@ bool verifica_verde()
             calibrar();
             return true;
         }
+        // Tratamento de falsos positivos
         else
         {
             return false;
         }
     }
 
+    // Verifica os sensores da direita
     else if (verde2 || verde3)
     {
+        // Verificação do beco sem saída
         if (beco()) { return true; }
+        // Se alinha na linha atrás e verifica novamente
         print(1, "CURVA VERDE - Esquerda");
         encoder(-300, 2);
         ajustar_linha();
@@ -95,20 +121,23 @@ bool verifica_verde()
         ler_cor();
         if (verde2 || verde3)
         {
+            // Nova verificação do beco
             if (beco()) { return true; }
+            // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("G", 100);
+            som("F", 100);
             while (!(tem_linha(2)))
             {
                 mover(190, 190);
             }
-            som("A", 100);
+            som("G", 100);
             while (cor(2) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("B", 100);
+            som("A", 100);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_esquerda(20);
             while (!tem_linha(2))
@@ -119,6 +148,7 @@ bool verifica_verde()
                     break;
                 }
             }
+            // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
             ajustar_linha();
             encoder(-300, 2);
@@ -128,6 +158,7 @@ bool verifica_verde()
             calibrar();
             return true;
         }
+        // Tratamento de falsos positivos
         else
         {
             return false;
@@ -157,17 +188,15 @@ bool verifica_curva()
         float objetivo = converter_graus(eixo_x() + 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            ler_cor();
-            if (preto1 || preto2)
+            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
             {
                 return false;
             }
             mover(1000, -1000);
         }
         objetivo = converter_graus(eixo_x() + 115);
-        while (!tem_linha(1))
+        while (!tem_linha(1) && !azul(1))
         {
-            ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
                 encoder(-300, 7f);
@@ -205,15 +234,14 @@ bool verifica_curva()
         float objetivo = converter_graus(eixo_x() - 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            ler_cor();
-            if (preto1 || preto2)
+            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
             {
                 return false;
             }
             mover(-1000, 1000);
         }
         objetivo = converter_graus(eixo_x() - 115);
-        while (!tem_linha(2))
+        while (!tem_linha(2) && !azul(2))
         {
             ler_cor();
             if (proximo(eixo_x(), objetivo))

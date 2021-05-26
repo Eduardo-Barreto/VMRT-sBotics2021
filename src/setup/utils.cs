@@ -1,3 +1,5 @@
+// Comandos úteis para todo o código
+
 float map(float val, float minimo, float maximo, float minimoSaida, float maximoSaida)
 {
     //"mapeia" ou reescala um val (val), de uma escala (minimo~maximo) para outra (minimoSaida~maximoSaida)
@@ -22,6 +24,7 @@ float converter_graus(float graus)
 
 void levantar_atuador()
 {
+    // Levanta o atuador para o ângulo correto
     bc.actuatorSpeed(150);
     bc.actuatorUp(100);
     if (bc.angleActuator() >= 0 && bc.angleActuator() < 88)

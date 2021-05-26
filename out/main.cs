@@ -1,54 +1,5 @@
-/*
-Francinaldo:
-se o Francinaldo acha, eu concordo
-se o Francinaldo fala, eu escuto
-se o Francinaldo erra, eu perdoo
-se o Francinaldo pensa, eu admiro
-se o Francinaldo tem 100 fãs, eu sou um deles
-se o Francinaldo tem 10 fãs, eu sou um deles
-se o Francinaldo tem 1 fã, eu sou esse fã
-se o Francinaldo não tem fãs, eu não existo
-
-Texugo:
-o que é Texugo?
-para o cego, é a luz
-para o faminto, é o pão
-para o sedento, é a água
-para o morto, é a vida
-para o enfermo, é a cura
-para o prisioneiro, é a liberdade
-para o viajante, é o caminho,
-para o robo 2, é a morte,
-para mim, tudo.
-
-Sarinha:
-Controladora de todos os seres vivos
-habitando o planeta terra, com apenas
-um :eyes: você entende todos seus pecados,
-imediatamente pede desculpa e vai ao correton
-dentre todos os membros da equipe, ela é a mais temida!
-
-
-Moura:
-Lucas, semi-Deus, criou tudo do nada
-E veja sua lista: Desenhista, programador,
-modelador 3d e mágico nas horas vagas...
-Faz seus problemas com o simulador desaparecer!
-sBotics era sem forma e vazia
-e Ele disse haja! E houve luz
-No primeiro dia. Parece magia!
-Claro e escuro, noite e dia.
-Você determina o horario da arena por causa
-da atualização desse artista
-
-SauloDaniel:
-Temos poucas informações desse ser, não contém
-muitos meios de comunicação e aparentemente não
-gosta de interagir com pessoas. Suposto ser amorfo
-que pode simplesmente aparece e sumir da barra de
-ONLINE do servidor sBotics.
-CASO TENHA INFORMAÇÕES SOBRE ELE LIGUE IMEDIATAMENTE PARA O 190
-*/float saida1 = 0,
+// Declaração das variáveis principais de todo o projeto, separadas por tipos
+float saida1 = 0,
         saida2 = 0,
         media_meio = 0,
         media_fora = 0;
@@ -73,7 +24,9 @@ bool preto0 = false,
         preto_curva_dir = false,
         preto_curva_esq = false;
 
-int[] angulos_retos = {0, 90, 180, 270};
+int[] angulos_retos = { 0, 90, 180, 270 };
+// Comandos úteis para todo o código
+
 float map(float val, float minimo, float maximo, float minimoSaida, float maximoSaida)
 {
     //"mapeia" ou reescala um val (val), de uma escala (minimo~maximo) para outra (minimoSaida~maximoSaida)
@@ -98,6 +51,7 @@ float converter_graus(float graus)
 
 void levantar_atuador()
 {
+    // Levanta o atuador para o ângulo correto
     bc.actuatorSpeed(150);
     bc.actuatorUp(100);
     if (bc.angleActuator() >= 0 && bc.angleActuator() < 88)
@@ -106,6 +60,8 @@ void levantar_atuador()
         bc.actuatorUp(600);
     }
 }
+// Métodos de leitura e outros
+
 int millis() => (int)(bc.Timer());
 string cor(int sensor) => bc.ReturnColor(sensor);
 int luz(byte sensor) => (int)bc.Lightness(sensor);
@@ -116,6 +72,7 @@ float angulo_atuador() => bc.AngleActuator();
 float angulo_giro_atuador() => bc.AngleScoop();
 void delay(int milissegundos) => bc.Wait(milissegundos);
 
+// Dicionário de notas para melhorar o comando de som
 Dictionary<string, float> notas = new Dictionary<string, float>(){
     {"C", 16.35f},
     {"C# ", 17.32f},
@@ -131,7 +88,8 @@ Dictionary<string, float> notas = new Dictionary<string, float>(){
     {"B", 30.87f},
     {"C1", 32.70f},
     {"C#", 34.65f},
-    {"MUDO", 0}
+    {"MUDO", 0},
+    {"", 0}
 };
 
 void som(string nota, int tempo) => bc.PlaySoundHertz(1, notas[nota], tempo, "QUADRADA");
@@ -140,7 +98,7 @@ void print(int linha, object texto) => bc.PrintConsole(linha, texto.ToString());
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
-bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 33);
+bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 24);
 
 bool azul(int sensor)
 {
@@ -172,14 +130,14 @@ bool preto(int sensor)
 {
     if (sensor == 1 || sensor == 2)
     {
-        if ((bc.lightness(sensor) < media_meio) || (cor(sensor) == "PRETO"))
+        if ((bc.lightness(sensor) < media_meio) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((bc.lightness(sensor) < media_fora) || (cor(sensor) == "PRETO"))
+        if ((bc.lightness(sensor) < media_fora) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -215,7 +173,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"calibragem: {media_meio}");
+    print(3, $"calibração: {media_meio}");
 }
 
 void verifica_calibrar()
@@ -243,8 +201,8 @@ void ler_cor()
     verde2 = verde(2);
     verde3 = verde(3);
 
-    preto_curva_dir = ((tem_linha(0) || cor(0) == "PRETO" || preto(0)) && !azul(0));
-    preto_curva_esq = ((tem_linha(3) || cor(3) == "PRETO" || preto(3)) && !azul(3));
+    preto_curva_dir = ((tem_linha(0) || cor(0) == "PRETO" || preto(0)));
+    preto_curva_esq = ((tem_linha(3) || cor(3) == "PRETO" || preto(3)));
 }
 
 bool angulo_reto()
@@ -258,128 +216,245 @@ bool angulo_reto()
     }
     return false;
 }
+// Métodos de movimentação e outros
+
 void mover(int esquerda, int direita) => bc.MoveFrontal(direita, esquerda);
 void rotacionar(int velocidade, int graus) => bc.MoveFrontalAngles(velocidade, graus);
 void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
-void parar(){bc.MoveFrontal(0, 0);delay(10);}
-void travar(){bc.MoveFrontal(0, 0);delay(999999999);}
+void parar() { bc.MoveFrontal(0, 0); delay(10); }
+void travar() { bc.MoveFrontal(0, 0); delay(999999999); }
 
-void girar_esquerda(int graus){
+// Curva para a esquerda em graus
+void girar_esquerda(int graus)
+{
     float objetivo = converter_graus(eixo_x() - graus);
 
-    while(!proximo(eixo_x(), objetivo)){
+    while (!proximo(eixo_x(), objetivo))
+    {
         mover(-1000, 1000);
     }
     parar();
 }
 
-void girar_direita(int graus){
+// Curva para a direita em graus
+void girar_direita(int graus)
+{
     float objetivo = converter_graus(eixo_x() + graus);
 
-    while(!proximo(eixo_x(), objetivo)){
+    while (!proximo(eixo_x(), objetivo))
+    {
         mover(1000, -1000);
     }
     parar();
 }
 
-void objetivo_esquerda(int objetivo){
-    while(!proximo(eixo_x(), objetivo)){
+// Gira para a esquerda até um objetivo (bússola)
+void objetivo_esquerda(int objetivo)
+{
+    while (!proximo(eixo_x(), objetivo))
+    {
         mover(-1000, 1000);
     }
     parar();
 }
 
-void objetivo_direita(int objetivo){
-    while(!proximo(eixo_x(), objetivo)){
+// Gira para a direita até um objetivo (bússola)
+void objetivo_direita(int objetivo)
+{
+    while (!proximo(eixo_x(), objetivo))
+    {
         mover(1000, -1000);
     }
     parar();
 }
 
-void alinhar_angulo(){
+// Alinha o robô no ângulo reto mais próximo
+void alinhar_angulo()
+{
     led(255, 255, 0);
     print(2, "Alinhando robô");
 
     int alinhamento = 0;
     float angulo = eixo_x();
 
-    if(angulo_reto()){
-		return;
-	}
+    if (angulo_reto())
+    {
+        return;
+    }
 
-    if((angulo > 315) || (angulo <= 45)){
-		alinhamento = 0;
-	}
-	else if((angulo > 45) && (angulo <= 135)){
-		alinhamento = 90;
-	}
-	else if((angulo > 135) && (angulo <= 225)){
-		alinhamento = 180;
-	}
-	else if((angulo > 225) && (angulo <= 315)){
-		alinhamento = 270;
-	}
+    if ((angulo > 315) || (angulo <= 45))
+    {
+        alinhamento = 0;
+    }
+    else if ((angulo > 45) && (angulo <= 135))
+    {
+        alinhamento = 90;
+    }
+    else if ((angulo > 135) && (angulo <= 225))
+    {
+        alinhamento = 180;
+    }
+    else if ((angulo > 225) && (angulo <= 315))
+    {
+        alinhamento = 270;
+    }
 
-	angulo = eixo_x();
+    angulo = eixo_x();
 
-	if((alinhamento == 0) && (angulo > 180)){
-		objetivo_direita(alinhamento);
-	}else if((alinhamento == 0) && (angulo < 180)){
-		objetivo_esquerda(alinhamento);
-	}else if(angulo < alinhamento){
-		objetivo_direita(alinhamento);
-	}else if(angulo > alinhamento){
-		objetivo_esquerda(alinhamento);
-	}
+    if ((alinhamento == 0) && (angulo > 180))
+    {
+        objetivo_direita(alinhamento);
+    }
+    else if ((alinhamento == 0) && (angulo < 180))
+    {
+        objetivo_esquerda(alinhamento);
+    }
+    else if (angulo < alinhamento)
+    {
+        objetivo_direita(alinhamento);
+    }
+    else if (angulo > alinhamento)
+    {
+        objetivo_esquerda(alinhamento);
+    }
 
-	limpar_linha(2);
-	bc.TurnLedOff();
-}
-
-void ajustar_linha(){
-    led(255, 255, 0);
-
-	while(cor(0) == "PRETO"){
-		bc.onTF(-1000, 1000);
-	}
-	while(cor(1) == "PRETO"){
-		bc.onTF(-1000, 1000);
-	}
-	while(cor(3) == "PRETO"){
-		bc.onTF(1000, -1000);
-	}
-	while(cor(2) == "PRETO"){
-		bc.onTF(1000, -1000);
-	}
-
-	parar();
+    limpar_linha(2);
     bc.TurnLedOff();
 }
+
+// Ajusta os sensores na linha preta
+void ajustar_linha()
+{
+    led(255, 255, 0);
+
+
+    tempo_correcao = millis() + 150;
+    while (cor(0) == "PRETO" && millis() < tempo_correcao)
+    {
+        bc.onTF(-1000, 1000);
+    }
+    tempo_correcao = millis() + 150;
+    while (cor(1) == "PRETO" && millis() < tempo_correcao)
+    {
+        bc.onTF(-1000, 1000);
+    }
+    tempo_correcao = millis() + 150;
+    while (cor(3) == "PRETO" && millis() < tempo_correcao)
+    {
+        bc.onTF(1000, -1000);
+    }
+    tempo_correcao = millis() + 150;
+    while (cor(2) == "PRETO" && millis() < tempo_correcao)
+    {
+        bc.onTF(1000, -1000);
+    }
+
+    parar();
+    bc.TurnLedOff();
+}
+// Segue as linhas
 void seguir_linha()
 {
     print(1, $"Seguindo linha: {velocidade}");
     bc.TurnLedOff();
     ler_cor();
 
+    // Área de ajustes===============================================================================
+
+    // Perdeu a linha (muito tempo sem se corrigir)
+    if ((millis() - ultima_correcao) > 1500)
+    {
+        // Se tem linha na posição atual, retorna ao normal
+        if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
+        {
+            ajustar_linha();
+            velocidade = velocidade_padrao;
+            ultima_correcao = millis();
+            return;
+        }
+
+        // Começa a verificar se há linha por perto
+        tempo_correcao = millis() + 210;
+        while (millis() < tempo_correcao)
+        {
+            mover(1000, -1000);
+            if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
+            {
+                ajustar_linha();
+                velocidade = velocidade_padrao;
+                ultima_correcao = millis();
+                return;
+            }
+        }
+        mover(-1000, 1000);
+        delay(210);
+        parar();
+
+        // Confirma que está perdido
+        print(1, "Perdi a linha...");
+        led(255, 0, 0);
+        som("F#", 64);
+        som("", 16);
+        som("F#", 64);
+        // Vai para trás até encontrar uma linha ou estourar o tempo
+        int tras = millis() + 1750;
+        while (millis() < tras)
+        {
+            mover(-velocidade, -velocidade);
+            if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
+            {
+                break;
+            }
+        }
+        delay(150);
+        ajustar_linha();
+        velocidade = velocidade_padrao;
+        ultima_correcao = millis();
+    }
+
+    // Está saindo da pista (detectou o azul do fim da arena)
     if (azul(1) || azul(2))
     {
         print(1, "Saí da arena...");
-        mover(-velocidade, -velocidade);
-        int tras = millis() - ultima_correcao + 100;
-        delay(tras);
+        led(255, 0, 0);
+        som("B", 64);
+        som("MUDO", 16);
+        som("B", 64);
+        // Calcula a diferença desde a última correção e vai para trás até encontrar uma linha ou estourar o tempo
+        int tras = millis() - ultima_correcao + 150;
+        tempo_correcao = millis() + tras;
+        while (millis() < tempo_correcao)
+        {
+            mover(-velocidade, -velocidade);
+            if (cor(0) == "PRETO" || cor(1) == "PRETO" || cor(2) == "PRETO" || cor(3) == "PRETO")
+            {
+                break;
+            }
+        }
+        ajustar_linha();
+        velocidade = velocidade_padrao;
+        ultima_correcao = millis();
     }
 
+
+    // Incremento da velocidade de acordo com o tempo
     if ((millis() > update_time) && (velocidade < velocidade_max))
     {
         update_time = millis() + 32;
         velocidade++;
     }
 
+    // Área do seguidor===============================================================================
+
+    // Se viu preto no sensor da direita
     if (preto1)
     {
+        // Atualiza a velocidade para o padrão
         velocidade = velocidade_padrao;
-        tempo_correcao = millis() + 210;
 
+
+        // Inicia a correção e gira até encontrar a linha novamente ou estourar o tempo
+        tempo_correcao = millis() + 210;
         while (tempo_correcao > millis())
         {
             if (branco(1) || preto(2))
@@ -388,16 +463,20 @@ void seguir_linha()
             }
             mover(1000, -1000);
         }
+        // Vai para a frente por um pequeno tempo e atualiza a última correção
         mover(velocidade, velocidade);
         delay(5);
         ultima_correcao = millis();
     }
 
+    // Se viu preto no sensor da direita
     else if (preto2)
     {
+        // Atualiza a velocidade para o padrão
         velocidade = velocidade_padrao;
-        tempo_correcao = millis() + 210;
 
+        // Inicia a correção e gira até encontrar a linha novamente ou estourar o tempo
+        tempo_correcao = millis() + 210;
         while (tempo_correcao > millis())
         {
             if (branco(2) || preto(1))
@@ -406,55 +485,75 @@ void seguir_linha()
             }
             mover(-1000, 1000);
         }
+        // Vai para a frente por um pequeno tempo e atualiza a última correção
         mover(velocidade, velocidade);
         delay(5);
         ultima_correcao = millis();
     }
 
+    // Se está certo na linha só vai para frente com a velocidade atual
     else
     {
         mover(velocidade, velocidade);
     }
 }
+// Verificação do beco sem saída
 bool beco()
 {
+    // Para, lê as cores e verifica se está na condição do beco
     parar();
     delay(64);
     ler_cor();
     if ((verde0 || verde1) && (verde2 || verde3))
     {
-        print(1, "BECO SEM SAÍDA");
-        led(0, 255, 0);
-        som("F#", 100);
-        som("D", 100);
-        som("F#", 100);
-        som("D", 100);
-        encoder(300, 12);
-        girar_direita(170);
-        while (!tem_linha(1))
-        {
-            mover(1000, -1000);
-            if (angulo_reto())
-            {
-                break;
-            }
-        }
-        delay(200);
+        // Ajusta na linha, para e confirma a leitura
         ajustar_linha();
-        velocidade = velocidade_padrao;
-        ultima_correcao = millis();
-        calibrar();
-        return true;
+        delay(64);
+        ler_cor();
+        if ((verde0 || verde1) && (verde2 || verde3))
+        {
+            // Feedback visual e sonoro para indicar que entrou na condição
+            print(1, "BECO SEM SAÍDA");
+            led(0, 255, 0);
+            som("F#", 100);
+            som("D", 100);
+            som("F#", 100);
+            som("D", 100);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
+            encoder(300, 12);
+            girar_direita(170);
+            while (!tem_linha(1))
+            {
+                mover(1000, -1000);
+                if (angulo_reto())
+                {
+                    break;
+                }
+            }
+            // Se ajusta na linha e atualiza os valores de correção e velocidade
+            delay(200);
+            ajustar_linha();
+            velocidade = velocidade_padrao;
+            ultima_correcao = millis();
+            calibrar();
+            return true;
+        }
+        // Tratamento de falsos positivos
+        return false;
     }
     return false;
 }
 
+// Verificação das condições de verde
 bool verifica_verde()
 {
+    // Atualiza os valores de cor e verifica os sensores da direita
     ler_cor();
     if (verde0 || verde1)
     {
+        // Verificação do beco sem saída
         if (beco()) { return true; }
+        // Se alinha na linha atrás e verifica novamente
         print(1, "CURVA VERDE - Direita");
         encoder(-300, 2);
         ajustar_linha();
@@ -463,20 +562,23 @@ bool verifica_verde()
         ler_cor();
         if (verde0 || verde1)
         {
+            // Nova verificação do beco
             if (beco()) { return true; }
+            // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("G", 100);
+            som("F", 100);
             while (!(tem_linha(1)))
             {
                 mover(190, 190);
             }
-            som("A", 100);
+            som("G", 100);
             while (cor(1) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("B", 100);
+            som("A", 100);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_direita(20);
             while (!tem_linha(1))
@@ -487,6 +589,7 @@ bool verifica_verde()
                     break;
                 }
             }
+            // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
             ajustar_linha();
             encoder(-300, 2);
@@ -496,15 +599,19 @@ bool verifica_verde()
             calibrar();
             return true;
         }
+        // Tratamento de falsos positivos
         else
         {
             return false;
         }
     }
 
+    // Verifica os sensores da direita
     else if (verde2 || verde3)
     {
+        // Verificação do beco sem saída
         if (beco()) { return true; }
+        // Se alinha na linha atrás e verifica novamente
         print(1, "CURVA VERDE - Esquerda");
         encoder(-300, 2);
         ajustar_linha();
@@ -513,20 +620,23 @@ bool verifica_verde()
         ler_cor();
         if (verde2 || verde3)
         {
+            // Nova verificação do beco
             if (beco()) { return true; }
+            // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("G", 100);
+            som("F", 100);
             while (!(tem_linha(2)))
             {
                 mover(190, 190);
             }
-            som("A", 100);
+            som("G", 100);
             while (cor(2) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("B", 100);
+            som("A", 100);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_esquerda(20);
             while (!tem_linha(2))
@@ -537,6 +647,7 @@ bool verifica_verde()
                     break;
                 }
             }
+            // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
             ajustar_linha();
             encoder(-300, 2);
@@ -546,6 +657,7 @@ bool verifica_verde()
             calibrar();
             return true;
         }
+        // Tratamento de falsos positivos
         else
         {
             return false;
@@ -575,17 +687,15 @@ bool verifica_curva()
         float objetivo = converter_graus(eixo_x() + 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            ler_cor();
-            if (preto1 || preto2)
+            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
             {
                 return false;
             }
             mover(1000, -1000);
         }
         objetivo = converter_graus(eixo_x() + 115);
-        while (!tem_linha(1))
+        while (!tem_linha(1) && !azul(1))
         {
-            ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
                 encoder(-300, 7f);
@@ -623,15 +733,14 @@ bool verifica_curva()
         float objetivo = converter_graus(eixo_x() - 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            ler_cor();
-            if (preto1 || preto2)
+            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
             {
                 return false;
             }
             mover(-1000, 1000);
         }
         objetivo = converter_graus(eixo_x() - 115);
-        while (!tem_linha(2))
+        while (!tem_linha(2) && !azul(2))
         {
             ler_cor();
             if (proximo(eixo_x(), objetivo))
@@ -664,15 +773,18 @@ bool verifica_curva()
     }
 }
 
-bool debug = false;
+// Variável de controle para ligar/desligar o debug
+bool debug = true;
 
+// Método principal
 void Main()
 {
     if (!debug)
     {
         calibrar();
+        ultima_correcao = millis();
     }
-    ultima_correcao = millis();
+    // Loop principal do programa
     while (!debug)
     {
         verifica_calibrar();
@@ -680,9 +792,9 @@ void Main()
         verifica_curva();
     }
 
+    // Loop para debug
     while (debug)
     {
-        encoder(-300, 10);
-        travar();
+        print(1, "Debug!!");
     }
 }

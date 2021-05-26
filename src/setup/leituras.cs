@@ -1,3 +1,5 @@
+// Métodos de leitura e outros
+
 int millis() => (int)(bc.Timer());
 string cor(int sensor) => bc.ReturnColor(sensor);
 int luz(byte sensor) => (int)bc.Lightness(sensor);
@@ -8,6 +10,7 @@ float angulo_atuador() => bc.AngleActuator();
 float angulo_giro_atuador() => bc.AngleScoop();
 void delay(int milissegundos) => bc.Wait(milissegundos);
 
+// Dicionário de notas para melhorar o comando de som
 Dictionary<string, float> notas = new Dictionary<string, float>(){
     {"C", 16.35f},
     {"C# ", 17.32f},
@@ -23,7 +26,8 @@ Dictionary<string, float> notas = new Dictionary<string, float>(){
     {"B", 30.87f},
     {"C1", 32.70f},
     {"C#", 34.65f},
-    {"MUDO", 0}
+    {"MUDO", 0},
+    {"", 0}
 };
 
 void som(string nota, int tempo) => bc.PlaySoundHertz(1, notas[nota], tempo, "QUADRADA");
@@ -32,7 +36,7 @@ void print(int linha, object texto) => bc.PrintConsole(linha, texto.ToString());
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
-bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 33);
+bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 24);
 
 bool azul(int sensor)
 {
@@ -64,14 +68,14 @@ bool preto(int sensor)
 {
     if (sensor == 1 || sensor == 2)
     {
-        if ((bc.lightness(sensor) < media_meio) || (cor(sensor) == "PRETO"))
+        if ((bc.lightness(sensor) < media_meio) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((bc.lightness(sensor) < media_fora) || (cor(sensor) == "PRETO"))
+        if ((bc.lightness(sensor) < media_fora) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -107,7 +111,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"calibragem: {media_meio}");
+    print(3, $"calibração: {media_meio}");
 }
 
 void verifica_calibrar()
@@ -135,8 +139,8 @@ void ler_cor()
     verde2 = verde(2);
     verde3 = verde(3);
 
-    preto_curva_dir = ((tem_linha(0) || cor(0) == "PRETO" || preto(0)) && !azul(0));
-    preto_curva_esq = ((tem_linha(3) || cor(3) == "PRETO" || preto(3)) && !azul(3));
+    preto_curva_dir = ((tem_linha(0) || cor(0) == "PRETO" || preto(0)));
+    preto_curva_esq = ((tem_linha(3) || cor(3) == "PRETO" || preto(3)));
 }
 
 bool angulo_reto()

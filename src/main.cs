@@ -1,20 +1,22 @@
-import("texto");
 import("setup/variaveis");
 import("setup/utils");
 import("setup/leituras");
 import("setup/movimentacao");
-import("seguir_linha");
-import("encruzilhadas");
+import("piso/seguir_linha");
+import("piso/encruzilhadas");
 
-bool debug = false;
+// Variável de controle para ligar/desligar o debug
+bool debug = true;
 
+// Método principal
 void Main()
 {
     if (!debug)
     {
         calibrar();
+        ultima_correcao = millis();
     }
-    ultima_correcao = millis();
+    // Loop principal do programa
     while (!debug)
     {
         verifica_calibrar();
@@ -22,9 +24,9 @@ void Main()
         verifica_curva();
     }
 
+    // Loop para debug
     while (debug)
     {
-        encoder(-300, 10);
-        travar();
+        print(1, "Debug!!");
     }
 }
