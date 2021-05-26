@@ -1,6 +1,6 @@
 void mover(int esquerda, int direita) => bc.MoveFrontal(direita, esquerda);
 void rotacionar(int velocidade, int graus) => bc.MoveFrontalAngles(velocidade, graus);
-void encoder(int velocidade, int rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
+void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
 void parar(){bc.MoveFrontal(0, 0);delay(10);}
 void travar(){bc.MoveFrontal(0, 0);delay(999999999);}
 
@@ -43,11 +43,7 @@ void alinhar_angulo(){
     int alinhamento = 0;
     float angulo = eixo_x();
 
-    if((angulo > (359 - 2))
-	|| (angulo < (0 + 2))
-	|| ((angulo > (90 - 2)) && (angulo < (90 + 2)))
-	|| ((angulo > (180 - 2)) && (angulo < (180 + 2)))
-	|| ((angulo > (270 - 2)) && (angulo < (270 + 2)))){
+    if(angulo_reto()){
 		return;
 	}
 

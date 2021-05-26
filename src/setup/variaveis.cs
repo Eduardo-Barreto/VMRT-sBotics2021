@@ -23,4 +23,4 @@ bool preto0 = false,
         preto_curva_dir = false,
         preto_curva_esq = false;
 
-int[] angulos_retos = {0, 45, 90, 135, 180, 225, 270};
+int[] angulos_retos = {0, 90, 180, 270};
