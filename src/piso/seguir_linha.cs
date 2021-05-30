@@ -1,6 +1,42 @@
+bool verifica_saida()
+{
+    // Está saindo da pista (detectou o fim da arena)
+    if (azul(1) || azul(2))
+    {
+        print(1, "Saí da arena...");
+        led(255, 0, 0);
+        som("B", 64);
+        som("MUDO", 16);
+        som("B", 64);
+        // Calcula a diferença desde a última correção e vai para trás até encontrar uma linha ou estourar o tempo
+        mover(-velocidade, -velocidade);
+        delay(150);
+        int tras = millis() - ultima_correcao;
+        tempo_correcao = millis() + tras;
+        while (millis() < tempo_correcao)
+        {
+            mover(-velocidade, -velocidade);
+            if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
+            {
+                break;
+            }
+        }
+        ajustar_linha();
+        velocidade = velocidade_padrao;
+        ultima_correcao = millis();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 // Segue as linhas
 void seguir_linha()
 {
+    if (verifica_saida()) { return; }
+    if (verifica_curva()) { return; }
     print(1, $"Seguindo linha: {velocidade}");
     bc.TurnLedOff();
     ler_cor();
@@ -20,7 +56,7 @@ void seguir_linha()
         }
 
         // Começa a verificar se há linha por perto
-        tempo_correcao = millis() + 210;
+        tempo_correcao = millis() + 300;
         while (millis() < tempo_correcao)
         {
             mover(1000, -1000);
@@ -40,7 +76,7 @@ void seguir_linha()
         print(1, "Perdi a linha...");
         led(255, 0, 0);
         som("F#", 64);
-        som("", 16);
+        som("MUDO", 16);
         som("F#", 64);
         // Vai para trás até encontrar uma linha ou estourar o tempo
         int tras = millis() + 1750;
@@ -58,31 +94,6 @@ void seguir_linha()
         ultima_correcao = millis();
     }
 
-    // Está saindo da pista (detectou o azul do fim da arena)
-    if (azul(1) || azul(2))
-    {
-        print(1, "Saí da arena...");
-        led(255, 0, 0);
-        som("B", 64);
-        som("MUDO", 16);
-        som("B", 64);
-        // Calcula a diferença desde a última correção e vai para trás até encontrar uma linha ou estourar o tempo
-        int tras = millis() - ultima_correcao + 150;
-        tempo_correcao = millis() + tras;
-        while (millis() < tempo_correcao)
-        {
-            mover(-velocidade, -velocidade);
-            if (cor(0) == "PRETO" || cor(1) == "PRETO" || cor(2) == "PRETO" || cor(3) == "PRETO")
-            {
-                break;
-            }
-        }
-        ajustar_linha();
-        velocidade = velocidade_padrao;
-        ultima_correcao = millis();
-    }
-
-
     // Incremento da velocidade de acordo com o tempo
     if ((millis() > update_time) && (velocidade < velocidade_max))
     {
@@ -95,9 +106,10 @@ void seguir_linha()
     // Se viu preto no sensor da direita
     if (preto1)
     {
+        if (verifica_curva()) { return; }
+        if (verifica_saida()) { return; }
         // Atualiza a velocidade para o padrão
         velocidade = velocidade_padrao;
-
 
         // Inicia a correção e gira até encontrar a linha novamente ou estourar o tempo
         tempo_correcao = millis() + 210;
@@ -109,6 +121,7 @@ void seguir_linha()
             }
             mover(1000, -1000);
         }
+        verifica_curva();
         // Vai para a frente por um pequeno tempo e atualiza a última correção
         mover(velocidade, velocidade);
         delay(5);
@@ -118,6 +131,8 @@ void seguir_linha()
     // Se viu preto no sensor da direita
     else if (preto2)
     {
+        if (verifica_curva()) { return; }
+        if (verifica_saida()) { return; }
         // Atualiza a velocidade para o padrão
         velocidade = velocidade_padrao;
 
@@ -131,6 +146,7 @@ void seguir_linha()
             }
             mover(-1000, 1000);
         }
+        verifica_curva();
         // Vai para a frente por um pequeno tempo e atualiza a última correção
         mover(velocidade, velocidade);
         delay(5);
@@ -140,6 +156,7 @@ void seguir_linha()
     // Se está certo na linha só vai para frente com a velocidade atual
     else
     {
+        verifica_curva();
         mover(velocidade, velocidade);
     }
 }

@@ -56,9 +56,11 @@ bool verifica_verde()
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
         print(1, "CURVA VERDE - Direita");
+        ajustar_linha();
         encoder(-300, 2);
         ajustar_linha();
         encoder(300, 2);
+        ajustar_linha();
         delay(64);
         ler_cor();
         if (verde0 || verde1)
@@ -114,9 +116,11 @@ bool verifica_verde()
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
         print(1, "CURVA VERDE - Esquerda");
+        ajustar_linha();
         encoder(-300, 2);
         ajustar_linha();
         encoder(300, 2);
+        ajustar_linha();
         delay(64);
         ler_cor();
         if (verde2 || verde3)
@@ -170,20 +174,28 @@ bool verifica_verde()
     }
 }
 
-
+// Verificações de curvas no preto
 bool verifica_curva()
 {
+    // Atualiza leituras de cores, verifica se está no verde e depois no preto
     ler_cor();
     if (verifica_verde()) { return true; }
+    if (verifica_saida()) { return false; }
 
     else if (preto_curva_dir)
     {
+        parar();
+        delay(64);
+        if (verifica_saida()) { return false; }
+        // Verifica o verde mais uma vez, vai para trás e verifica novamente
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
+        // Confirmações visuais e sonoras de que entrou na condição da curva
         print(1, "CURVA PRETO - Direita");
         led(0, 0, 0);
         som("C", 100);
+        // Vai para frente e começa a verificar se não existe uma linha reta na frente
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() + 15);
         while (!proximo(eixo_x(), objetivo))
@@ -194,14 +206,17 @@ bool verifica_curva()
             }
             mover(1000, -1000);
         }
+        // Confirmada a curva, gira até encontrar uma linha ou passar do ângulo máximo
         objetivo = converter_graus(eixo_x() + 115);
         while (!tem_linha(1) && !azul(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
-                encoder(-300, 7f);
+                /* Se chegar ao ângulo máximo, é uma curva com um gap no final
+                Se alinha e arruma a curva de 90 somente com a referência de graus*/
+                encoder(-300, 5f);
                 mover(-1000, 1000);
-                delay(300);
+                delay(500);
                 alinhar_angulo();
                 encoder(300, 2f);
                 ajustar_linha();
@@ -212,6 +227,7 @@ bool verifica_curva()
             }
             mover(1000, -1000);
         }
+        // Se ajusta na linha e atualiza os valores de correção e velocidade
         delay(200);
         ajustar_linha();
         encoder(-300, 2);
@@ -224,6 +240,9 @@ bool verifica_curva()
 
     else if (preto_curva_esq)
     {
+        parar();
+        delay(64);
+        if (verifica_saida()) { return false; }
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
@@ -246,7 +265,7 @@ bool verifica_curva()
             ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
-                encoder(-300, 7f);
+                encoder(-300, 5f);
                 mover(1000, -1000);
                 delay(300);
                 alinhar_angulo();

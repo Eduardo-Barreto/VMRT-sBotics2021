@@ -6,10 +6,10 @@ float map(float val, float minimo, float maximo, float minimoSaida, float maximo
     return (val - minimo) * (maximoSaida - minimoSaida) / (maximo - minimo) + minimoSaida;
 }
 
-bool proximo(float atual, float objetivo)
+bool proximo(float atual, float objetivo, float sensibilidade = 1)
 {
     // Verifica se um val (atual) esta próximo de um objetivo (objetivo)
-    return (atual > objetivo - 1 && atual < objetivo + 1);
+    return (atual > objetivo - sensibilidade && atual < objetivo + sensibilidade);
 }
 
 float converter_graus(float graus)

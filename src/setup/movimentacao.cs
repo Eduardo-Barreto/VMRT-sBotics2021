@@ -101,7 +101,6 @@ void alinhar_angulo()
     }
 
     limpar_linha(2);
-    bc.TurnLedOff();
 }
 
 // Ajusta os sensores na linha preta
@@ -132,5 +131,4 @@ void ajustar_linha()
     }
 
     parar();
-    bc.TurnLedOff();
 }

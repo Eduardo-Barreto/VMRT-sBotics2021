@@ -1,6 +1,7 @@
 // Métodos de leitura e outros
 
 int millis() => (int)(bc.Timer());
+bool toque() => (bc.Touch(0));
 string cor(int sensor) => bc.ReturnColor(sensor);
 int luz(byte sensor) => (int)bc.Lightness(sensor);
 int ultra(byte sensor) => (int)bc.Distance(sensor);
@@ -10,29 +11,13 @@ float angulo_atuador() => bc.AngleActuator();
 float angulo_giro_atuador() => bc.AngleScoop();
 void delay(int milissegundos) => bc.Wait(milissegundos);
 
-// Dicionário de notas para melhorar o comando de som
-Dictionary<string, float> notas = new Dictionary<string, float>(){
-    {"C", 16.35f},
-    {"C# ", 17.32f},
-    {"D", 18.35f},
-    {"D#", 19.45f},
-    {"E", 20.60f},
-    {"F", 21.83f},
-    {"F#", 23.12f},
-    {"G", 24.50f},
-    {"G#", 25.96f},
-    {"A", 27.50f},
-    {"A#", 29.14f},
-    {"B", 30.87f},
-    {"C1", 32.70f},
-    {"C#", 34.65f},
-    {"MUDO", 0},
-    {"", 0}
-};
-
-void som(string nota, int tempo) => bc.PlaySoundHertz(1, notas[nota], tempo, "QUADRADA");
+void som(string nota, int tempo) => bc.PlayNote(0, nota, tempo);
 void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
-void print(int linha, object texto) => bc.PrintConsole(linha, texto.ToString());
+
+string[] consoleLines = { "", "", "", "" };
+
+void print(int linha, object texto) => bc.Print(linha - 1, texto.ToString());
+
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
@@ -43,12 +28,12 @@ bool azul(int sensor)
     float val_vermelho = bc.ReturnRed(sensor);
     float val_verde = bc.ReturnGreen(sensor);
     float val_azul = bc.ReturnBlue(sensor);
-    byte media_vermelho = 31, media_verde = 40, media_azul = 35;
+    byte media_vermelho = 28, media_verde = 33, media_azul = 39;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
-    return ((vermelho < media_vermelho) && (verde < media_verde) && (azul > media_azul));
+    return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)));
 }
 
 bool verde(int sensor)
@@ -111,7 +96,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"calibração: {media_meio}");
+    print(3, $"calibração: {media_meio} || {media_fora}");
 }
 
 void verifica_calibrar()
