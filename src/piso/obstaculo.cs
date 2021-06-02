@@ -5,25 +5,25 @@ void verifica_obstaculo()
         alinhar_angulo();
         print(1, "OBSTÁCULO");
         led(40, 153, 219);
-        som("E", 64);
+        som("E3", 64);
         som("MUDO", 16);
-        som("E", 64);
+        som("E3", 64);
         som("MUDO", 16);
-        som("E", 64);
+        som("E3", 64);
         girar_direita(45);
-        som("E", 32);
+        som("E3", 32);
         encoder(300, 20);
-        som("E", 32);
+        som("E3", 32);
         girar_esquerda(45);
-        som("E", 32);
+        som("E3", 32);
         encoder(300, 25);
-        som("E", 32);
+        som("E3", 32);
         girar_esquerda(45);
-        som("E", 32);
-        encoder(300, 20);
-        som("E", 32);
+        som("E3", 32);
+        encoder(300, 20);// ACHAR LINHAA!
+        som("E3", 32);
         float objetivo = converter_graus(eixo_x() + 45);
-        while (!tem_linha(1) && !azul(1))
+        while (!tem_linha(1) && !vermelho(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
@@ -42,9 +42,9 @@ void verifica_obstaculo()
                 break;
             }
         }
-        som("D", 32);
+        som("D3", 32);
         som("MUDO", 16);
-        som("D", 32);
+        som("D3", 32);
         parar();
         ajustar_linha();
     }
