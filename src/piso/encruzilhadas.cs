@@ -16,10 +16,10 @@ bool beco()
             // Feedback visual e sonoro para indicar que entrou na condição
             print(1, "BECO SEM SAÍDA");
             led(0, 255, 0);
-            som("F#", 100);
-            som("D", 100);
-            som("F#", 100);
-            som("D", 100);
+            som("F#3", 100);
+            som("D3", 100);
+            som("F#3", 100);
+            som("D3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 12);
             girar_direita(170);
@@ -55,7 +55,7 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "CURVA VERDE - Direita");
+        print(1, "<b><color=#248f75>CURVA VERDE - Direita</color></b>");
         ajustar_linha();
         encoder(-300, 2);
         ajustar_linha();
@@ -69,18 +69,18 @@ bool verifica_verde()
             if (beco()) { return true; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("F", 100);
+            som("F3", 100);
             while (!(tem_linha(1)))
             {
                 mover(190, 190);
             }
-            som("G", 100);
+            som("G3", 100);
             while (cor(1) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("A", 100);
+            som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_direita(20);
@@ -115,7 +115,7 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "CURVA VERDE - Esquerda");
+        print(1, "<b><color=#248f75>CURVA VERDE - Esquerda</color></b>");
         ajustar_linha();
         encoder(-300, 2);
         ajustar_linha();
@@ -129,18 +129,18 @@ bool verifica_verde()
             if (beco()) { return true; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("F", 100);
+            som("F3", 100);
             while (!(tem_linha(2)))
             {
                 mover(190, 190);
             }
-            som("G", 100);
+            som("G3", 100);
             while (cor(2) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("A", 100);
+            som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_esquerda(20);
@@ -184,6 +184,7 @@ bool verifica_curva()
 
     else if (preto_curva_dir)
     {
+        if (vermelho(1)) { return false; }
         parar();
         delay(64);
         if (verifica_saida()) { return false; }
@@ -194,13 +195,13 @@ bool verifica_curva()
         // Confirmações visuais e sonoras de que entrou na condição da curva
         print(1, "CURVA PRETO - Direita");
         led(0, 0, 0);
-        som("C", 100);
+        som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() + 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
+            if ((tem_linha(1) || tem_linha(2)) && !vermelho(1) && !vermelho(2))
             {
                 return false;
             }
@@ -208,15 +209,23 @@ bool verifica_curva()
         }
         // Confirmada a curva, gira até encontrar uma linha ou passar do ângulo máximo
         objetivo = converter_graus(eixo_x() + 115);
-        while (!tem_linha(1) && !azul(1))
+        while (!tem_linha(1) && !vermelho(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
                 /* Se chegar ao ângulo máximo, é uma curva com um gap no final
                 Se alinha e arruma a curva de 90 somente com a referência de graus*/
-                encoder(-300, 5f);
+                tempo_correcao = millis() + 1000;
+                for (int i = 0; i < 10; i++)
+                {
+                    encoder(-300, 0.2f);
+                    if (millis() > tempo_correcao)
+                    {
+                        break;
+                    }
+                }
                 mover(-1000, 1000);
-                delay(500);
+                delay(650);
                 alinhar_angulo();
                 encoder(300, 2f);
                 ajustar_linha();
@@ -240,6 +249,7 @@ bool verifica_curva()
 
     else if (preto_curva_esq)
     {
+        if (vermelho(3)) { return false; }
         parar();
         delay(64);
         if (verifica_saida()) { return false; }
@@ -248,26 +258,34 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         print(1, "CURVA PRETO - Esquerda");
         led(0, 0, 0);
-        som("C", 100);
+        som("C3", 100);
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() - 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
+            if ((tem_linha(1) || tem_linha(2)) && !vermelho(1) && !vermelho(2))
             {
                 return false;
             }
             mover(-1000, 1000);
         }
         objetivo = converter_graus(eixo_x() - 115);
-        while (!tem_linha(2) && !azul(2))
+        while (!tem_linha(2) && !vermelho(2))
         {
             ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
-                encoder(-300, 5f);
+                tempo_correcao = millis() + 1000;
+                for (int i = 0; i < 10; i++)
+                {
+                    encoder(-300, 0.2f);
+                    if (millis() > tempo_correcao)
+                    {
+                        break;
+                    }
+                }
                 mover(1000, -1000);
-                delay(300);
+                delay(650);
                 alinhar_angulo();
                 encoder(300, 2f);
                 ajustar_linha();
