@@ -1,13 +1,13 @@
 bool verifica_saida()
 {
     // Está saindo da pista (detectou o fim da arena)
-    if (azul(1) || azul(2))
+    if (vermelho(1) || vermelho(2))
     {
-        print(1, "Saí da arena...");
+        print(1, "<color=#c93432>Saí da arena...</color>");
         led(255, 0, 0);
-        som("B", 64);
+        som("B3", 64);
         som("MUDO", 16);
-        som("B", 64);
+        som("B3", 64);
         // Calcula a diferença desde a última correção e vai para trás até encontrar uma linha ou estourar o tempo
         mover(-velocidade, -velocidade);
         delay(150);
@@ -18,7 +18,7 @@ bool verifica_saida()
             mover(-velocidade, -velocidade);
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
-                break;
+                if (vermelho(1) || vermelho(2)) { break; }
             }
         }
         ajustar_linha();
@@ -37,14 +37,14 @@ void seguir_linha()
 {
     if (verifica_saida()) { return; }
     if (verifica_curva()) { return; }
-    print(1, $"Seguindo linha: {velocidade}");
+    print(1, $"Seguindo linha: <color=#3ea7fa>{velocidade}</color>");
     bc.TurnLedOff();
     ler_cor();
 
     // Área de ajustes===============================================================================
 
     // Perdeu a linha (muito tempo sem se corrigir)
-    if ((millis() - ultima_correcao) > 1500)
+    if ((millis() - ultima_correcao) > 1000)
     {
         // Se tem linha na posição atual, retorna ao normal
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
@@ -73,11 +73,11 @@ void seguir_linha()
         parar();
 
         // Confirma que está perdido
-        print(1, "Perdi a linha...");
+        print(1, "<b><color=#c93432>Perdi a linha...</color></b>");
         led(255, 0, 0);
-        som("F#", 64);
+        som("F#3", 64);
         som("MUDO", 16);
-        som("F#", 64);
+        som("F#3", 64);
         // Vai para trás até encontrar uma linha ou estourar o tempo
         int tras = millis() + 1750;
         while (millis() < tras)

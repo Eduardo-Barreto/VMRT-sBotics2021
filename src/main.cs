@@ -9,6 +9,7 @@ import("piso/obstaculo");
 
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
+bool console = true;
 
 // Método principal
 void Main()
@@ -30,6 +31,6 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        print(1, (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3)));
+        parar();
     }
 }

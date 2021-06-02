@@ -79,19 +79,19 @@ void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
 
 string[] consoleLines = { "", "", "", "" };
 
-void print(int linha, object texto) => bc.Print(linha - 1, texto.ToString());
+void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
 
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
 bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 24);
 
-bool azul(int sensor)
+bool vermelho(int sensor)
 {
     float val_vermelho = bc.ReturnRed(sensor);
     float val_verde = bc.ReturnGreen(sensor);
     float val_azul = bc.ReturnBlue(sensor);
-    byte media_vermelho = 28, media_verde = 33, media_azul = 39;
+    byte media_vermelho = 66, media_verde = 16, media_azul = 16;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
@@ -159,7 +159,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"calibração: {media_meio} || {media_fora}");
+    print(3, $"<color=#4c4d53>calibração: {media_meio} || {media_fora}</color>");
 }
 
 void verifica_calibrar()
@@ -339,13 +339,13 @@ void ajustar_linha()
 bool verifica_saida()
 {
     // Está saindo da pista (detectou o fim da arena)
-    if (azul(1) || azul(2))
+    if (vermelho(1) || vermelho(2))
     {
-        print(1, "Saí da arena...");
+        print(1, "<color=#c93432>Saí da arena...</color>");
         led(255, 0, 0);
-        som("B", 64);
+        som("B3", 64);
         som("MUDO", 16);
-        som("B", 64);
+        som("B3", 64);
         // Calcula a diferença desde a última correção e vai para trás até encontrar uma linha ou estourar o tempo
         mover(-velocidade, -velocidade);
         delay(150);
@@ -356,7 +356,7 @@ bool verifica_saida()
             mover(-velocidade, -velocidade);
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
-                break;
+                if (vermelho(1) || vermelho(2)) { break; }
             }
         }
         ajustar_linha();
@@ -375,14 +375,14 @@ void seguir_linha()
 {
     if (verifica_saida()) { return; }
     if (verifica_curva()) { return; }
-    print(1, $"Seguindo linha: {velocidade}");
+    print(1, $"Seguindo linha: <color=#3ea7fa>{velocidade}</color>");
     bc.TurnLedOff();
     ler_cor();
 
     // Área de ajustes===============================================================================
 
     // Perdeu a linha (muito tempo sem se corrigir)
-    if ((millis() - ultima_correcao) > 1500)
+    if ((millis() - ultima_correcao) > 1000)
     {
         // Se tem linha na posição atual, retorna ao normal
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
@@ -411,11 +411,11 @@ void seguir_linha()
         parar();
 
         // Confirma que está perdido
-        print(1, "Perdi a linha...");
+        print(1, "<b><color=#c93432>Perdi a linha...</color></b>");
         led(255, 0, 0);
-        som("F#", 64);
+        som("F#3", 64);
         som("MUDO", 16);
-        som("F#", 64);
+        som("F#3", 64);
         // Vai para trás até encontrar uma linha ou estourar o tempo
         int tras = millis() + 1750;
         while (millis() < tras)
@@ -516,10 +516,10 @@ bool beco()
             // Feedback visual e sonoro para indicar que entrou na condição
             print(1, "BECO SEM SAÍDA");
             led(0, 255, 0);
-            som("F#", 100);
-            som("D", 100);
-            som("F#", 100);
-            som("D", 100);
+            som("F#3", 100);
+            som("D3", 100);
+            som("F#3", 100);
+            som("D3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 12);
             girar_direita(170);
@@ -555,7 +555,7 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "CURVA VERDE - Direita");
+        print(1, "<b><color=#248f75>CURVA VERDE - Direita</color></b>");
         ajustar_linha();
         encoder(-300, 2);
         ajustar_linha();
@@ -569,18 +569,18 @@ bool verifica_verde()
             if (beco()) { return true; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("F", 100);
+            som("F3", 100);
             while (!(tem_linha(1)))
             {
                 mover(190, 190);
             }
-            som("G", 100);
+            som("G3", 100);
             while (cor(1) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("A", 100);
+            som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_direita(20);
@@ -615,7 +615,7 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "CURVA VERDE - Esquerda");
+        print(1, "<b><color=#248f75>CURVA VERDE - Esquerda</color></b>");
         ajustar_linha();
         encoder(-300, 2);
         ajustar_linha();
@@ -629,18 +629,18 @@ bool verifica_verde()
             if (beco()) { return true; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("F", 100);
+            som("F3", 100);
             while (!(tem_linha(2)))
             {
                 mover(190, 190);
             }
-            som("G", 100);
+            som("G3", 100);
             while (cor(2) == "PRETO")
             {
                 mover(190, 190);
             }
             parar();
-            som("A", 100);
+            som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
             girar_esquerda(20);
@@ -684,6 +684,7 @@ bool verifica_curva()
 
     else if (preto_curva_dir)
     {
+        if (vermelho(1)) { return false; }
         parar();
         delay(64);
         if (verifica_saida()) { return false; }
@@ -694,13 +695,13 @@ bool verifica_curva()
         // Confirmações visuais e sonoras de que entrou na condição da curva
         print(1, "CURVA PRETO - Direita");
         led(0, 0, 0);
-        som("C", 100);
+        som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() + 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
+            if ((tem_linha(1) || tem_linha(2)) && !vermelho(1) && !vermelho(2))
             {
                 return false;
             }
@@ -708,15 +709,23 @@ bool verifica_curva()
         }
         // Confirmada a curva, gira até encontrar uma linha ou passar do ângulo máximo
         objetivo = converter_graus(eixo_x() + 115);
-        while (!tem_linha(1) && !azul(1))
+        while (!tem_linha(1) && !vermelho(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
                 /* Se chegar ao ângulo máximo, é uma curva com um gap no final
                 Se alinha e arruma a curva de 90 somente com a referência de graus*/
-                encoder(-300, 5f);
+                tempo_correcao = millis() + 1000;
+                for (int i = 0; i < 10; i++)
+                {
+                    encoder(-300, 0.2f);
+                    if (millis() > tempo_correcao)
+                    {
+                        break;
+                    }
+                }
                 mover(-1000, 1000);
-                delay(500);
+                delay(650);
                 alinhar_angulo();
                 encoder(300, 2f);
                 ajustar_linha();
@@ -740,6 +749,7 @@ bool verifica_curva()
 
     else if (preto_curva_esq)
     {
+        if (vermelho(3)) { return false; }
         parar();
         delay(64);
         if (verifica_saida()) { return false; }
@@ -748,26 +758,34 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         print(1, "CURVA PRETO - Esquerda");
         led(0, 0, 0);
-        som("C", 100);
+        som("C3", 100);
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() - 15);
         while (!proximo(eixo_x(), objetivo))
         {
-            if ((tem_linha(1) || tem_linha(2)) && !azul(1) && !azul(2))
+            if ((tem_linha(1) || tem_linha(2)) && !vermelho(1) && !vermelho(2))
             {
                 return false;
             }
             mover(-1000, 1000);
         }
         objetivo = converter_graus(eixo_x() - 115);
-        while (!tem_linha(2) && !azul(2))
+        while (!tem_linha(2) && !vermelho(2))
         {
             ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
-                encoder(-300, 5f);
+                tempo_correcao = millis() + 1000;
+                for (int i = 0; i < 10; i++)
+                {
+                    encoder(-300, 0.2f);
+                    if (millis() > tempo_correcao)
+                    {
+                        break;
+                    }
+                }
                 mover(1000, -1000);
-                delay(300);
+                delay(650);
                 alinhar_angulo();
                 encoder(300, 2f);
                 ajustar_linha();
@@ -799,25 +817,25 @@ void verifica_obstaculo()
         alinhar_angulo();
         print(1, "OBSTÁCULO");
         led(40, 153, 219);
-        som("E", 64);
+        som("E3", 64);
         som("MUDO", 16);
-        som("E", 64);
+        som("E3", 64);
         som("MUDO", 16);
-        som("E", 64);
+        som("E3", 64);
         girar_direita(45);
-        som("E", 32);
+        som("E3", 32);
         encoder(300, 20);
-        som("E", 32);
+        som("E3", 32);
         girar_esquerda(45);
-        som("E", 32);
+        som("E3", 32);
         encoder(300, 25);
-        som("E", 32);
+        som("E3", 32);
         girar_esquerda(45);
-        som("E", 32);
-        encoder(300, 20);
-        som("E", 32);
+        som("E3", 32);
+        encoder(300, 20);// ACHAR LINHAA!
+        som("E3", 32);
         float objetivo = converter_graus(eixo_x() + 45);
-        while (!tem_linha(1) && !azul(1))
+        while (!tem_linha(1) && !vermelho(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
@@ -836,9 +854,9 @@ void verifica_obstaculo()
                 break;
             }
         }
-        som("D", 32);
+        som("D3", 32);
         som("MUDO", 16);
-        som("D", 32);
+        som("D3", 32);
         parar();
         ajustar_linha();
     }
@@ -846,6 +864,7 @@ void verifica_obstaculo()
 
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
+bool console = true;
 
 // Método principal
 void Main()
@@ -867,6 +886,6 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        print(1, (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3)));
+        parar();
     }
 }

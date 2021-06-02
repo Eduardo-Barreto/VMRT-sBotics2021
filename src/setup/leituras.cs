@@ -16,19 +16,19 @@ void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
 
 string[] consoleLines = { "", "", "", "" };
 
-void print(int linha, object texto) => bc.Print(linha - 1, texto.ToString());
+void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
 
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
 bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 24);
 
-bool azul(int sensor)
+bool vermelho(int sensor)
 {
     float val_vermelho = bc.ReturnRed(sensor);
     float val_verde = bc.ReturnGreen(sensor);
     float val_azul = bc.ReturnBlue(sensor);
-    byte media_vermelho = 28, media_verde = 33, media_azul = 39;
+    byte media_vermelho = 66, media_verde = 16, media_azul = 16;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
@@ -96,7 +96,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"calibração: {media_meio} || {media_fora}");
+    print(3, $"<color=#4c4d53>calibração: {media_meio} || {media_fora}</color>");
 }
 
 void verifica_calibrar()
