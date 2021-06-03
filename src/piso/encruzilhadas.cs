@@ -83,7 +83,7 @@ bool verifica_verde()
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
-            girar_direita(20);
+            girar_direita(25);
             while (!tem_linha(1))
             {
                 mover(1000, -1000);
@@ -143,7 +143,7 @@ bool verifica_verde()
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
-            girar_esquerda(20);
+            girar_esquerda(25);
             while (!tem_linha(2))
             {
                 mover(-1000, 1000);
@@ -184,9 +184,15 @@ bool verifica_curva()
 
     else if (preto_curva_dir)
     {
-        if (vermelho(1)) { return false; }
         parar();
         delay(64);
+        ler_cor();
+        if (vermelho(0)) { return false; }
+        if (preto_curva_esq)
+        {
+            encoder(200, 3);
+            return false;
+        }
         if (verifica_saida()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
         if (verifica_verde()) { return true; }
@@ -240,7 +246,8 @@ bool verifica_curva()
         delay(200);
         ajustar_linha();
         encoder(-300, 2);
-        ajustar_linha();
+        ajustar_linha(true);
+        ajustar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         calibrar();
@@ -249,9 +256,15 @@ bool verifica_curva()
 
     else if (preto_curva_esq)
     {
-        if (vermelho(3)) { return false; }
         parar();
         delay(64);
+        ler_cor();
+        if (vermelho(3)) { return false; }
+        if (preto_curva_dir)
+        {
+            encoder(200, 3);
+            return false;
+        }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
@@ -299,7 +312,8 @@ bool verifica_curva()
         delay(200);
         ajustar_linha();
         encoder(-300, 2);
-        ajustar_linha();
+        ajustar_linha(true);
+        ajustar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         calibrar();

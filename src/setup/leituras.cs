@@ -21,7 +21,7 @@ void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=c
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
-bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 24);
+bool tem_linha(int sensor) => (bc.returnRed(sensor) < 24);
 
 bool vermelho(int sensor)
 {
@@ -60,7 +60,7 @@ bool preto(int sensor)
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((bc.lightness(sensor) < media_fora) || (cor(sensor) == "PRETO") || tem_linha(sensor))
+        if ((bc.lightness(sensor) < 40) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -124,8 +124,8 @@ void ler_cor()
     verde2 = verde(2);
     verde3 = verde(3);
 
-    preto_curva_dir = ((tem_linha(0) || cor(0) == "PRETO" || preto(0)));
-    preto_curva_esq = ((tem_linha(3) || cor(3) == "PRETO" || preto(3)));
+    preto_curva_dir = (preto(0));
+    preto_curva_esq = (preto(3));
 }
 
 bool angulo_reto()
