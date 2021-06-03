@@ -104,31 +104,57 @@ void alinhar_angulo()
 }
 
 // Ajusta os sensores na linha preta
-void ajustar_linha()
+void ajustar_linha(bool por_luz = false)
 {
     led(255, 255, 0);
 
+    if (por_luz)
+    {
+        tempo_correcao = millis() + 150;
+        while (luz(0) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(1) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(3) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(2) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+    }
+    else
+    {
+        tempo_correcao = millis() + 150;
+        while (cor(0) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (cor(1) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (cor(3) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (cor(2) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+    }
 
-    tempo_correcao = millis() + 150;
-    while (cor(0) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(-1000, 1000);
-    }
-    tempo_correcao = millis() + 150;
-    while (cor(1) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(-1000, 1000);
-    }
-    tempo_correcao = millis() + 150;
-    while (cor(3) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(1000, -1000);
-    }
-    tempo_correcao = millis() + 150;
-    while (cor(2) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(1000, -1000);
-    }
-
+    delay(64);
     parar();
 }

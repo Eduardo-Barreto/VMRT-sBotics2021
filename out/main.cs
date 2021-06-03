@@ -84,7 +84,7 @@ void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=c
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
 
-bool tem_linha(int sensor) => (bc.returnBlue(sensor) < 24);
+bool tem_linha(int sensor) => (bc.returnRed(sensor) < 24);
 
 bool vermelho(int sensor)
 {
@@ -123,7 +123,7 @@ bool preto(int sensor)
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((bc.lightness(sensor) < media_fora) || (cor(sensor) == "PRETO") || tem_linha(sensor))
+        if ((bc.lightness(sensor) < 40) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -187,8 +187,8 @@ void ler_cor()
     verde2 = verde(2);
     verde3 = verde(3);
 
-    preto_curva_dir = ((tem_linha(0) || cor(0) == "PRETO" || preto(0)));
-    preto_curva_esq = ((tem_linha(3) || cor(3) == "PRETO" || preto(3)));
+    preto_curva_dir = (preto(0));
+    preto_curva_esq = (preto(3));
 }
 
 bool angulo_reto()
@@ -308,32 +308,58 @@ void alinhar_angulo()
 }
 
 // Ajusta os sensores na linha preta
-void ajustar_linha()
+void ajustar_linha(bool por_luz = false)
 {
     led(255, 255, 0);
 
+    if (por_luz)
+    {
+        tempo_correcao = millis() + 150;
+        while (luz(0) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(1) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(3) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(2) < 40 && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+    }
+    else
+    {
+        tempo_correcao = millis() + 150;
+        while (cor(0) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (cor(1) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(-1000, 1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (cor(3) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+        tempo_correcao = millis() + 150;
+        while (cor(2) == "PRETO" && millis() < tempo_correcao)
+        {
+            bc.onTF(1000, -1000);
+        }
+    }
 
-    tempo_correcao = millis() + 150;
-    while (cor(0) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(-1000, 1000);
-    }
-    tempo_correcao = millis() + 150;
-    while (cor(1) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(-1000, 1000);
-    }
-    tempo_correcao = millis() + 150;
-    while (cor(3) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(1000, -1000);
-    }
-    tempo_correcao = millis() + 150;
-    while (cor(2) == "PRETO" && millis() < tempo_correcao)
-    {
-        bc.onTF(1000, -1000);
-    }
-
+    delay(64);
     parar();
 }
 bool verifica_saida()
@@ -583,7 +609,7 @@ bool verifica_verde()
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
-            girar_direita(20);
+            girar_direita(25);
             while (!tem_linha(1))
             {
                 mover(1000, -1000);
@@ -643,7 +669,7 @@ bool verifica_verde()
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
-            girar_esquerda(20);
+            girar_esquerda(25);
             while (!tem_linha(2))
             {
                 mover(-1000, 1000);
@@ -684,9 +710,15 @@ bool verifica_curva()
 
     else if (preto_curva_dir)
     {
-        if (vermelho(1)) { return false; }
         parar();
         delay(64);
+        ler_cor();
+        if (vermelho(0)) { return false; }
+        if (preto_curva_esq)
+        {
+            encoder(200, 3);
+            return false;
+        }
         if (verifica_saida()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
         if (verifica_verde()) { return true; }
@@ -740,7 +772,8 @@ bool verifica_curva()
         delay(200);
         ajustar_linha();
         encoder(-300, 2);
-        ajustar_linha();
+        ajustar_linha(true);
+        ajustar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         calibrar();
@@ -749,9 +782,15 @@ bool verifica_curva()
 
     else if (preto_curva_esq)
     {
-        if (vermelho(3)) { return false; }
         parar();
         delay(64);
+        ler_cor();
+        if (vermelho(3)) { return false; }
+        if (preto_curva_dir)
+        {
+            encoder(200, 3);
+            return false;
+        }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
@@ -799,7 +838,8 @@ bool verifica_curva()
         delay(200);
         ajustar_linha();
         encoder(-300, 2);
-        ajustar_linha();
+        ajustar_linha(true);
+        ajustar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         calibrar();
@@ -886,6 +926,5 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        parar();
     }
 }

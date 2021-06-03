@@ -31,6 +31,5 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        parar();
     }
 }
