@@ -25,11 +25,20 @@ float converter_graus(float graus)
 void levantar_atuador()
 {
     // Levanta o atuador para o ângulo correto
-    bc.actuatorSpeed(150);
-    bc.actuatorUp(100);
-    if (bc.angleActuator() >= 0 && bc.angleActuator() < 88)
+    bc.ActuatorSpeed(150);
+    bc.ActuatorUp(100);
+    if (bc.angleActuator() >= 0 && bc.AngleActuator() < 88)
     {
-        bc.actuatorSpeed(150);
-        bc.actuatorUp(600);
+        bc.ActuatorSpeed(150);
+        bc.ActuatorUp(600);
+    }
+}
+
+void abaixar_atuador()
+{
+    if (bc.AngleActuator() > 5)
+    {
+        bc.ActuatorSpeed(150);
+        bc.ActuatorDown(600);
     }
 }

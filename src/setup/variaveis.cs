@@ -9,7 +9,9 @@ int velocidade_padrao = 190,
         velocidade_max = 300,
         update_time = 16,
         tempo_correcao = 0,
-        ultima_correcao = 0;
+        ultima_correcao = 0,
+        update_elevado = 0,
+        update_obstaculo = 0;
 
 bool preto0 = false,
         preto1 = false,
@@ -25,3 +27,6 @@ bool preto0 = false,
         preto_curva_esq = false;
 
 int[] angulos_retos = { 0, 90, 180, 270 };
+
+string lado_ajuste = "0",
+        lugar = "piso";

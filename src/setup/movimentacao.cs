@@ -1,7 +1,6 @@
 // Métodos de movimentação e outros
 
 void mover(int esquerda, int direita) => bc.MoveFrontal(direita, esquerda);
-void rotacionar(int velocidade, int graus) => bc.MoveFrontalAngles(velocidade, graus);
 void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
 void parar() { bc.MoveFrontal(0, 0); delay(10); }
 void travar() { bc.MoveFrontal(0, 0); delay(999999999); }
@@ -110,51 +109,61 @@ void ajustar_linha(bool por_luz = false)
 
     if (por_luz)
     {
-        tempo_correcao = millis() + 150;
-        while (luz(0) < 40 && millis() < tempo_correcao)
+        if (luz(0) < 30 && luz(1) < 30 && luz(2) < 30 && luz(3) < 30)
         {
+            mover(200, 200);
+            delay(200);
+            return;
+        }
+        tempo_correcao = millis() + 150;
+        while (luz(0) < 30 && millis() < tempo_correcao)
             bc.onTF(-1000, 1000);
-        }
         tempo_correcao = millis() + 150;
-        while (luz(1) < 40 && millis() < tempo_correcao)
-        {
+        while (luz(1) < 30 && millis() < tempo_correcao)
             bc.onTF(-1000, 1000);
-        }
         tempo_correcao = millis() + 150;
-        while (luz(3) < 40 && millis() < tempo_correcao)
-        {
+        while (luz(3) < 30 && millis() < tempo_correcao)
             bc.onTF(1000, -1000);
-        }
         tempo_correcao = millis() + 150;
-        while (luz(2) < 40 && millis() < tempo_correcao)
-        {
+        while (luz(2) < 30 && millis() < tempo_correcao)
             bc.onTF(1000, -1000);
-        }
     }
     else
     {
         tempo_correcao = millis() + 150;
         while (cor(0) == "PRETO" && millis() < tempo_correcao)
-        {
             bc.onTF(-1000, 1000);
-        }
         tempo_correcao = millis() + 150;
         while (cor(1) == "PRETO" && millis() < tempo_correcao)
-        {
             bc.onTF(-1000, 1000);
-        }
         tempo_correcao = millis() + 150;
         while (cor(3) == "PRETO" && millis() < tempo_correcao)
-        {
             bc.onTF(1000, -1000);
-        }
         tempo_correcao = millis() + 150;
         while (cor(2) == "PRETO" && millis() < tempo_correcao)
-        {
             bc.onTF(1000, -1000);
-        }
     }
 
     delay(64);
     parar();
+}
+
+void alinhar_ultra(int distancia)
+{
+    while (ultra(0) > distancia)
+    {
+        mover(300, 300);
+    }
+    while (ultra(0) < distancia)
+    {
+        mover(-300, -300);
+    }
+    while (ultra(0) > distancia)
+    {
+        mover(200, 200);
+    }
+    while (ultra(0) < distancia)
+    {
+        mover(-200, -200);
+    }
 }

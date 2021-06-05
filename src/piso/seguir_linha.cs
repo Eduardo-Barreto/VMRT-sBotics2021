@@ -1,7 +1,11 @@
 bool verifica_saida()
 {
+    if (lugar == "percurso de saida")
+    {
+        return (vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3));
+    }
     // Está saindo da pista (detectou o fim da arena)
-    if (vermelho(1) || vermelho(2))
+    else if (vermelho(1) || vermelho(2))
     {
         print(1, "<color=#c93432>Saí da arena...</color>");
         led(255, 0, 0);
@@ -56,10 +60,14 @@ void seguir_linha()
         }
 
         // Começa a verificar se há linha por perto
-        tempo_correcao = millis() + 300;
-        while (millis() < tempo_correcao)
+        float objetivo = (lado_ajuste == "d") ? (converter_graus(eixo_x() + 10)) : (converter_graus(eixo_x() - 10));
+        while (!proximo(eixo_x(), objetivo))
         {
-            mover(1000, -1000);
+            if (lado_ajuste == "d")
+                mover(1000, -1000);
+            else
+                mover(-1000, 1000);
+
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
                 ajustar_linha();
@@ -68,8 +76,11 @@ void seguir_linha()
                 return;
             }
         }
-        mover(-1000, 1000);
-        delay(210);
+        if (lado_ajuste == "d")
+            girar_esquerda(10);
+        else
+            girar_direita(10);
+
         parar();
 
         // Confirma que está perdido
@@ -126,6 +137,7 @@ void seguir_linha()
         mover(velocidade, velocidade);
         delay(5);
         ultima_correcao = millis();
+        lado_ajuste = "d";
     }
 
     // Se viu preto no sensor da direita
@@ -151,6 +163,7 @@ void seguir_linha()
         mover(velocidade, velocidade);
         delay(5);
         ultima_correcao = millis();
+        lado_ajuste = "e";
     }
 
     // Se está certo na linha só vai para frente com a velocidade atual

@@ -19,7 +19,7 @@ string[] consoleLines = { "", "", "", "" };
 void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
 
 void limpar_console() => bc.ClearConsole();
-void limpar_linha(int linha) => bc.ClearConsoleLine(linha);
+void limpar_linha(int linha) => bc.Print(linha - 1, "");
 
 bool tem_linha(int sensor) => (bc.returnRed(sensor) < 24);
 

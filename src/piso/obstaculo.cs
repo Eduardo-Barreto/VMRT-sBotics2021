@@ -1,5 +1,6 @@
-void verifica_obstaculo()
+bool verifica_obstaculo()
 {
+    if (millis() < update_obstaculo) { return false; }
     if (ultra(0) < 35)
     {
         alinhar_angulo();
@@ -20,10 +21,15 @@ void verifica_obstaculo()
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        encoder(300, 20);// ACHAR LINHAA!
+        while (!preto(0) && !preto(1))
+        {
+            mover(200, 200);
+        }
+        som("D3", 32);
+        encoder(300, 10);
         som("E3", 32);
         float objetivo = converter_graus(eixo_x() + 45);
-        while (!tem_linha(1) && !vermelho(1))
+        while (!preto(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
@@ -36,16 +42,20 @@ void verifica_obstaculo()
         tempo_correcao = millis() + 500;
         while (millis() < tempo_correcao)
         {
-            mover(-150, -150);
             if (toque())
             {
                 break;
             }
+            mover(-150, -150);
         }
+        parar();
         som("D3", 32);
         som("MUDO", 16);
         som("D3", 32);
-        parar();
         ajustar_linha();
+        abaixar_atuador();
+        update_obstaculo = millis() + 100;
+        return true;
     }
+    return false;
 }

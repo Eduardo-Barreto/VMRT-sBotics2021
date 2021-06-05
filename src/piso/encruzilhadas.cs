@@ -70,13 +70,19 @@ bool verifica_verde()
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
             som("F3", 100);
+            tempo_correcao = millis() + 200;
             while (!(tem_linha(1)))
             {
+                if (millis() > tempo_correcao)
+                    break;
                 mover(190, 190);
             }
             som("G3", 100);
+            tempo_correcao = millis() + 200;
             while (cor(1) == "PRETO")
             {
+                if (millis() > tempo_correcao)
+                    break;
                 mover(190, 190);
             }
             parar();
