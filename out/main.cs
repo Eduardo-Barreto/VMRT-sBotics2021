@@ -932,7 +932,7 @@ bool verifica_obstaculo()
         }
         delay(200);
         alinhar_angulo();
-        tempo_correcao = millis() + 500;
+        tempo_correcao = millis() + 350;
         while (millis() < tempo_correcao)
         {
             if (toque())
@@ -946,7 +946,6 @@ bool verifica_obstaculo()
         som("MUDO", 16);
         som("D3", 32);
         ajustar_linha();
-        abaixar_atuador();
         update_obstaculo = millis() + 100;
         return true;
     }
@@ -979,8 +978,7 @@ bool verifica_elevada()
 
     }
     return false;
-}
-void seguir_rampa()
+}void seguir_rampa()
 {
     ler_cor();
 
