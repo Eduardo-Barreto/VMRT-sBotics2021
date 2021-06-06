@@ -167,3 +167,24 @@ void alinhar_ultra(int distancia)
         mover(-200, -200);
     }
 }
+
+void levantar_atuador()
+{
+    // Levanta o atuador para o ângulo correto
+    bc.ActuatorSpeed(150);
+    bc.ActuatorUp(100);
+    if (angulo_atuador() >= 0 && angulo_atuador() < 88)
+    {
+        bc.ActuatorSpeed(150);
+        bc.ActuatorUp(600);
+    }
+}
+
+void abaixar_atuador()
+{
+    if (angulo_atuador() > 5)
+    {
+        bc.ActuatorSpeed(150);
+        bc.ActuatorDown(600);
+    }
+}

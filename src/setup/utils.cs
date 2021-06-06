@@ -21,24 +21,3 @@ float converter_graus(float graus)
     graus_convertidos = (graus_convertidos == 360) ? 0 : graus_convertidos;
     return graus_convertidos;
 }
-
-void levantar_atuador()
-{
-    // Levanta o atuador para o ângulo correto
-    bc.ActuatorSpeed(150);
-    bc.ActuatorUp(100);
-    if (bc.angleActuator() >= 0 && bc.AngleActuator() < 88)
-    {
-        bc.ActuatorSpeed(150);
-        bc.ActuatorUp(600);
-    }
-}
-
-void abaixar_atuador()
-{
-    if (bc.AngleActuator() > 5)
-    {
-        bc.ActuatorSpeed(150);
-        bc.ActuatorDown(600);
-    }
-}

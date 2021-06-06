@@ -89,7 +89,7 @@ bool branco(int sensor)
 
 void calibrar()
 {
-    ajustar_linha();
+    ajustar_linha(true);
     media_meio = (luz(1) + luz(2)) / 4.2f;
     media_fora = (luz(0) + luz(3)) / 4.2f;
 

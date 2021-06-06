@@ -4,14 +4,14 @@ float saida1 = 0,
         media_meio = 0,
         media_fora = 0;
 
-int velocidade_padrao = 190,
-        velocidade = 200,
-        velocidade_max = 300,
+int velocidade_padrao = 185,
+        velocidade = 180,
+        velocidade_max = 220,
         update_time = 16,
         tempo_correcao = 0,
         ultima_correcao = 0,
-        update_elevado = 0,
-        update_obstaculo = 0;
+        update_obstaculo = 0,
+        update_rampa = 0;
 
 bool preto0 = false,
         preto1 = false,
@@ -52,27 +52,6 @@ float converter_graus(float graus)
     graus_convertidos = (graus_convertidos > 360) ? (graus_convertidos - 360) : graus_convertidos;
     graus_convertidos = (graus_convertidos == 360) ? 0 : graus_convertidos;
     return graus_convertidos;
-}
-
-void levantar_atuador()
-{
-    // Levanta o atuador para o ângulo correto
-    bc.ActuatorSpeed(150);
-    bc.ActuatorUp(100);
-    if (bc.angleActuator() >= 0 && bc.AngleActuator() < 88)
-    {
-        bc.ActuatorSpeed(150);
-        bc.ActuatorUp(600);
-    }
-}
-
-void abaixar_atuador()
-{
-    if (bc.AngleActuator() > 5)
-    {
-        bc.ActuatorSpeed(150);
-        bc.ActuatorDown(600);
-    }
 }
 // Métodos de leitura e outros
 
@@ -165,7 +144,7 @@ bool branco(int sensor)
 
 void calibrar()
 {
-    ajustar_linha();
+    ajustar_linha(true);
     media_meio = (luz(1) + luz(2)) / 4.2f;
     media_fora = (luz(0) + luz(3)) / 4.2f;
 
@@ -382,6 +361,27 @@ void alinhar_ultra(int distancia)
     while (ultra(0) < distancia)
     {
         mover(-200, -200);
+    }
+}
+
+void levantar_atuador()
+{
+    // Levanta o atuador para o ângulo correto
+    bc.ActuatorSpeed(150);
+    bc.ActuatorUp(100);
+    if (angulo_atuador() >= 0 && angulo_atuador() < 88)
+    {
+        bc.ActuatorSpeed(150);
+        bc.ActuatorUp(600);
+    }
+}
+
+void abaixar_atuador()
+{
+    if (angulo_atuador() > 5)
+    {
+        bc.ActuatorSpeed(150);
+        bc.ActuatorDown(600);
     }
 }
 bool verifica_saida()
@@ -631,7 +631,7 @@ bool verifica_verde()
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
             som("F3", 100);
-            tempo_correcao = millis() + 200;
+            tempo_correcao = millis() + 150;
             while (!(tem_linha(1)))
             {
                 if (millis() > tempo_correcao)
@@ -639,7 +639,7 @@ bool verifica_verde()
                 mover(190, 190);
             }
             som("G3", 100);
-            tempo_correcao = millis() + 200;
+            tempo_correcao = millis() + 150;
             while (cor(1) == "PRETO")
             {
                 if (millis() > tempo_correcao)
@@ -953,32 +953,50 @@ bool verifica_obstaculo()
 }
 bool verifica_elevada()
 {
-    if (millis() < update_elevado)
-    {
+
+    /* 
+    
+        Quando a inclinação for próxima de 350
+            Levanta o atuador
+            Sobe e para o tempo suficiente pra possível gangorra
+            Abaixa o atuador e retorna
+
+    */
+    if (millis() < update_rampa)
         return false;
-    }
-    if (proximo(eixo_y(), 340, 10))
+
+    if (proximo(eixo_y(), 350))
     {
-        if (ultra(1) < 40 && ultra(2) < 40)
-        {
-            lugar = "rampa resgate";
-            return false;
-        }
-        print(2, "RAMPA");
-        int tempo_gangorra = millis() + 1500;
+        parar();
+        levantar_atuador();
+        int tempo_gangorra = millis() + 2000;
         while (millis() < tempo_gangorra)
         {
+            ultima_correcao = millis();
             seguir_linha();
+            if (verifica_rampa_resgate())
+                return true;
         }
         parar();
         delay(550);
-        update_elevado = millis() + 2000;
-        limpar_linha(2);
+        abaixar_atuador();
+        update_rampa = millis() + 2000;
         return true;
-
     }
     return false;
-}void seguir_rampa()
+
+}
+
+bool verifica_rampa_resgate()
+{
+    if ((proximo(eixo_y(), 340, 10)) && (ultra(1) < 40 && ultra(2) < 40))
+    {
+        lugar = "rampa resgate";
+        return true;
+    }
+    return false;
+}
+void seguir_rampa()
 {
     ler_cor();
 
@@ -1028,6 +1046,7 @@ bool verifica_elevada()
         mover(300, 300);
     limpar_console();
     print(2, "Saindo!");
+    som("C1", 100);
 }
 
 void sair()
@@ -1055,9 +1074,13 @@ void sair()
             return;
         }
     }
-    print(2, "Saida a direita não encontrada");
+    print(3, "Saida a direita não encontrada");
+    som("D3", 150);
+    som("C3", 150);
 
     alinhar_ultra(100);
+    limpar_console();
+    print(1, "BUSCANDO SAÍDA");
     girar_direita(45);
     while (ultra(0) > 103)
     {
@@ -1066,8 +1089,10 @@ void sair()
         if (ultra(2) > 256)
         {
             print(3, "Encontrada!");
+            som("B2", 150);
             girar_esquerda(45);
             alinhar_ultra(32);
+            som("C3", 150);
             girar_esquerda(45);
             encoder(300, 4);
             girar_esquerda(45);
@@ -1076,8 +1101,13 @@ void sair()
             return;
         }
     }
+    print(3, "Saida a esquerda não encontrada");
+    som("D3", 150);
+    som("C3", 150);
 
     girar_direita(45);
+    limpar_console();
+    print(2, "indo para saida a frente na direita");
     alinhar_angulo();
     alinhar_ultra(32);
     girar_esquerda(45);
@@ -1086,22 +1116,20 @@ void sair()
     alinhar_angulo();
     alcancar_saida();
     return;
-
-
 }
 
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
-bool console = true;
+bool console = false;
 
 // Método principal
 void Main()
 {
     if (!debug)
     {
-        levantar_atuador();
         calibrar();
         ultima_correcao = millis();
+        abaixar_atuador();
     }
     // Loop principal do programa
     while (!debug)
@@ -1113,9 +1141,12 @@ void Main()
             seguir_linha();
             verifica_calibrar();
             verifica_elevada();
+            verifica_rampa_resgate();
         }
         limpar_console();
         print(1, "SUBINDO RAMPA");
+        led(255, 0, 0);
+        som("B2", 500);
         while (lugar == "rampa resgate")
         {
             velocidade = 250;
@@ -1130,14 +1161,19 @@ void Main()
         {
             sair();
             limpar_console();
-            while (verde(0) && verde(1) && verde(2) && verde(3))
+            while (verde(0) || verde(1) || verde(2) || verde(3))
                 mover(200, 200);
-            delay(150);
+            delay(64);
+            parar();
+            mover(200, 200);
+            delay(16);
+            parar();
             lugar = "percurso de saida";
         }
+        abaixar_atuador();
         while (lugar == "percurso de saida")
         {
-            if (verifica_saida()) { encoder(300, 10); travar(); }
+            if (verifica_saida()) { encoder(300, 15); travar(); }
             verifica_obstaculo();
             seguir_linha();
             verifica_calibrar();
@@ -1148,5 +1184,7 @@ void Main()
     // Loop para debug
     while (debug)
     {
+        abaixar_atuador();
+        travar();
     }
 }

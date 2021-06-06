@@ -11,16 +11,16 @@ import("resgate/sair");
 
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
-bool console = true;
+bool console = false;
 
 // Método principal
 void Main()
 {
     if (!debug)
     {
-        levantar_atuador();
         calibrar();
         ultima_correcao = millis();
+        abaixar_atuador();
     }
     // Loop principal do programa
     while (!debug)
@@ -32,9 +32,12 @@ void Main()
             seguir_linha();
             verifica_calibrar();
             verifica_elevada();
+            verifica_rampa_resgate();
         }
         limpar_console();
         print(1, "SUBINDO RAMPA");
+        led(255, 0, 0);
+        som("B2", 500);
         while (lugar == "rampa resgate")
         {
             velocidade = 250;
@@ -49,14 +52,19 @@ void Main()
         {
             sair();
             limpar_console();
-            while (verde(0) && verde(1) && verde(2) && verde(3))
+            while (verde(0) || verde(1) || verde(2) || verde(3))
                 mover(200, 200);
-            delay(150);
+            delay(64);
+            parar();
+            mover(200, 200);
+            delay(16);
+            parar();
             lugar = "percurso de saida";
         }
+        abaixar_atuador();
         while (lugar == "percurso de saida")
         {
-            if (verifica_saida()) { encoder(300, 10); travar(); }
+            if (verifica_saida()) { encoder(300, 15); travar(); }
             verifica_obstaculo();
             seguir_linha();
             verifica_calibrar();
@@ -67,5 +75,7 @@ void Main()
     // Loop para debug
     while (debug)
     {
+        abaixar_atuador();
+        travar();
     }
 }
