@@ -1171,6 +1171,7 @@ void Main()
             lugar = "percurso de saida";
         }
         abaixar_atuador();
+        delay(700);
         while (lugar == "percurso de saida")
         {
             if (verifica_saida()) { encoder(300, 15); travar(); }
