@@ -76,6 +76,11 @@ void Main()
     // Loop para debug
     while (debug)
     {
+        mover(300, 300);
+        delay(500);
+        mover(-300, -300);
+        delay(500);
+        parar();
         abaixar_atuador();
         travar();
     }

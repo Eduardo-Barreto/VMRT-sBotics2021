@@ -3,7 +3,9 @@ bool verifica_obstaculo()
     if (millis() < update_obstaculo) { return false; }
     if (ultra(0) < 35)
     {
+        parar();
         alinhar_angulo();
+        levantar_atuador();
         print(1, "OBSTÁCULO");
         led(40, 153, 219);
         som("E3", 64);
@@ -53,6 +55,7 @@ bool verifica_obstaculo()
         som("MUDO", 16);
         som("D3", 32);
         ajustar_linha();
+        abaixar_atuador();
         update_obstaculo = millis() + 100;
         return true;
     }

@@ -48,7 +48,7 @@ void seguir_linha()
     // Área de ajustes===============================================================================
 
     // Perdeu a linha (muito tempo sem se corrigir)
-    if ((millis() - ultima_correcao) > 1000)
+    if ((millis() - ultima_correcao) > 1500)
     {
         // Se tem linha na posição atual, retorna ao normal
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))

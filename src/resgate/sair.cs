@@ -1,5 +1,11 @@
 void alcancar_saida()
 {
+    mover(300, 300);
+    delay(500);
+    mover(-300, -300);
+    delay(550);
+    parar();
+    abaixar_atuador();
     while (!verde(0) && !verde(1) && !verde(2) && !verde(3))
         mover(300, 300);
     limpar_console();

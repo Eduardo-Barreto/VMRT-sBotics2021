@@ -434,7 +434,7 @@ void seguir_linha()
     // Área de ajustes===============================================================================
 
     // Perdeu a linha (muito tempo sem se corrigir)
-    if ((millis() - ultima_correcao) > 1000)
+    if ((millis() - ultima_correcao) > 1500)
     {
         // Se tem linha na posição atual, retorna ao normal
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
@@ -697,13 +697,19 @@ bool verifica_verde()
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
             som("F3", 100);
+            tempo_correcao = millis() + 150;
             while (!(tem_linha(2)))
             {
+                if (millis() > tempo_correcao)
+                    break;
                 mover(190, 190);
             }
             som("G3", 100);
+            tempo_correcao = millis() + 150;
             while (cor(2) == "PRETO")
             {
+                if (millis() > tempo_correcao)
+                    break;
                 mover(190, 190);
             }
             parar();
@@ -896,7 +902,9 @@ bool verifica_obstaculo()
     if (millis() < update_obstaculo) { return false; }
     if (ultra(0) < 35)
     {
+        parar();
         alinhar_angulo();
+        levantar_atuador();
         print(1, "OBSTÁCULO");
         led(40, 153, 219);
         som("E3", 64);
@@ -946,6 +954,7 @@ bool verifica_obstaculo()
         som("MUDO", 16);
         som("D3", 32);
         ajustar_linha();
+        abaixar_atuador();
         update_obstaculo = millis() + 100;
         return true;
     }
@@ -1042,6 +1051,12 @@ void seguir_rampa()
     }
 }void alcancar_saida()
 {
+    mover(300, 300);
+    delay(500);
+    mover(-300, -300);
+    delay(550);
+    parar();
+    abaixar_atuador();
     while (!verde(0) && !verde(1) && !verde(2) && !verde(3))
         mover(300, 300);
     limpar_console();
@@ -1070,6 +1085,7 @@ void sair()
             som("C3", 150);
             girar_direita(90);
             alinhar_angulo();
+            //encoder();// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
             alcancar_saida();
             return;
         }
@@ -1185,6 +1201,11 @@ void Main()
     // Loop para debug
     while (debug)
     {
+        mover(300, 300);
+        delay(500);
+        mover(-300, -300);
+        delay(500);
+        parar();
         abaixar_atuador();
         travar();
     }
