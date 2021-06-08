@@ -8,6 +8,7 @@ bool verifica_obstaculo()
         levantar_atuador();
         print(1, "OBSTÁCULO");
         led(40, 153, 219);
+        encoder(300, 10);
         som("E3", 64);
         som("MUDO", 16);
         som("E3", 64);
@@ -19,7 +20,7 @@ bool verifica_obstaculo()
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        encoder(300, 25);
+        encoder(300, 15);
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
@@ -56,6 +57,8 @@ bool verifica_obstaculo()
         som("D3", 32);
         ajustar_linha();
         abaixar_atuador();
+        if (proximo(eixo_y(), 350, 3))
+            levantar_atuador();
         update_obstaculo = millis() + 100;
         return true;
     }
