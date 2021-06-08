@@ -1152,7 +1152,7 @@ void achar_saida()
 
     const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
                 relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
-                sense_triangulo = 1.5f; // constande de sensibilidade para encontrar triangulo 
+                sense_triangulo = 10f; // constande de sensibilidade para encontrar triangulo 
 
     pos_saida = 0;      //inicia as localizações zeradas 
     pos_triangulo = 0;
@@ -1163,9 +1163,9 @@ void achar_saida()
 
     pos_inicial = eixo_x(); // define a posição em que o robô estava ao entrar na sala de resgate
 
-    while (ultra(0) > 185) // enqunto estiver a mais de 185cm da parede frontal busca por saida ou triangulo
+    while (ultra(0) > 180) // enqunto estiver a mais de 180cm da parede frontal busca por saida ou triangulo
     {
-        mover(200, 200);
+        mover(180, 180);
         ler_ultra();
         if (ultra_direita > 300)  // caso o ultrasonico da lateral direita veja uma distancia muito grande o robô encontrou a saida
         {
