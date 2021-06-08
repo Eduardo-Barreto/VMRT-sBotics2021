@@ -8,9 +8,11 @@ import("piso/obstaculo");
 import("piso/elevados");
 import("resgate/rampa");
 import("resgate/sair");
+import("resgate/achar_saida");
+
 
 // Variável de controle para ligar/desligar o debug
-bool debug = false;
+bool debug = true;
 bool console = false;
 
 // Método principal
@@ -76,12 +78,6 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        mover(300, 300);
-        delay(500);
-        mover(-300, -300);
-        delay(500);
-        parar();
-        abaixar_atuador();
-        travar();
+        achar_saida();
     }
 }

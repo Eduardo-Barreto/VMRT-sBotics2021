@@ -2,7 +2,12 @@
 float saida1 = 0,
         saida2 = 0,
         media_meio = 0,
-        media_fora = 0;
+        media_fora = 0,
+        pos_saida = 0,
+        pos_triangulo = 0,
+        ultra_frente = 0,
+        ultra_direita = 0,
+        ultra_esquerda = 0;
 
 int velocidade_padrao = 185,
         velocidade = 180,

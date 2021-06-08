@@ -128,6 +128,13 @@ void ler_cor()
     preto_curva_esq = (preto(3));
 }
 
+void ler_ultra()
+{
+    ultra_frente = ultra(0);
+    ultra_direita = ultra(1);
+    ultra_esquerda = ultra(2);
+}
+
 bool angulo_reto()
 {
     foreach (int angulo_verificado in angulos_retos)
