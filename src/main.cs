@@ -79,5 +79,6 @@ void Main()
     while (debug)
     {
         achar_saida();
+        travar();
     }
 }
