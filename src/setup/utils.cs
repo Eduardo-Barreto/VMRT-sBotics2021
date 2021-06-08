@@ -15,9 +15,5 @@ bool proximo(float atual, float objetivo, float sensibilidade = 1)
 float converter_graus(float graus)
 {
     // converte os graus pra sempre se manterem entre 0~360, uso em calculos para curvas
-    float graus_convertidos = graus;
-    graus_convertidos = (graus_convertidos < 0) ? (360 + graus_convertidos) : graus_convertidos;
-    graus_convertidos = (graus_convertidos > 360) ? (graus_convertidos - 360) : graus_convertidos;
-    graus_convertidos = (graus_convertidos == 360) ? 0 : graus_convertidos;
-    return graus_convertidos;
+    return (graus % 360 + 360) % 360;
 }

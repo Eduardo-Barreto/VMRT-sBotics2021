@@ -10,9 +10,8 @@ import("resgate/rampa");
 import("resgate/sair");
 import("resgate/achar_saida");
 
-
 // Variável de controle para ligar/desligar o debug
-bool debug = true;
+bool debug = false;
 bool console = true;
 
 // Método principal
@@ -52,7 +51,8 @@ void Main()
         limpar_console();
         while (lugar == "resgate")
         {
-            sair();
+            achar_saida();
+            travar();
             limpar_console();
             while (verde(0) || verde(1) || verde(2) || verde(3))
                 mover(200, 200);
@@ -78,7 +78,6 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        achar_saida();
-        travar();
+        print(1, converter_graus(10 - 90));
     }
 }
