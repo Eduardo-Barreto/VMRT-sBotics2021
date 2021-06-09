@@ -78,6 +78,8 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        print(1, converter_graus(10 - 90));
+        mover(200, 200);
+        delay(5);
+        travar();
     }
 }

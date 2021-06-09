@@ -166,6 +166,7 @@ void alinhar_ultra(int distancia)
     {
         mover(-200, -200);
     }
+    parar();
 }
 
 void levantar_atuador()
