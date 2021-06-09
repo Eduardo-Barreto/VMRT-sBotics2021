@@ -1,3 +1,21 @@
+bool falso_verde()
+{
+    int tempo_check_preto = millis() + 180;
+    while (millis() < tempo_check_preto)
+    {
+        mover(-200, -200);
+        if (cor(0) == "PRETO" && cor(3) == "PRETO")
+        {
+            encoder(200, 4);
+            return true;
+        }
+    }
+    mover(200, 200);
+    delay(196);
+    parar();
+    return false;
+}
+
 // Verificação do beco sem saída
 bool beco()
 {
@@ -13,6 +31,7 @@ bool beco()
         ler_cor();
         if ((verde0 || verde1) && (verde2 || verde3))
         {
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição
             print(1, "BECO SEM SAÍDA");
             led(0, 255, 0);
@@ -57,16 +76,14 @@ bool verifica_verde()
         // Se alinha na linha atrás e verifica novamente
         print(1, "<b><color=#248f75>CURVA VERDE - Direita</color></b>");
         ajustar_linha();
-        encoder(-300, 2);
-        ajustar_linha();
-        encoder(300, 2);
-        ajustar_linha();
         delay(64);
+        ajustar_linha();
         ler_cor();
         if (verde0 || verde1)
         {
             // Nova verificação do beco
             if (beco()) { return true; }
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
             som("F3", 100);
@@ -123,16 +140,14 @@ bool verifica_verde()
         // Se alinha na linha atrás e verifica novamente
         print(1, "<b><color=#248f75>CURVA VERDE - Esquerda</color></b>");
         ajustar_linha();
-        encoder(-300, 2);
-        ajustar_linha();
-        encoder(300, 2);
-        ajustar_linha();
         delay(64);
+        ajustar_linha();
         ler_cor();
         if (verde2 || verde3)
         {
             // Nova verificação do beco
             if (beco()) { return true; }
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
             som("F3", 100);
@@ -202,7 +217,7 @@ bool verifica_curva()
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
         {
-            encoder(200, 3);
+            encoder(200, 4);
             return false;
         }
         if (verifica_saida()) { return false; }
@@ -274,7 +289,7 @@ bool verifica_curva()
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)
         {
-            encoder(200, 3);
+            encoder(200, 4);
             return false;
         }
         if (verifica_saida()) { return false; }
