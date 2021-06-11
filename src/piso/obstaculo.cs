@@ -24,10 +24,16 @@ bool verifica_obstaculo()
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
+        int timeout_obstaculo = millis() + 600;
         while (!preto(0) && !preto(1))
         {
+            if(millis() > timeout_obstaculo){
+                print(2, "timeout");
+                break;
+            }
             mover(200, 200);
         }
+        parar();
         som("D3", 32);
         encoder(300, 10);
         som("E3", 32);

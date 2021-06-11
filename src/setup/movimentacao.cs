@@ -1,9 +1,20 @@
 // Métodos de movimentação e outros
 
+void abrir_atuador() => bc.OpenActuator();
+void fechar_atuador() => bc.CloseActuator();
 void mover(int esquerda, int direita) => bc.MoveFrontal(direita, esquerda);
 void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
-void parar() { bc.MoveFrontal(0, 0); delay(10); }
+void parar(int tempo = 10) { bc.MoveFrontal(0, 0); delay(tempo); }
 void travar() { bc.MoveFrontal(0, 0); delay(999999999); }
+
+void mover_tempo(int velocidade, int tempo){
+    int timeout = millis() + tempo;
+    while(millis() < timeout){
+        mover(velocidade, velocidade);
+    }
+    parar();
+    delay(5);
+}
 
 // Curva para a esquerda em graus
 void girar_esquerda(int graus)

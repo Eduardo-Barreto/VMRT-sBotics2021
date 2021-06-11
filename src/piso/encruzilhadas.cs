@@ -86,8 +86,7 @@ bool verifica_verde()
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("F3", 100);
-            tempo_correcao = millis() + 150;
+            /* tempo_correcao = millis() + 150;
             while (!(tem_linha(1)))
             {
                 if (millis() > tempo_correcao)
@@ -102,11 +101,14 @@ bool verifica_verde()
                     break;
                 mover(190, 190);
             }
-            parar();
+            parar(); */
+            encoder(300, 4);
+            som("F3", 100);
+            som("G3", 100);
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
-            girar_direita(25);
+            girar_direita(40);
             while (!tem_linha(1))
             {
                 mover(1000, -1000);
@@ -150,7 +152,7 @@ bool verifica_verde()
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             led(0, 255, 0);
-            som("F3", 100);
+            /* som("F3", 100);
             tempo_correcao = millis() + 150;
             while (!(tem_linha(2)))
             {
@@ -167,10 +169,14 @@ bool verifica_verde()
                 mover(190, 190);
             }
             parar();
+            som("A3", 100); */
+            encoder(300, 4);
+            som("F3", 100);
+            som("G3", 100);
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
             encoder(300, 10);
-            girar_esquerda(25);
+            girar_esquerda(40);
             while (!tem_linha(2))
             {
                 mover(-1000, 1000);

@@ -78,8 +78,7 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        mover(200, 200);
-        delay(5);
+        mover_tempo(300, 335);
         travar();
     }
 }

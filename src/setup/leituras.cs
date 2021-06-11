@@ -9,6 +9,7 @@ float eixo_x() => bc.Compass();
 float eixo_y() => bc.Inclination();
 float angulo_atuador() => bc.AngleActuator();
 float angulo_giro_atuador() => bc.AngleScoop();
+bool tem_vitima() => bc.HasVictim();
 void delay(int milissegundos) => bc.Wait(milissegundos);
 
 void som(string nota, int tempo) => bc.PlayNote(0, nota, tempo);
@@ -16,7 +17,7 @@ void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
 
 string[] consoleLines = { "", "", "", "" };
 
-void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
+void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bc.Print(linha, "");}
 
 void limpar_console() => bc.ClearConsole();
 void limpar_linha(int linha) => bc.Print(linha - 1, "");
