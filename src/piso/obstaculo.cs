@@ -6,8 +6,7 @@ bool verifica_obstaculo()
         parar();
         alinhar_angulo();
         levantar_atuador();
-        print(1, "OBSTÁCULO");
-        led(40, 153, 219);
+        console_led(1, "<:OBSTÁCULO:>", "azul");
         encoder(300, 10);
         som("E3", 64);
         som("MUDO", 16);
@@ -28,7 +27,6 @@ bool verifica_obstaculo()
         while (!preto(0) && !preto(1))
         {
             if(millis() > timeout_obstaculo){
-                print(2, "timeout");
                 break;
             }
             mover(200, 200);

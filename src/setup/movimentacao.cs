@@ -7,9 +7,11 @@ void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocida
 void parar(int tempo = 10) { bc.MoveFrontal(0, 0); delay(tempo); }
 void travar() { bc.MoveFrontal(0, 0); delay(999999999); }
 
-void mover_tempo(int velocidade, int tempo){
+void mover_tempo(int velocidade, int tempo)
+{
     int timeout = millis() + tempo;
-    while(millis() < timeout){
+    while (millis() < timeout)
+    {
         mover(velocidade, velocidade);
     }
     parar();
@@ -63,8 +65,7 @@ void objetivo_direita(int objetivo)
 // Alinha o robô no ângulo reto mais próximo
 void alinhar_angulo()
 {
-    led(255, 255, 0);
-    print(2, "Alinhando robô");
+    led("amarelo");
 
     int alinhamento = 0;
     float angulo = eixo_x();
@@ -110,13 +111,13 @@ void alinhar_angulo()
         objetivo_esquerda(alinhamento);
     }
 
-    limpar_linha(2);
+    led("desligado");
 }
 
 // Ajusta os sensores na linha preta
 void ajustar_linha(bool por_luz = false)
 {
-    led(255, 255, 0);
+    led("amarelo");
 
     if (por_luz)
     {
@@ -157,6 +158,7 @@ void ajustar_linha(bool por_luz = false)
 
     delay(64);
     parar();
+    led("desligado");
 }
 
 void alinhar_ultra(int distancia)
@@ -198,5 +200,7 @@ void abaixar_atuador()
     {
         bc.ActuatorSpeed(150);
         bc.ActuatorDown(600);
+        bc.ActuatorSpeed(75);
+        bc.ActuatorUp(5);
     }
 }

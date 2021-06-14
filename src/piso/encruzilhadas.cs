@@ -33,8 +33,7 @@ bool beco()
         {
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição
-            print(1, "BECO SEM SAÍDA");
-            led(0, 255, 0);
+            console_led(1, "<:BECO SEM SAÍDA:>", "verde");
             som("F#3", 100);
             som("D3", 100);
             som("F#3", 100);
@@ -47,7 +46,10 @@ bool beco()
                 mover(1000, -1000);
                 if (angulo_reto())
                 {
-                    break;
+                    velocidade = velocidade_padrao;
+                    ultima_correcao = millis();
+                    calibrar();
+                    return true;
                 }
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
@@ -74,7 +76,6 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "<b><color=#248f75>CURVA VERDE - Direita</color></b>");
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -85,7 +86,7 @@ bool verifica_verde()
             if (beco()) { return true; }
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
-            led(0, 255, 0);
+            console_led(1, "<:CURVA VERDE:> - Direita", "verde");
             /* tempo_correcao = millis() + 150;
             while (!(tem_linha(1)))
             {
@@ -114,7 +115,10 @@ bool verifica_verde()
                 mover(1000, -1000);
                 if (angulo_reto())
                 {
-                    break;
+                    velocidade = velocidade_padrao;
+                    ultima_correcao = millis();
+                    calibrar();
+                    return true;
                 }
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
@@ -140,7 +144,6 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "<b><color=#248f75>CURVA VERDE - Esquerda</color></b>");
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -151,7 +154,7 @@ bool verifica_verde()
             if (beco()) { return true; }
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
-            led(0, 255, 0);
+            console_led(1, "<:CURVA VERDE:> - Esquerda", "verde");
             /* som("F3", 100);
             tempo_correcao = millis() + 150;
             while (!(tem_linha(2)))
@@ -182,7 +185,10 @@ bool verifica_verde()
                 mover(-1000, 1000);
                 if (angulo_reto())
                 {
-                    break;
+                    velocidade = velocidade_padrao;
+                    ultima_correcao = millis();
+                    calibrar();
+                    return true;
                 }
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
@@ -232,8 +238,7 @@ bool verifica_curva()
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
         // Confirmações visuais e sonoras de que entrou na condição da curva
-        print(1, "CURVA PRETO - Direita");
-        led(0, 0, 0);
+        console_led(1, "<:CURVA PRETO:> - Direita", "preto");
         som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
         encoder(300, 7.5f);
@@ -302,8 +307,7 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
-        print(1, "CURVA PRETO - Esquerda");
-        led(0, 0, 0);
+        console_led(1, "<:CURVA PRETO:> - Esquerda", "preto");
         som("C3", 100);
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() - 15);

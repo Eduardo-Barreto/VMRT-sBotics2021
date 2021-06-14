@@ -7,8 +7,7 @@ bool verifica_saida()
     // Está saindo da pista (detectou o fim da arena)
     else if (vermelho(1) || vermelho(2))
     {
-        print(1, "<color=#c93432>Saí da arena...</color>");
-        led(255, 0, 0);
+        console_led(1, "<:Saí da arena...:>", "vermelho");
         som("B3", 64);
         som("MUDO", 16);
         som("B3", 64);
@@ -41,8 +40,7 @@ void seguir_linha()
 {
     if (verifica_saida()) { return; }
     if (verifica_curva()) { return; }
-    print(1, $"Seguindo linha: <color=#3ea7fa>{velocidade}</color>");
-    bc.TurnLedOff();
+    console_led(1, $"Seguindo linha: <:{velocidade}:>", "azul", false);
     ler_cor();
 
     // Área de ajustes===============================================================================
@@ -84,8 +82,7 @@ void seguir_linha()
         parar();
 
         // Confirma que está perdido
-        print(1, "<b><color=#c93432>Perdi a linha...</color></b>");
-        led(255, 0, 0);
+        console_led(1, "<:Perdi a linha...:>", "vermelho");
         som("F#3", 64);
         som("MUDO", 16);
         som("F#3", 64);

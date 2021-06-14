@@ -13,14 +13,57 @@ bool tem_vitima() => bc.HasVictim();
 void delay(int milissegundos) => bc.Wait(milissegundos);
 
 void som(string nota, int tempo) => bc.PlayNote(0, nota, tempo);
+
+Dictionary<string, string> cores = new Dictionary<string, string>(){
+    {"preto", "#000000"},
+    {"cinza escuro", "#333332"},
+    {"cinza claro", "#656565"},
+    {"branco", "#fffffe"},
+    {"amarelo", "#ffcc02"},
+    {"verde", "#009245"},
+    {"vermelho", "#ff3232"},
+    {"azul", "#28ade2"}
+};
 void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
+void led(string cor)
+{
+    if (cor == "desligado")
+    {
+        bc.TurnLedOff();
+        return;
+    }
+    if (!cor.StartsWith("#"))
+    {
+        cor = cores[cor];
+    }
+    bc.TurnLedOn(cor);
+}
 
-string[] consoleLines = { "", "", "", "" };
+void console_led(byte linha, object texto, string cor, bool ligar_led = true)
+{
+    if (!cor.StartsWith("#"))
+    {
+        cor = cores[cor];
+    }
+    string texto_aux = texto.ToString();
+    texto_aux = texto_aux.Replace("<:", $"<color={cor}>");
+    texto_aux = texto_aux.Replace(":>", "</color>");
+    print(linha, "<align=center>" + texto_aux.ToString() + "</align>");
+    if (!ligar_led)
+    {
+        bc.TurnLedOff();
+        return;
+    }
+    bot.TurnLedOn(cor);
+}
 
-void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bc.Print(linha, "");}
+
+void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bc.Print(linha, ""); }
 
 void limpar_console() => bc.ClearConsole();
-void limpar_linha(int linha) => bc.Print(linha - 1, "");
+void limpar_linha(int linha) => print(linha - 1, " ");
+
+
 
 bool tem_linha(int sensor) => (bc.returnRed(sensor) < 24);
 
@@ -97,7 +140,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"<color=#4c4d53>calibração: {media_meio} || {media_fora}</color>");
+    console_led(3, $"<:calibração: {media_meio} || {media_fora}:>", "cinza claro", false);
 }
 
 void verifica_calibrar()

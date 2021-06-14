@@ -69,14 +69,57 @@ bool tem_vitima() => bc.HasVictim();
 void delay(int milissegundos) => bc.Wait(milissegundos);
 
 void som(string nota, int tempo) => bc.PlayNote(0, nota, tempo);
+
+Dictionary<string, string> cores = new Dictionary<string, string>(){
+    {"preto", "#000000"},
+    {"cinza escuro", "#333332"},
+    {"cinza claro", "#656565"},
+    {"branco", "#fffffe"},
+    {"amarelo", "#ffcc02"},
+    {"verde", "#009245"},
+    {"vermelho", "#ff3232"},
+    {"azul", "#28ade2"}
+};
 void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
+void led(string cor)
+{
+    if (cor == "desligado")
+    {
+        bc.TurnLedOff();
+        return;
+    }
+    if (!cor.StartsWith("#"))
+    {
+        cor = cores[cor];
+    }
+    bc.TurnLedOn(cor);
+}
 
-string[] consoleLines = { "", "", "", "" };
+void console_led(byte linha, object texto, string cor, bool ligar_led = true)
+{
+    if (!cor.StartsWith("#"))
+    {
+        cor = cores[cor];
+    }
+    string texto_aux = texto.ToString();
+    texto_aux = texto_aux.Replace("<:", $"<color={cor}>");
+    texto_aux = texto_aux.Replace(":>", "</color>");
+    print(linha, "<align=center>" + texto_aux.ToString() + "</align>");
+    if (!ligar_led)
+    {
+        bc.TurnLedOff();
+        return;
+    }
+    bot.TurnLedOn(cor);
+}
 
-void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bc.Print(linha, "");}
+
+void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bc.Print(linha, ""); }
 
 void limpar_console() => bc.ClearConsole();
-void limpar_linha(int linha) => bc.Print(linha - 1, "");
+void limpar_linha(int linha) => print(linha - 1, " ");
+
+
 
 bool tem_linha(int sensor) => (bc.returnRed(sensor) < 24);
 
@@ -153,7 +196,7 @@ void calibrar()
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    print(3, $"<color=#4c4d53>calibração: {media_meio} || {media_fora}</color>");
+    console_led(3, $"<:calibração: {media_meio} || {media_fora}:>", "cinza claro", false);
 }
 
 void verifica_calibrar()
@@ -212,9 +255,11 @@ void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocida
 void parar(int tempo = 10) { bc.MoveFrontal(0, 0); delay(tempo); }
 void travar() { bc.MoveFrontal(0, 0); delay(999999999); }
 
-void mover_tempo(int velocidade, int tempo){
+void mover_tempo(int velocidade, int tempo)
+{
     int timeout = millis() + tempo;
-    while(millis() < timeout){
+    while (millis() < timeout)
+    {
         mover(velocidade, velocidade);
     }
     parar();
@@ -268,8 +313,7 @@ void objetivo_direita(int objetivo)
 // Alinha o robô no ângulo reto mais próximo
 void alinhar_angulo()
 {
-    led(255, 255, 0);
-    print(2, "Alinhando robô");
+    led("amarelo");
 
     int alinhamento = 0;
     float angulo = eixo_x();
@@ -315,13 +359,13 @@ void alinhar_angulo()
         objetivo_esquerda(alinhamento);
     }
 
-    limpar_linha(2);
+    led("desligado");
 }
 
 // Ajusta os sensores na linha preta
 void ajustar_linha(bool por_luz = false)
 {
-    led(255, 255, 0);
+    led("amarelo");
 
     if (por_luz)
     {
@@ -362,6 +406,7 @@ void ajustar_linha(bool por_luz = false)
 
     delay(64);
     parar();
+    led("desligado");
 }
 
 void alinhar_ultra(int distancia)
@@ -403,6 +448,8 @@ void abaixar_atuador()
     {
         bc.ActuatorSpeed(150);
         bc.ActuatorDown(600);
+        bc.ActuatorSpeed(75);
+        bc.ActuatorUp(5);
     }
 }
 bool verifica_saida()
@@ -414,8 +461,7 @@ bool verifica_saida()
     // Está saindo da pista (detectou o fim da arena)
     else if (vermelho(1) || vermelho(2))
     {
-        print(1, "<color=#c93432>Saí da arena...</color>");
-        led(255, 0, 0);
+        console_led(1, "<:Saí da arena...:>", "vermelho");
         som("B3", 64);
         som("MUDO", 16);
         som("B3", 64);
@@ -448,8 +494,7 @@ void seguir_linha()
 {
     if (verifica_saida()) { return; }
     if (verifica_curva()) { return; }
-    print(1, $"Seguindo linha: <color=#3ea7fa>{velocidade}</color>");
-    bc.TurnLedOff();
+    console_led(1, $"Seguindo linha: <:{velocidade}:>", "azul", false);
     ler_cor();
 
     // Área de ajustes===============================================================================
@@ -491,8 +536,7 @@ void seguir_linha()
         parar();
 
         // Confirma que está perdido
-        print(1, "<b><color=#c93432>Perdi a linha...</color></b>");
-        led(255, 0, 0);
+        console_led(1, "<:Perdi a linha...:>", "vermelho");
         som("F#3", 64);
         som("MUDO", 16);
         som("F#3", 64);
@@ -615,8 +659,7 @@ bool beco()
         {
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição
-            print(1, "BECO SEM SAÍDA");
-            led(0, 255, 0);
+            console_led(1, "<:BECO SEM SAÍDA:>", "verde");
             som("F#3", 100);
             som("D3", 100);
             som("F#3", 100);
@@ -629,7 +672,10 @@ bool beco()
                 mover(1000, -1000);
                 if (angulo_reto())
                 {
-                    break;
+                    velocidade = velocidade_padrao;
+                    ultima_correcao = millis();
+                    calibrar();
+                    return true;
                 }
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
@@ -656,7 +702,6 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "<b><color=#248f75>CURVA VERDE - Direita</color></b>");
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -667,7 +712,7 @@ bool verifica_verde()
             if (beco()) { return true; }
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
-            led(0, 255, 0);
+            console_led(1, "<:CURVA VERDE:> - Direita", "verde");
             /* tempo_correcao = millis() + 150;
             while (!(tem_linha(1)))
             {
@@ -696,7 +741,10 @@ bool verifica_verde()
                 mover(1000, -1000);
                 if (angulo_reto())
                 {
-                    break;
+                    velocidade = velocidade_padrao;
+                    ultima_correcao = millis();
+                    calibrar();
+                    return true;
                 }
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
@@ -722,7 +770,6 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha atrás e verifica novamente
-        print(1, "<b><color=#248f75>CURVA VERDE - Esquerda</color></b>");
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -733,7 +780,7 @@ bool verifica_verde()
             if (beco()) { return true; }
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
-            led(0, 255, 0);
+            console_led(1, "<:CURVA VERDE:> - Esquerda", "verde");
             /* som("F3", 100);
             tempo_correcao = millis() + 150;
             while (!(tem_linha(2)))
@@ -764,7 +811,10 @@ bool verifica_verde()
                 mover(-1000, 1000);
                 if (angulo_reto())
                 {
-                    break;
+                    velocidade = velocidade_padrao;
+                    ultima_correcao = millis();
+                    calibrar();
+                    return true;
                 }
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
@@ -814,8 +864,7 @@ bool verifica_curva()
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
         // Confirmações visuais e sonoras de que entrou na condição da curva
-        print(1, "CURVA PRETO - Direita");
-        led(0, 0, 0);
+        console_led(1, "<:CURVA PRETO:> - Direita", "preto");
         som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
         encoder(300, 7.5f);
@@ -884,8 +933,7 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
-        print(1, "CURVA PRETO - Esquerda");
-        led(0, 0, 0);
+        console_led(1, "<:CURVA PRETO:> - Esquerda", "preto");
         som("C3", 100);
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() - 15);
@@ -947,8 +995,7 @@ bool verifica_obstaculo()
         parar();
         alinhar_angulo();
         levantar_atuador();
-        print(1, "OBSTÁCULO");
-        led(40, 153, 219);
+        console_led(1, "<:OBSTÁCULO:>", "azul");
         encoder(300, 10);
         som("E3", 64);
         som("MUDO", 16);
@@ -969,7 +1016,6 @@ bool verifica_obstaculo()
         while (!preto(0) && !preto(1))
         {
             if(millis() > timeout_obstaculo){
-                print(2, "timeout");
                 break;
             }
             mover(200, 200);
@@ -1011,11 +1057,25 @@ bool verifica_obstaculo()
     }
     return false;
 }
-bool verifica_elevada()
+bool verifica_gangorra()
 {
+    if (eixo_y() > 350 || eixo_y() < 5)
+    {
+        alinhar_angulo();
+        parar();
+        console_led(1, "<:GANGORRA:>", "vermelho");
+        encoder(-300, 2);
+        delay(600);
+        alinhar_angulo();
+        return true;
+    }
+    return false;
+}
 
+bool verifica_rampa()
+{
     /* 
-    
+
         Quando a inclinação for próxima de 350
             Levanta o atuador
             Sobe e para o tempo suficiente pra possível gangorra
@@ -1029,16 +1089,21 @@ bool verifica_elevada()
     {
         parar();
         levantar_atuador();
-        int tempo_gangorra = millis() + 2000;
-        while (millis() < tempo_gangorra)
+        int tempo_subir = millis() + 2500;
+        bool flag_subiu = false;
+        int tempo_check_gangorra = millis() + 400;
+        while (millis() < tempo_subir)
         {
+            if (millis() > tempo_check_gangorra && proximo(eixo_y(), 340))
+            {
+                flag_subiu = true;
+            }
+            if (flag_subiu && verifica_gangorra()) { break; }
             ultima_correcao = millis();
             seguir_linha();
             if (verifica_rampa_resgate())
                 return true;
         }
-        parar();
-        delay(550);
         abaixar_atuador();
         update_rampa = millis() + 2000;
         return true;
@@ -1397,12 +1462,11 @@ void Main()
             verifica_saida();
             seguir_linha();
             verifica_calibrar();
-            verifica_elevada();
+            verifica_rampa();
             verifica_rampa_resgate();
         }
         limpar_console();
-        print(1, "SUBINDO RAMPA");
-        led(255, 0, 0);
+        console_led(1, "<:SUBINDO A RAMPA!:>", "#28ade2");
         som("B2", 500);
         while (lugar == "rampa resgate")
         {
@@ -1436,16 +1500,14 @@ void Main()
             verifica_obstaculo();
             seguir_linha();
             verifica_calibrar();
-            verifica_elevada();
+            verifica_rampa();
         }
     }
 
     // Loop para debug
     while (debug)
     {
-        mover_tempo(300, 335);
-        parar();
-        mover_tempo(-300, 335);
+        abaixar_atuador();
         travar();
     }
 }

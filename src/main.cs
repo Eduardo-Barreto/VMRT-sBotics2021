@@ -32,12 +32,11 @@ void Main()
             verifica_saida();
             seguir_linha();
             verifica_calibrar();
-            verifica_elevada();
+            verifica_rampa();
             verifica_rampa_resgate();
         }
         limpar_console();
-        print(1, "SUBINDO RAMPA");
-        led(255, 0, 0);
+        console_led(1, "<:SUBINDO A RAMPA!:>", "#28ade2");
         som("B2", 500);
         while (lugar == "rampa resgate")
         {
@@ -71,14 +70,14 @@ void Main()
             verifica_obstaculo();
             seguir_linha();
             verifica_calibrar();
-            verifica_elevada();
+            verifica_rampa();
         }
     }
 
     // Loop para debug
     while (debug)
     {
-        mover_tempo(300, 335);
+        abaixar_atuador();
         travar();
     }
 }
