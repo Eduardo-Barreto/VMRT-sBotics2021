@@ -6,6 +6,7 @@ import("piso/seguir_linha");
 import("piso/encruzilhadas");
 import("piso/obstaculo");
 import("piso/elevados");
+import("resgate/movimentacao");
 import("resgate/rampa");
 import("resgate/sair");
 import("resgate/achar_saida");
@@ -77,7 +78,13 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        abaixar_atuador();
+        limpar_console();
+        alinhar_angulo();
+        alinhar_ultra(124);
+        alinhar_angulo();
+        console_led(1, $"<:ESTOU ALINHADO VADIAS:> ({ultra(0)})", "vermelho");
+        girar_direita(90);
+        print(1, $"{ultra(1)} <> {ultra(2)}");
         travar();
     }
 }

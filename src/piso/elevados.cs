@@ -1,5 +1,15 @@
 bool verifica_gangorra()
 {
+    /*
+    Verifica gangorra: Verifica se o robô está numa gangorra
+        Vindo do verifica_rampa, se estiver num ângulo próximo a 0, com 5 de tolerancia
+            Alinha no ângulo ortogonal mais próximo
+            Escreve no console que está na gangorra e acende o led vermelho
+            Vai um pouquinho pra trás e espera 600 milissegundos
+            Alinha no ângulo ortogonal mais próximo novamente
+            retorna verdadeiro
+    */
+
     if (eixo_y() > 350 || eixo_y() < 5)
     {
         alinhar_angulo();
@@ -16,10 +26,13 @@ bool verifica_gangorra()
 bool verifica_rampa()
 {
     /* 
-
+    Verifica rampa: Verifica se o robô está numa rampa
         Quando a inclinação for próxima de 350
             Levanta o atuador
-            Sobe e para o tempo suficiente pra possível gangorra
+            Define um tempo para chegar ao topo da rampa
+            Inicia a subida
+                Segue linha
+                Verifica se é uma gangorra
             Abaixa o atuador e retorna
 
     */
@@ -55,6 +68,13 @@ bool verifica_rampa()
 
 bool verifica_rampa_resgate()
 {
+    /*
+    Verifica rampa resgate: Verifica se o robô está na rampa do resgate
+        Se o eixo y (inclinação) estiver próximo de 340 com uma sensibilidade de 10
+        e os dois ultrassônicos do lado estiverem tampados (com parede)
+            Define o lugar global como a rampa do resgate e retorna
+    */
+
     if ((proximo(eixo_y(), 340, 10)) && (ultra(1) < 40 && ultra(2) < 40))
     {
         lugar = "rampa resgate";

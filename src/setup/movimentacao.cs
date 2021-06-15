@@ -43,7 +43,7 @@ void girar_direita(int graus)
 }
 
 // Gira para a esquerda até um objetivo (bússola)
-void objetivo_esquerda(int objetivo)
+void objetivo_esquerda(float objetivo)
 {
     while (!proximo(eixo_x(), objetivo))
     {
@@ -53,7 +53,7 @@ void objetivo_esquerda(int objetivo)
 }
 
 // Gira para a direita até um objetivo (bússola)
-void objetivo_direita(int objetivo)
+void objetivo_direita(float objetivo)
 {
     while (!proximo(eixo_x(), objetivo))
     {
@@ -161,27 +161,6 @@ void ajustar_linha(bool por_luz = false)
     led("desligado");
 }
 
-void alinhar_ultra(int distancia)
-{
-    while (ultra(0) > distancia)
-    {
-        mover(300, 300);
-    }
-    while (ultra(0) < distancia)
-    {
-        mover(-300, -300);
-    }
-    while (ultra(0) > distancia)
-    {
-        mover(200, 200);
-    }
-    while (ultra(0) < distancia)
-    {
-        mover(-200, -200);
-    }
-    parar();
-}
-
 void levantar_atuador()
 {
     // Levanta o atuador para o ângulo correto
@@ -200,7 +179,5 @@ void abaixar_atuador()
     {
         bc.ActuatorSpeed(150);
         bc.ActuatorDown(600);
-        bc.ActuatorSpeed(75);
-        bc.ActuatorUp(5);
     }
 }

@@ -1,5 +1,14 @@
 bool falso_verde()
 {
+    /*
+    Falso Verde: Verifica se o robô realmente está no verde e não passou reto de uma outra encruzilhada
+        Vem da verificação do verde
+        Define um tempo máximo de verificação de 180 milissegundos
+        Enquanto está nesse tempo:
+            Anda para trás
+            Se encontrar a cor preta, vai para frente e retorna verdadeiro (era realmente um falso verde)
+            Senão, continua a movimentação, retorna falso (falso falso verde = verde verdadeiro), e realiza a curva
+    */
     int tempo_check_preto = millis() + 180;
     while (millis() < tempo_check_preto)
     {
@@ -16,9 +25,22 @@ bool falso_verde()
     return false;
 }
 
-// Verificação do beco sem saída
 bool beco()
 {
+    /*
+    Beco: Verifica se o robô está no Beco sem saída (verde dos dois lados da encruzilhada)
+        Para o robô por tempo suficiente para atualizar a leitura dos sensores
+        Se detectar verde dos dois lados:
+            Ajusta na linha e para novamente por tempo suficiente para atualizar a leitura dos sensores
+            Se novamente identificar verde dos dois lados
+                Verifica se é realmente uma encruzilhada (falso_verde())
+                Confirmado o beco, acende o led verde e escreve no console
+                Indica pelo som que caiu na condição correta
+                Vai para frente e faz uma curva de 170 graus para a direita
+                Gira até encontrar a linha ou um ângulo ortogonal
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+    */
+
     // Para, lê as cores e verifica se está na condição do beco
     parar();
     delay(64);
@@ -38,7 +60,7 @@ bool beco()
             som("D3", 100);
             som("F#3", 100);
             som("D3", 100);
-            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
             encoder(300, 12);
             girar_direita(170);
             while (!tem_linha(1))
@@ -69,13 +91,39 @@ bool beco()
 // Verificação das condições de verde
 bool verifica_verde()
 {
+
+    /*
+    Verifica Verde: Verifica se o robô está em uma encruzilhada com verde
+        Atualiza as leituras dos sensores
+        Se encontrar verde em algum dos sensores da direita
+            Verifica se é um beco
+            Se não for, ajusta na linha, atualiza os sensores e ajusta novamente
+            Atualiza os sensores mais uma vez e verifica novamente se o verde está ali
+                Caso esteja, verifica novamente pelo beco
+                Se não for beco, verifica se não pulou uma encruzilhada reta (falso_verde())
+                Confirmando que está certo, dá o feedback visual e sonoro
+                Vai para frente e inicia a curva com 60 graus à direita
+                Gira até achar a linha ou um ângulo ortogonal
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+        Se encontrar verde em algum dos sensores da esquerda
+            Verifica se é um beco
+            Se não for, ajusta na linha, atualiza os sensores e ajusta novamente
+            Atualiza os sensores mais uma vez e verifica novamente se o verde está ali
+                Caso esteja, verifica novamente pelo beco
+                Se não for beco, verifica se não pulou uma encruzilhada reta (falso_verde())
+                Confirmando que está certo, dá o feedback visual e sonoro
+                Vai para frente e inicia a curva com 60 graus à esquerda
+                Gira até achar a linha ou um ângulo ortogonal
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+    */
+
     // Atualiza os valores de cor e verifica os sensores da direita
     ler_cor();
     if (verde0 || verde1)
     {
         // Verificação do beco sem saída
         if (beco()) { return true; }
-        // Se alinha na linha atrás e verifica novamente
+        // Se alinha na linha e verifica novamente
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -87,28 +135,11 @@ bool verifica_verde()
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:CURVA VERDE:> - Direita", "verde");
-            /* tempo_correcao = millis() + 150;
-            while (!(tem_linha(1)))
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            som("G3", 100);
-            tempo_correcao = millis() + 150;
-            while (cor(1) == "PRETO")
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            parar(); */
-            encoder(300, 4);
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
-            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
-            encoder(300, 10);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
+            encoder(300, 14);
             girar_direita(40);
             while (!tem_linha(1))
             {
@@ -138,12 +169,12 @@ bool verifica_verde()
         }
     }
 
-    // Verifica os sensores da direita
+    // Verifica os sensores da esquerda
     else if (verde2 || verde3)
     {
         // Verificação do beco sem saída
         if (beco()) { return true; }
-        // Se alinha na linha atrás e verifica novamente
+        // Se alinha na linha e verifica novamente
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -155,30 +186,11 @@ bool verifica_verde()
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:CURVA VERDE:> - Esquerda", "verde");
-            /* som("F3", 100);
-            tempo_correcao = millis() + 150;
-            while (!(tem_linha(2)))
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            som("G3", 100);
-            tempo_correcao = millis() + 150;
-            while (cor(2) == "PRETO")
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            parar();
-            som("A3", 100); */
-            encoder(300, 4);
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
-            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
-            encoder(300, 10);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
+            encoder(300, 14);
             girar_esquerda(40);
             while (!tem_linha(2))
             {
@@ -216,7 +228,45 @@ bool verifica_verde()
 // Verificações de curvas no preto
 bool verifica_curva()
 {
-    // Atualiza leituras de cores, verifica se está no verde e depois no preto
+    /*
+    Verifica Curva: Verifica se o robô está em alguma curva de 90° no preto
+        Atualiza as leituras dos sensores
+        Verifica se está no verde ou no fim da arena
+        Se encontrar preto no sensor da direita
+            Para o robô por tempo suficiente para atualizar a leitura dos sensores
+            Atualiza a leitura dos sensores
+            Se estiver no vermelho (fim da arena), retorna falso (não é curva)
+            Se encontrar preto no sensor da esquerda (encruz reta)
+                Vai para frente e retorna falso (não é curva)
+            Verifica novamente pela saída da arena (vermelho) e verde
+            Vai para trás e verifica novamente pelo verde
+            Confirmando que é uma corva normal, dá os feedbacks visuais e sonoros
+            Vai para frente e inicia com uma curva de 15 graus, verificando se há linha na frente (encruz. reta)
+            Com a curva totalmente confirmada, continua girando até achar a linha
+            Se passar de 115 graus, assume que é o ladrilho de Curva C com GAP
+                Se alinha atrás e por graus
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+            Se alinha na linha
+            Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+        Se encontrar preto no sensor da esquerda
+            Para o robô por tempo suficiente para atualizar a leitura dos sensores
+                Atualiza a leitura dos sensores
+                Se estiver no vermelho (fim da arena), retorna falso (não é curva)
+                Se encontrar preto no sensor da direita (encruz reta)
+                    Vai para frente e retorna falso (não é curva)
+                Verifica novamente pela saída da arena (vermelho) e verde
+                Vai para trás e verifica novamente pelo verde
+                Confirmando que é uma corva normal, dá os feedbacks visuais e sonoros
+                Vai para frente e inicia com uma curva de 15 graus, verificando se há linha na frente (encruz. reta)
+                Com a curva totalmente confirmada, continua girando até achar a linha
+                Se passar de 115 graus, assume que é o ladrilho de Curva C com GAP
+                    Se alinha atrás e por graus
+                    Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+                Se alinha na linha
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+    */
+
+    // Atualiza leituras de cores, verifica se está no verde e depois no vermelho
     ler_cor();
     if (verifica_verde()) { return true; }
     if (verifica_saida()) { return false; }
@@ -237,7 +287,7 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
-        // Confirmações visuais e sonoras de que entrou na condição da curva
+        // Feedbacks visuais e sonoross de que entrou na condição da curva
         console_led(1, "<:CURVA PRETO:> - Direita", "preto");
         som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente

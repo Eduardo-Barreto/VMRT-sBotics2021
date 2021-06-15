@@ -1,10 +1,11 @@
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
+byte direcao_triangulo = 0,
+        direcao_saida = 0;
+
 float saida1 = 0,
         saida2 = 0,
         media_meio = 0,
         media_fora = 0,
-        direcao_saida = 0,
-        direcao_triangulo = 0,
         ultra_frente = 0,
         ultra_direita = 0,
         ultra_esquerda = 0;

@@ -1,10 +1,11 @@
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
+byte direcao_triangulo = 0,
+        direcao_saida = 0;
+
 float saida1 = 0,
         saida2 = 0,
         media_meio = 0,
         media_fora = 0,
-        direcao_saida = 0,
-        direcao_triangulo = 0,
         ultra_frente = 0,
         ultra_direita = 0,
         ultra_esquerda = 0;
@@ -291,7 +292,7 @@ void girar_direita(int graus)
 }
 
 // Gira para a esquerda até um objetivo (bússola)
-void objetivo_esquerda(int objetivo)
+void objetivo_esquerda(float objetivo)
 {
     while (!proximo(eixo_x(), objetivo))
     {
@@ -301,7 +302,7 @@ void objetivo_esquerda(int objetivo)
 }
 
 // Gira para a direita até um objetivo (bússola)
-void objetivo_direita(int objetivo)
+void objetivo_direita(float objetivo)
 {
     while (!proximo(eixo_x(), objetivo))
     {
@@ -409,27 +410,6 @@ void ajustar_linha(bool por_luz = false)
     led("desligado");
 }
 
-void alinhar_ultra(int distancia)
-{
-    while (ultra(0) > distancia)
-    {
-        mover(300, 300);
-    }
-    while (ultra(0) < distancia)
-    {
-        mover(-300, -300);
-    }
-    while (ultra(0) > distancia)
-    {
-        mover(200, 200);
-    }
-    while (ultra(0) < distancia)
-    {
-        mover(-200, -200);
-    }
-    parar();
-}
-
 void levantar_atuador()
 {
     // Levanta o atuador para o ângulo correto
@@ -448,8 +428,6 @@ void abaixar_atuador()
     {
         bc.ActuatorSpeed(150);
         bc.ActuatorDown(600);
-        bc.ActuatorSpeed(75);
-        bc.ActuatorUp(5);
     }
 }
 bool verifica_saida()
@@ -626,6 +604,15 @@ void seguir_linha()
 }
 bool falso_verde()
 {
+    /*
+    Falso Verde: Verifica se o robô realmente está no verde e não passou reto de uma outra encruzilhada
+        Vem da verificação do verde
+        Define um tempo máximo de verificação de 180 milissegundos
+        Enquanto está nesse tempo:
+            Anda para trás
+            Se encontrar a cor preta, vai para frente e retorna verdadeiro (era realmente um falso verde)
+            Senão, continua a movimentação, retorna falso (falso falso verde = verde verdadeiro), e realiza a curva
+    */
     int tempo_check_preto = millis() + 180;
     while (millis() < tempo_check_preto)
     {
@@ -642,9 +629,22 @@ bool falso_verde()
     return false;
 }
 
-// Verificação do beco sem saída
 bool beco()
 {
+    /*
+    Beco: Verifica se o robô está no Beco sem saída (verde dos dois lados da encruzilhada)
+        Para o robô por tempo suficiente para atualizar a leitura dos sensores
+        Se detectar verde dos dois lados:
+            Ajusta na linha e para novamente por tempo suficiente para atualizar a leitura dos sensores
+            Se novamente identificar verde dos dois lados
+                Verifica se é realmente uma encruzilhada (falso_verde())
+                Confirmado o beco, acende o led verde e escreve no console
+                Indica pelo som que caiu na condição correta
+                Vai para frente e faz uma curva de 170 graus para a direita
+                Gira até encontrar a linha ou um ângulo ortogonal
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+    */
+
     // Para, lê as cores e verifica se está na condição do beco
     parar();
     delay(64);
@@ -664,7 +664,7 @@ bool beco()
             som("D3", 100);
             som("F#3", 100);
             som("D3", 100);
-            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
             encoder(300, 12);
             girar_direita(170);
             while (!tem_linha(1))
@@ -695,13 +695,39 @@ bool beco()
 // Verificação das condições de verde
 bool verifica_verde()
 {
+
+    /*
+    Verifica Verde: Verifica se o robô está em uma encruzilhada com verde
+        Atualiza as leituras dos sensores
+        Se encontrar verde em algum dos sensores da direita
+            Verifica se é um beco
+            Se não for, ajusta na linha, atualiza os sensores e ajusta novamente
+            Atualiza os sensores mais uma vez e verifica novamente se o verde está ali
+                Caso esteja, verifica novamente pelo beco
+                Se não for beco, verifica se não pulou uma encruzilhada reta (falso_verde())
+                Confirmando que está certo, dá o feedback visual e sonoro
+                Vai para frente e inicia a curva com 60 graus à direita
+                Gira até achar a linha ou um ângulo ortogonal
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+        Se encontrar verde em algum dos sensores da esquerda
+            Verifica se é um beco
+            Se não for, ajusta na linha, atualiza os sensores e ajusta novamente
+            Atualiza os sensores mais uma vez e verifica novamente se o verde está ali
+                Caso esteja, verifica novamente pelo beco
+                Se não for beco, verifica se não pulou uma encruzilhada reta (falso_verde())
+                Confirmando que está certo, dá o feedback visual e sonoro
+                Vai para frente e inicia a curva com 60 graus à esquerda
+                Gira até achar a linha ou um ângulo ortogonal
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+    */
+
     // Atualiza os valores de cor e verifica os sensores da direita
     ler_cor();
     if (verde0 || verde1)
     {
         // Verificação do beco sem saída
         if (beco()) { return true; }
-        // Se alinha na linha atrás e verifica novamente
+        // Se alinha na linha e verifica novamente
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -713,28 +739,11 @@ bool verifica_verde()
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:CURVA VERDE:> - Direita", "verde");
-            /* tempo_correcao = millis() + 150;
-            while (!(tem_linha(1)))
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            som("G3", 100);
-            tempo_correcao = millis() + 150;
-            while (cor(1) == "PRETO")
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            parar(); */
-            encoder(300, 4);
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
-            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
-            encoder(300, 10);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
+            encoder(300, 14);
             girar_direita(40);
             while (!tem_linha(1))
             {
@@ -764,12 +773,12 @@ bool verifica_verde()
         }
     }
 
-    // Verifica os sensores da direita
+    // Verifica os sensores da esquerda
     else if (verde2 || verde3)
     {
         // Verificação do beco sem saída
         if (beco()) { return true; }
-        // Se alinha na linha atrás e verifica novamente
+        // Se alinha na linha e verifica novamente
         ajustar_linha();
         delay(64);
         ajustar_linha();
@@ -781,30 +790,11 @@ bool verifica_verde()
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:CURVA VERDE:> - Esquerda", "verde");
-            /* som("F3", 100);
-            tempo_correcao = millis() + 150;
-            while (!(tem_linha(2)))
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            som("G3", 100);
-            tempo_correcao = millis() + 150;
-            while (cor(2) == "PRETO")
-            {
-                if (millis() > tempo_correcao)
-                    break;
-                mover(190, 190);
-            }
-            parar();
-            som("A3", 100); */
-            encoder(300, 4);
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
-            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo reto
-            encoder(300, 10);
+            // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
+            encoder(300, 14);
             girar_esquerda(40);
             while (!tem_linha(2))
             {
@@ -842,7 +832,45 @@ bool verifica_verde()
 // Verificações de curvas no preto
 bool verifica_curva()
 {
-    // Atualiza leituras de cores, verifica se está no verde e depois no preto
+    /*
+    Verifica Curva: Verifica se o robô está em alguma curva de 90° no preto
+        Atualiza as leituras dos sensores
+        Verifica se está no verde ou no fim da arena
+        Se encontrar preto no sensor da direita
+            Para o robô por tempo suficiente para atualizar a leitura dos sensores
+            Atualiza a leitura dos sensores
+            Se estiver no vermelho (fim da arena), retorna falso (não é curva)
+            Se encontrar preto no sensor da esquerda (encruz reta)
+                Vai para frente e retorna falso (não é curva)
+            Verifica novamente pela saída da arena (vermelho) e verde
+            Vai para trás e verifica novamente pelo verde
+            Confirmando que é uma corva normal, dá os feedbacks visuais e sonoros
+            Vai para frente e inicia com uma curva de 15 graus, verificando se há linha na frente (encruz. reta)
+            Com a curva totalmente confirmada, continua girando até achar a linha
+            Se passar de 115 graus, assume que é o ladrilho de Curva C com GAP
+                Se alinha atrás e por graus
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+            Se alinha na linha
+            Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+        Se encontrar preto no sensor da esquerda
+            Para o robô por tempo suficiente para atualizar a leitura dos sensores
+                Atualiza a leitura dos sensores
+                Se estiver no vermelho (fim da arena), retorna falso (não é curva)
+                Se encontrar preto no sensor da direita (encruz reta)
+                    Vai para frente e retorna falso (não é curva)
+                Verifica novamente pela saída da arena (vermelho) e verde
+                Vai para trás e verifica novamente pelo verde
+                Confirmando que é uma corva normal, dá os feedbacks visuais e sonoros
+                Vai para frente e inicia com uma curva de 15 graus, verificando se há linha na frente (encruz. reta)
+                Com a curva totalmente confirmada, continua girando até achar a linha
+                Se passar de 115 graus, assume que é o ladrilho de Curva C com GAP
+                    Se alinha atrás e por graus
+                    Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+                Se alinha na linha
+                Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
+    */
+
+    // Atualiza leituras de cores, verifica se está no verde e depois no vermelho
     ler_cor();
     if (verifica_verde()) { return true; }
     if (verifica_saida()) { return false; }
@@ -863,7 +891,7 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
-        // Confirmações visuais e sonoras de que entrou na condição da curva
+        // Feedbacks visuais e sonoross de que entrou na condição da curva
         console_led(1, "<:CURVA PRETO:> - Direita", "preto");
         som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
@@ -1059,6 +1087,16 @@ bool verifica_obstaculo()
 }
 bool verifica_gangorra()
 {
+    /*
+    Verifica gangorra: Verifica se o robô está numa gangorra
+        Vindo do verifica_rampa, se estiver num ângulo próximo a 0, com 5 de tolerancia
+            Alinha no ângulo ortogonal mais próximo
+            Escreve no console que está na gangorra e acende o led vermelho
+            Vai um pouquinho pra trás e espera 600 milissegundos
+            Alinha no ângulo ortogonal mais próximo novamente
+            retorna verdadeiro
+    */
+
     if (eixo_y() > 350 || eixo_y() < 5)
     {
         alinhar_angulo();
@@ -1075,10 +1113,13 @@ bool verifica_gangorra()
 bool verifica_rampa()
 {
     /* 
-
+    Verifica rampa: Verifica se o robô está numa rampa
         Quando a inclinação for próxima de 350
             Levanta o atuador
-            Sobe e para o tempo suficiente pra possível gangorra
+            Define um tempo para chegar ao topo da rampa
+            Inicia a subida
+                Segue linha
+                Verifica se é uma gangorra
             Abaixa o atuador e retorna
 
     */
@@ -1114,6 +1155,13 @@ bool verifica_rampa()
 
 bool verifica_rampa_resgate()
 {
+    /*
+    Verifica rampa resgate: Verifica se o robô está na rampa do resgate
+        Se o eixo y (inclinação) estiver próximo de 340 com uma sensibilidade de 10
+        e os dois ultrassônicos do lado estiverem tampados (com parede)
+            Define o lugar global como a rampa do resgate e retorna
+    */
+
     if ((proximo(eixo_y(), 340, 10)) && (ultra(1) < 40 && ultra(2) < 40))
     {
         lugar = "rampa resgate";
@@ -1121,7 +1169,104 @@ bool verifica_rampa_resgate()
     }
     return false;
 }
-void seguir_rampa()
+// metodos de movimentação para a area de resgate
+//;
+void alinhar_ultra(int distancia)
+{
+    if (ultra(0) > distancia)
+    {
+        while (ultra(0) > distancia + distancia / 6)
+        {
+            mover(300, 300);
+        }
+        while (ultra(0) > distancia + distancia / 5)
+        {
+            mover(200, 200);
+        }
+        while (ultra(0) > distancia)
+        {
+            mover(100, 100);
+        }
+        while (ultra(0) < distancia)
+        {
+            mover(-75, -75);
+        }
+    }
+    else
+    {
+        while (ultra(0) < distancia - distancia / 6)
+        {
+            mover(-300, -300);
+        }
+        while (ultra(0) < distancia - distancia / 5)
+        {
+            mover(-200, -200);
+        }
+        while (ultra(0) < distancia)
+        {
+            mover(-100, -100);
+        }
+        while (ultra(0) > distancia)
+        {
+            mover(75, 75);
+        }
+    }
+    parar();
+    delay(5);
+}
+
+void entregar_vitima()
+{
+    abrir_atuador();
+    abaixar_atuador();
+    int timeout_vitima = millis() + 2000;
+    while (tem_vitima())
+    {
+        if (millis() > timeout_vitima)
+        {
+            levantar_atuador();
+            fechar_atuador();
+            abrir_atuador();
+            abaixar_atuador();
+            timeout_vitima = millis() + 2000;
+        }
+        delay(14);
+    }
+    delay(350);
+    levantar_atuador();
+    fechar_atuador();
+}
+
+void totozinho(byte vezes = 1)
+{ // empurra possiveis bolinhas para frente
+    for (byte i = 0; i < vezes; i++)
+    {
+        encoder(250, 10);
+        encoder(-300, 10);
+    }
+    parar();
+}
+
+void preparar_atuador(bool apenas_sem_vitima = false)
+{
+    if (apenas_sem_vitima)
+    {
+        if (!tem_vitima())
+        {
+            totozinho();
+            alinhar_angulo();
+            abaixar_atuador();
+            abrir_atuador();
+        }
+    }
+    else
+    {
+        totozinho();
+        alinhar_angulo();
+        abaixar_atuador();
+        abrir_atuador();
+    }
+}void seguir_rampa()
 {
     ler_cor();
 
@@ -1248,28 +1393,6 @@ void sair()
     alcancar_saida();
     return;
 }
-void entregar_vitima()
-{
-    abrir_atuador();
-    abaixar_atuador();
-    int timeout_vitima = millis() + 2000;
-    while (tem_vitima())
-    {
-        if (millis() > timeout_vitima)
-        {
-            levantar_atuador();
-            fechar_atuador();
-            abrir_atuador();
-            abaixar_atuador();
-            timeout_vitima = millis() + 2000;
-        }
-        delay(14);
-    }
-    delay(350);
-    levantar_atuador();
-    fechar_atuador();
-}
-
 void achar_saida()
 {
     float direcao_inicial = 0; // variavel para a posição inical do robô
@@ -1282,17 +1405,14 @@ void achar_saida()
     direcao_triangulo = 0;
 
     alinhar_angulo();
-    encoder(100, 10); // empurra possiveis bolinhas para frente
-    encoder(-250, 10);
-    abaixar_atuador();
-    delay(511);
-    abrir_atuador();
-    encoder(250, 5);
+    totozinho();
+    alinhar_angulo();
+    preparar_atuador();
     alinhar_ultra(255); // vai para o inicio da sala de resgate 
     alinhar_angulo();
 
     direcao_inicial = eixo_x(); // define a posição em que o robô estava ao entrar na sala de resgate
-
+    ler_ultra();
     while (ultra_frente > 180) // enqunto estiver a mais de 180cm da parede frontal busca por saida ou triangulo
     {
         ler_ultra();
@@ -1314,10 +1434,11 @@ void achar_saida()
             break;
         }
     }
-
-    alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
+    mover(300, 300);
+    delay(1500);
     fechar_atuador();
     levantar_atuador();
+    alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
     delay(511);
     alinhar_ultra(85);
     mover(200, 200);
@@ -1328,7 +1449,7 @@ void achar_saida()
     if (luz(4) < 2) // verifica se o triangula esta lá
     {
         direcao_triangulo = 1; // determina que o triangulo está a esquerda
-        print(2, "TRIÂNGULO FRENTE");
+        print(2, "TRIÂNGULO ESQUERDA");
         som("D3", 150);
         som("C3", 150);
         if (tem_vitima())
@@ -1370,20 +1491,12 @@ void achar_saida()
         }
     }
 
-    objetivo_direita((int)converter_graus(direcao_inicial + 90));
-    if (!tem_vitima())
-    {
-        encoder(100, 10);
-        encoder(-250, 10);
-        alinhar_angulo();
-        abaixar_atuador();
-        abrir_atuador();
-        encoder(250, 5);
-    }
-    alinhar_ultra(115);
+    objetivo_direita(converter_graus(direcao_inicial + 90));
+    preparar_atuador(true);
+    mover(300, 300);
+    delay(650);
     fechar_atuador();
     levantar_atuador();
-    delay(511);
     alinhar_ultra(85);
     mover(200, 200);
     delay(700);
@@ -1403,8 +1516,6 @@ void achar_saida()
             alinhar_ultra(65);
             girar_esquerda(90);
             entregar_vitima();
-            girar_direita(90);
-            alinhar_ultra(26);
         }
     }
 
@@ -1415,8 +1526,8 @@ void achar_saida()
         ler_ultra();
         if (ultra_esquerda > 300)
         {
-            direcao_saida = direcao_inicial; // determina que a saida está na frente a direita
-            print(1, "saida na frente direita");
+            direcao_saida = 2; // determina que a saida está na frente a direita
+            print(1, "SAIDA FRONTAL DIREITA");
             som("D3", 300);
             som("C3", 300);
             break;
@@ -1425,21 +1536,71 @@ void achar_saida()
 
     if (direcao_saida == 0) // se a saida ainda não foi encontrada ela está na ultima posição possivel
     {
-        direcao_saida = converter_graus(direcao_inicial + 90); // determina que a saida está na direita
-        print(1, "saida na frente direita");
+        direcao_saida = 3; // determina que a saida está a direita
+        print(1, "SAÍDA DIREITA");
         som("D3", 300);
         som("C3", 300);
 
     }
     if (direcao_triangulo == 0) // se o triangulo ainda não foi encontrado ele está na ultima possição possivel
     {
-        direcao_triangulo = converter_graus(direcao_inicial + 135); // determina que o triangulo a direita
-        print(2, "triangulo encontrado na frente direita");
+        direcao_triangulo = 3; // determina que o triangulo está a direita
+        print(2, "TRIÂNGULO DIREITA");
         som("D3", 150);
         som("C3", 150);
     }
-}
 
+    if (direcao_triangulo == 1 || direcao_triangulo == 2)
+    {
+        mover(-300, -300);
+        delay(300);
+        girar_esquerda(5);
+        objetivo_direita(converter_graus(direcao_inicial + 90));
+        alinhar_ultra(124);
+        alinhar_angulo();
+        alinhar_ultra(124);
+        girar_direita(90);
+        alinhar_angulo();
+        mover(-300, -300);
+        delay(500);
+        alinhar_angulo();
+        int timeout = millis() + 400;
+        while (!toque())
+        {
+            mover(-300, -300);
+            if (millis() > timeout)
+            {
+                parar();
+                break;
+            }
+        }
+        alinhar_angulo();
+    }
+    else
+    {
+        objetivo_direita(converter_graus(direcao_inicial + 180));
+        alinhar_angulo();
+        alinhar_ultra(124);
+        alinhar_angulo();
+        alinhar_ultra(124);
+        girar_direita(90);
+        alinhar_angulo();
+        mover(-300, -300);
+        delay(750);
+        alinhar_angulo();
+        int timeout = millis() + 300;
+        while (!toque())
+        {
+            mover(-300, -300);
+            if (millis() > timeout)
+            {
+                parar();
+                break;
+            }
+        }
+        alinhar_angulo();
+    }
+}
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
 bool console = true;
@@ -1507,7 +1668,13 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        abaixar_atuador();
+        limpar_console();
+        alinhar_angulo();
+        alinhar_ultra(124);
+        alinhar_angulo();
+        console_led(1, $"<:ESTOU ALINHADO VADIAS:> ({ultra(0)})", "vermelho");
+        girar_direita(90);
+        print(1, $"{ultra(1)} <> {ultra(2)}");
         travar();
     }
 }

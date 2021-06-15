@@ -1,25 +1,3 @@
-void entregar_vitima()
-{
-    abrir_atuador();
-    abaixar_atuador();
-    int timeout_vitima = millis() + 2000;
-    while (tem_vitima())
-    {
-        if (millis() > timeout_vitima)
-        {
-            levantar_atuador();
-            fechar_atuador();
-            abrir_atuador();
-            abaixar_atuador();
-            timeout_vitima = millis() + 2000;
-        }
-        delay(14);
-    }
-    delay(350);
-    levantar_atuador();
-    fechar_atuador();
-}
-
 void achar_saida()
 {
     float direcao_inicial = 0; // variavel para a posição inical do robô
@@ -32,17 +10,14 @@ void achar_saida()
     direcao_triangulo = 0;
 
     alinhar_angulo();
-    encoder(100, 10); // empurra possiveis bolinhas para frente
-    encoder(-250, 10);
-    abaixar_atuador();
-    delay(511);
-    abrir_atuador();
-    encoder(250, 5);
+    totozinho();
+    alinhar_angulo();
+    preparar_atuador();
     alinhar_ultra(255); // vai para o inicio da sala de resgate 
     alinhar_angulo();
 
     direcao_inicial = eixo_x(); // define a posição em que o robô estava ao entrar na sala de resgate
-
+    ler_ultra();
     while (ultra_frente > 180) // enqunto estiver a mais de 180cm da parede frontal busca por saida ou triangulo
     {
         ler_ultra();
@@ -64,10 +39,11 @@ void achar_saida()
             break;
         }
     }
-
-    alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
+    mover(300, 300);
+    delay(1500);
     fechar_atuador();
     levantar_atuador();
+    alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
     delay(511);
     alinhar_ultra(85);
     mover(200, 200);
@@ -78,7 +54,7 @@ void achar_saida()
     if (luz(4) < 2) // verifica se o triangula esta lá
     {
         direcao_triangulo = 1; // determina que o triangulo está a esquerda
-        print(2, "TRIÂNGULO FRENTE");
+        print(2, "TRIÂNGULO ESQUERDA");
         som("D3", 150);
         som("C3", 150);
         if (tem_vitima())
@@ -120,20 +96,12 @@ void achar_saida()
         }
     }
 
-    objetivo_direita((int)converter_graus(direcao_inicial + 90));
-    if (!tem_vitima())
-    {
-        encoder(100, 10);
-        encoder(-250, 10);
-        alinhar_angulo();
-        abaixar_atuador();
-        abrir_atuador();
-        encoder(250, 5);
-    }
-    alinhar_ultra(115);
+    objetivo_direita(converter_graus(direcao_inicial + 90));
+    preparar_atuador(true);
+    mover(300, 300);
+    delay(650);
     fechar_atuador();
     levantar_atuador();
-    delay(511);
     alinhar_ultra(85);
     mover(200, 200);
     delay(700);
@@ -153,8 +121,6 @@ void achar_saida()
             alinhar_ultra(65);
             girar_esquerda(90);
             entregar_vitima();
-            girar_direita(90);
-            alinhar_ultra(26);
         }
     }
 
@@ -165,8 +131,8 @@ void achar_saida()
         ler_ultra();
         if (ultra_esquerda > 300)
         {
-            direcao_saida = direcao_inicial; // determina que a saida está na frente a direita
-            print(1, "saida na frente direita");
+            direcao_saida = 2; // determina que a saida está na frente a direita
+            print(1, "SAIDA FRONTAL DIREITA");
             som("D3", 300);
             som("C3", 300);
             break;
@@ -175,17 +141,68 @@ void achar_saida()
 
     if (direcao_saida == 0) // se a saida ainda não foi encontrada ela está na ultima posição possivel
     {
-        direcao_saida = converter_graus(direcao_inicial + 90); // determina que a saida está na direita
-        print(1, "saida na frente direita");
+        direcao_saida = 3; // determina que a saida está a direita
+        print(1, "SAÍDA DIREITA");
         som("D3", 300);
         som("C3", 300);
 
     }
     if (direcao_triangulo == 0) // se o triangulo ainda não foi encontrado ele está na ultima possição possivel
     {
-        direcao_triangulo = converter_graus(direcao_inicial + 135); // determina que o triangulo a direita
-        print(2, "triangulo encontrado na frente direita");
+        direcao_triangulo = 3; // determina que o triangulo está a direita
+        print(2, "TRIÂNGULO DIREITA");
         som("D3", 150);
         som("C3", 150);
+    }
+
+    if (direcao_triangulo == 1 || direcao_triangulo == 2)
+    {
+        mover(-300, -300);
+        delay(300);
+        girar_esquerda(5);
+        objetivo_direita(converter_graus(direcao_inicial + 90));
+        alinhar_ultra(124);
+        alinhar_angulo();
+        alinhar_ultra(124);
+        girar_direita(90);
+        alinhar_angulo();
+        mover(-300, -300);
+        delay(500);
+        alinhar_angulo();
+        int timeout = millis() + 400;
+        while (!toque())
+        {
+            mover(-300, -300);
+            if (millis() > timeout)
+            {
+                parar();
+                break;
+            }
+        }
+        alinhar_angulo();
+    }
+    else
+    {
+        objetivo_direita(converter_graus(direcao_inicial + 180));
+        alinhar_angulo();
+        alinhar_ultra(124);
+        alinhar_angulo();
+        alinhar_ultra(124);
+        girar_direita(90);
+        alinhar_angulo();
+        mover(-300, -300);
+        delay(750);
+        alinhar_angulo();
+        int timeout = millis() + 300;
+        while (!toque())
+        {
+            mover(-300, -300);
+            if (millis() > timeout)
+            {
+                parar();
+                break;
+            }
+        }
+        alinhar_angulo();
     }
 }
