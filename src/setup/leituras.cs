@@ -1,18 +1,18 @@
 // Métodos de leitura e outros
 
-int millis() => (int)(bc.Timer());
-bool toque() => (bc.Touch(0));
-string cor(int sensor) => bc.ReturnColor(sensor);
-int luz(byte sensor) => (int)bc.Lightness(sensor);
-int ultra(byte sensor) => (int)bc.Distance(sensor);
-float eixo_x() => bc.Compass();
-float eixo_y() => bc.Inclination();
-float angulo_atuador() => bc.AngleActuator();
-float angulo_giro_atuador() => bc.AngleScoop();
-bool tem_vitima() => bc.HasVictim();
-void delay(int milissegundos) => bc.Wait(milissegundos);
+int millis() => (int)(bot.Timer());
+bool toque() => (bot.Touch(0));
+string cor(byte sensor) => bot.ReturnColor(sensor);
+int luz(byte sensor) => (int)bot.Lightness(sensor);
+int ultra(byte sensor) => (int)bot.Distance(sensor);
+float eixo_x() => bot.Compass();
+float eixo_y() => bot.Inclination();
+float angulo_atuador() => bot.AngleActuator();
+float angulo_giro_atuador() => bot.AngleScoop();
+bool tem_vitima() => bot.HasVictim();
+void delay(int milissegundos) => bot.Wait(milissegundos);
 
-void som(string nota, int tempo) => bc.PlayNote(0, nota, tempo);
+void som(string nota, int tempo) => bot.PlayNote(0, nota, tempo);
 
 Dictionary<string, string> cores = new Dictionary<string, string>(){
     {"preto", "#000000"},
@@ -24,19 +24,19 @@ Dictionary<string, string> cores = new Dictionary<string, string>(){
     {"vermelho", "#ff3232"},
     {"azul", "#28ade2"}
 };
-void led(byte R, byte G, byte B) => bc.TurnLedOn(R, G, B);
+void led(byte R, byte G, byte B) => bot.TurnLedOn(R, G, B);
 void led(string cor)
 {
     if (cor == "desligado")
     {
-        bc.TurnLedOff();
+        bot.TurnLedOff();
         return;
     }
     if (!cor.StartsWith("#"))
     {
         cor = cores[cor];
     }
-    bc.TurnLedOn(cor);
+    bot.TurnLedOn(cor);
 }
 
 void console_led(byte linha, object texto, string cor, bool ligar_led = true)
@@ -51,27 +51,25 @@ void console_led(byte linha, object texto, string cor, bool ligar_led = true)
     print(linha, "<align=center>" + texto_aux.ToString() + "</align>");
     if (!ligar_led)
     {
-        bc.TurnLedOff();
+        bot.TurnLedOff();
         return;
     }
     bot.TurnLedOn(cor);
 }
 
 
-void print(int linha, object texto) { if (console) bc.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bc.Print(linha, ""); }
+void print(byte linha, object texto) { if (console) bot.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bot.Print(linha, ""); }
 
-void limpar_console() => bc.ClearConsole();
-void limpar_linha(int linha) => print(linha - 1, " ");
+void limpar_console() => bot.ClearConsole();
+void limpar_linha(byte linha) => print((byte)(linha - 1), " ");
 
+bool tem_linha(byte sensor) => (bot.returnRed(sensor) < 24);
 
-
-bool tem_linha(int sensor) => (bc.returnRed(sensor) < 24);
-
-bool vermelho(int sensor)
+bool vermelho(byte sensor)
 {
-    float val_vermelho = bc.ReturnRed(sensor);
-    float val_verde = bc.ReturnGreen(sensor);
-    float val_azul = bc.ReturnBlue(sensor);
+    float val_vermelho = bot.ReturnRed(sensor);
+    float val_verde = bot.ReturnGreen(sensor);
+    float val_azul = bot.ReturnBlue(sensor);
     byte media_vermelho = 66, media_verde = 16, media_azul = 16;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
@@ -80,11 +78,11 @@ bool vermelho(int sensor)
     return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)));
 }
 
-bool verde(int sensor)
+bool verde(byte sensor)
 {
-    float val_vermelho = bc.ReturnRed(sensor);
-    float val_verde = bc.ReturnGreen(sensor);
-    float val_azul = bc.ReturnBlue(sensor);
+    float val_vermelho = bot.ReturnRed(sensor);
+    float val_verde = bot.ReturnGreen(sensor);
+    float val_azul = bot.ReturnBlue(sensor);
     byte media_vermelho = 20, media_verde = 65, media_azul = 14;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
@@ -93,18 +91,18 @@ bool verde(int sensor)
     return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 96) || cor(sensor) == "VERDE");
 }
 
-bool preto(int sensor)
+bool preto(byte sensor)
 {
     if (sensor == 1 || sensor == 2)
     {
-        if ((bc.lightness(sensor) < media_meio) || (cor(sensor) == "PRETO") || tem_linha(sensor))
+        if ((luz(sensor) < media_meio) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((bc.lightness(sensor) < 40) || (cor(sensor) == "PRETO") || tem_linha(sensor))
+        if ((luz(sensor) < 40) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -112,18 +110,18 @@ bool preto(int sensor)
     return false;
 }
 
-bool branco(int sensor)
+bool branco(byte sensor)
 {
     if (sensor == 1 || sensor == 2)
     {
-        if ((bc.lightness(sensor) > media_meio) || (cor(sensor) == "BRANCO"))
+        if ((luz(sensor) > media_meio) || (cor(sensor) == "BRANCO"))
         {
             return true;
         }
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((bc.lightness(sensor) > media_fora) || (cor(sensor) == "BRANCO"))
+        if ((luz(sensor) > 40) || (cor(sensor) == "BRANCO"))
         {
             return true;
         }
@@ -134,13 +132,12 @@ bool branco(int sensor)
 void calibrar()
 {
     ajustar_linha(true);
-    media_meio = (luz(1) + luz(2)) / 4.2f;
-    media_fora = (luz(0) + luz(3)) / 4.2f;
+    media_meio = (byte)Math.Round((luz(1) + luz(2)) / 3f);
 
     saida1 = converter_graus(eixo_x() + 90);
     saida2 = converter_graus(eixo_x() - 90);
 
-    console_led(3, $"<:calibração: {media_meio} || {media_fora}:>", "cinza claro", false);
+    console_led(3, $"<:calibração: {media_meio}:>", "cinza claro", false);
 }
 
 void verifica_calibrar()

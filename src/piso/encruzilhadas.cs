@@ -3,17 +3,18 @@ bool falso_verde()
     /*
     Falso Verde: Verifica se o robô realmente está no verde e não passou reto de uma outra encruzilhada
         Vem da verificação do verde
-        Define um tempo máximo de verificação de 180 milissegundos
+        Define um tempo máximo de verificação de 200 milissegundos
         Enquanto está nesse tempo:
             Anda para trás
             Se encontrar a cor preta, vai para frente e retorna verdadeiro (era realmente um falso verde)
             Senão, continua a movimentação, retorna falso (falso falso verde = verde verdadeiro), e realiza a curva
     */
-    int tempo_check_preto = millis() + 180;
+    parar();
+    int tempo_check_preto = millis() + 200;
     while (millis() < tempo_check_preto)
     {
-        mover(-200, -200);
-        if (cor(0) == "PRETO" && cor(3) == "PRETO")
+        mover(-180, -180);
+        if (cor(0) == "PRETO" || cor(3) == "PRETO")
         {
             encoder(200, 4);
             return true;
@@ -42,8 +43,7 @@ bool beco()
     */
 
     // Para, lê as cores e verifica se está na condição do beco
-    parar();
-    delay(64);
+    parar(64);
     ler_cor();
     if ((verde0 || verde1) && (verde2 || verde3))
     {
@@ -68,7 +68,7 @@ bool beco()
                 mover(1000, -1000);
                 if (angulo_reto())
                 {
-                    velocidade = velocidade_padrao;
+                    velocidade = (byte)(velocidade_padrao - 5);
                     ultima_correcao = millis();
                     calibrar();
                     return true;
@@ -77,7 +77,7 @@ bool beco()
             // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
             ajustar_linha();
-            velocidade = velocidade_padrao;
+            velocidade = (byte)(velocidade_padrao - 5);
             ultima_correcao = millis();
             calibrar();
             return true;
@@ -140,13 +140,14 @@ bool verifica_verde()
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
             encoder(300, 14);
-            girar_direita(40);
+            girar_direita(30);
             while (!tem_linha(1))
             {
                 mover(1000, -1000);
                 if (angulo_reto())
                 {
-                    velocidade = velocidade_padrao;
+                    encoder(-300, 2);
+                    velocidade = (byte)(velocidade_padrao - 5);
                     ultima_correcao = millis();
                     calibrar();
                     return true;
@@ -157,7 +158,7 @@ bool verifica_verde()
             ajustar_linha();
             encoder(-300, 2);
             ajustar_linha();
-            velocidade = velocidade_padrao;
+            velocidade = (byte)(velocidade_padrao - 5);
             ultima_correcao = millis();
             calibrar();
             return true;
@@ -191,13 +192,14 @@ bool verifica_verde()
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
             encoder(300, 14);
-            girar_esquerda(40);
+            girar_esquerda(30);
             while (!tem_linha(2))
             {
                 mover(-1000, 1000);
                 if (angulo_reto())
                 {
-                    velocidade = velocidade_padrao;
+                    encoder(-300, 2);
+                    velocidade = (byte)(velocidade_padrao - 5);
                     ultima_correcao = millis();
                     calibrar();
                     return true;
@@ -208,7 +210,7 @@ bool verifica_verde()
             ajustar_linha();
             encoder(-300, 2);
             ajustar_linha();
-            velocidade = velocidade_padrao;
+            velocidade = (byte)(velocidade_padrao - 5);
             ultima_correcao = millis();
             calibrar();
             return true;
@@ -273,8 +275,7 @@ bool verifica_curva()
 
     else if (preto_curva_dir)
     {
-        parar();
-        delay(64);
+        parar(64);
         ler_cor();
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
@@ -288,7 +289,7 @@ bool verifica_curva()
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
         // Feedbacks visuais e sonoross de que entrou na condição da curva
-        console_led(1, "<:CURVA PRETO:> - Direita", "preto");
+        console_led(1, "<b>CURVA PRETO</b> - Direita", "preto");
         som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
         encoder(300, 7.5f);
@@ -309,21 +310,12 @@ bool verifica_curva()
             {
                 /* Se chegar ao ângulo máximo, é uma curva com um gap no final
                 Se alinha e arruma a curva de 90 somente com a referência de graus*/
-                tempo_correcao = millis() + 1000;
-                for (int i = 0; i < 10; i++)
-                {
-                    encoder(-300, 0.2f);
-                    if (millis() > tempo_correcao)
-                    {
-                        break;
-                    }
-                }
+                mover_tempo(-300, 239);
                 mover(-1000, 1000);
                 delay(650);
                 alinhar_angulo();
-                encoder(300, 2f);
-                ajustar_linha();
-                velocidade = velocidade_padrao;
+                mover_tempo(300, 181);
+                velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
                 calibrar();
                 return true;
@@ -344,8 +336,7 @@ bool verifica_curva()
 
     else if (preto_curva_esq)
     {
-        parar();
-        delay(64);
+        parar(64);
         ler_cor();
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)
@@ -357,7 +348,7 @@ bool verifica_curva()
         if (verifica_verde()) { return true; }
         encoder(-300, 1.5f);
         if (verifica_verde()) { return true; }
-        console_led(1, "<:CURVA PRETO:> - Esquerda", "preto");
+        console_led(1, "<b>CURVA PRETO</b> - Esquerda", "preto");
         som("C3", 100);
         encoder(300, 7.5f);
         float objetivo = converter_graus(eixo_x() - 15);
@@ -375,21 +366,12 @@ bool verifica_curva()
             ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
-                tempo_correcao = millis() + 1000;
-                for (int i = 0; i < 10; i++)
-                {
-                    encoder(-300, 0.2f);
-                    if (millis() > tempo_correcao)
-                    {
-                        break;
-                    }
-                }
+                mover_tempo(-300, 239);
                 mover(1000, -1000);
                 delay(650);
                 alinhar_angulo();
-                encoder(300, 2f);
-                ajustar_linha();
-                velocidade = velocidade_padrao;
+                mover_tempo(300, 181);
+                velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
                 calibrar();
                 return true;

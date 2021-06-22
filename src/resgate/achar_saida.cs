@@ -48,8 +48,7 @@ void achar_saida()
     alinhar_ultra(85);
     mover(200, 200);
     delay(700);
-    parar();
-    delay(64);
+    parar(64);
     alinhar_angulo();
     if (luz(4) < 2) // verifica se o triangula esta lá
     {

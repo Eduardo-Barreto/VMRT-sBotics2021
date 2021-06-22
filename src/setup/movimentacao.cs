@@ -1,21 +1,20 @@
 // Métodos de movimentação e outros
 
-void abrir_atuador() => bc.OpenActuator();
-void fechar_atuador() => bc.CloseActuator();
-void mover(int esquerda, int direita) => bc.MoveFrontal(direita, esquerda);
-void encoder(int velocidade, float rotacoes) => bc.MoveFrontalRotations(velocidade, rotacoes);
-void parar(int tempo = 10) { bc.MoveFrontal(0, 0); delay(tempo); }
-void travar() { bc.MoveFrontal(0, 0); delay(999999999); }
+void abrir_atuador() => bot.OpenActuator();
+void fechar_atuador() => bot.CloseActuator();
+void mover(int esquerda, int direita) => bot.MoveFrontal(direita, esquerda);
+void encoder(int velocidade, float rotacoes) => bot.MoveFrontalRotations(velocidade, rotacoes);
+void parar(int tempo = 10) { bot.MoveFrontal(0, 0); delay(tempo); }
+void travar() { bot.MoveFrontal(0, 0); delay(999999999); }
 
 void mover_tempo(int velocidade, int tempo)
 {
-    int timeout = millis() + tempo;
-    while (millis() < timeout)
+    int timeout = bot.Timer() + tempo;
+    while (bot.Timer() < timeout)
     {
         mover(velocidade, velocidade);
     }
     parar();
-    delay(5);
 }
 
 // Curva para a esquerda em graus
@@ -129,31 +128,31 @@ void ajustar_linha(bool por_luz = false)
         }
         tempo_correcao = millis() + 150;
         while (luz(0) < 30 && millis() < tempo_correcao)
-            bc.onTF(-1000, 1000);
+            mover(1000, -1000);
         tempo_correcao = millis() + 150;
         while (luz(1) < 30 && millis() < tempo_correcao)
-            bc.onTF(-1000, 1000);
+            mover(1000, -1000);
         tempo_correcao = millis() + 150;
         while (luz(3) < 30 && millis() < tempo_correcao)
-            bc.onTF(1000, -1000);
+            mover(-1000, 1000);
         tempo_correcao = millis() + 150;
         while (luz(2) < 30 && millis() < tempo_correcao)
-            bc.onTF(1000, -1000);
+            mover(-1000, 1000);
     }
     else
     {
         tempo_correcao = millis() + 150;
         while (cor(0) == "PRETO" && millis() < tempo_correcao)
-            bc.onTF(-1000, 1000);
+            mover(1000, -1000);
         tempo_correcao = millis() + 150;
         while (cor(1) == "PRETO" && millis() < tempo_correcao)
-            bc.onTF(-1000, 1000);
+            mover(1000, -1000);
         tempo_correcao = millis() + 150;
         while (cor(3) == "PRETO" && millis() < tempo_correcao)
-            bc.onTF(1000, -1000);
+            mover(-1000, 1000);
         tempo_correcao = millis() + 150;
         while (cor(2) == "PRETO" && millis() < tempo_correcao)
-            bc.onTF(1000, -1000);
+            mover(-1000, 1000);
     }
 
     delay(64);
@@ -164,12 +163,12 @@ void ajustar_linha(bool por_luz = false)
 void levantar_atuador()
 {
     // Levanta o atuador para o ângulo correto
-    bc.ActuatorSpeed(150);
-    bc.ActuatorUp(100);
+    bot.ActuatorSpeed(150);
+    bot.ActuatorUp(100);
     if (angulo_atuador() >= 0 && angulo_atuador() < 88)
     {
-        bc.ActuatorSpeed(150);
-        bc.ActuatorUp(600);
+        bot.ActuatorSpeed(150);
+        bot.ActuatorUp(600);
     }
 }
 
@@ -177,7 +176,7 @@ void abaixar_atuador()
 {
     if (angulo_atuador() > 5)
     {
-        bc.ActuatorSpeed(150);
-        bc.ActuatorDown(600);
+        bot.ActuatorSpeed(150);
+        bot.ActuatorDown(600);
     }
 }

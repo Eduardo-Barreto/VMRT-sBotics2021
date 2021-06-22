@@ -1,8 +1,13 @@
 bool verifica_saida()
 {
-    if (lugar == "percurso de saida")
+    if (lugar == 3)
     {
-        return (vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3));
+        if ((vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3)))
+        {
+            encoder(300, 15);
+            travar();
+        }
+        return true;
     }
     // Está saindo da pista (detectou o fim da arena)
     else if (vermelho(1) || vermelho(2))
@@ -52,7 +57,7 @@ void seguir_linha()
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
         {
             ajustar_linha();
-            velocidade = velocidade_padrao;
+            velocidade = (byte)(velocidade - 5);
             ultima_correcao = millis();
             return;
         }
@@ -69,7 +74,7 @@ void seguir_linha()
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
                 ajustar_linha();
-                velocidade = velocidade_padrao;
+                velocidade = (byte)(velocidade - 5);
                 ultima_correcao = millis();
                 return;
             }

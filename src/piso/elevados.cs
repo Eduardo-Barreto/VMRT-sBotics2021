@@ -58,6 +58,7 @@ bool verifica_rampa()
             if (verifica_rampa_resgate())
                 return true;
         }
+        parar();
         abaixar_atuador();
         update_rampa = millis() + 2000;
         return true;
@@ -77,7 +78,7 @@ bool verifica_rampa_resgate()
 
     if ((proximo(eixo_y(), 340, 10)) && (ultra(1) < 40 && ultra(2) < 40))
     {
-        lugar = "rampa resgate";
+        lugar = 1;
         return true;
     }
     return false;

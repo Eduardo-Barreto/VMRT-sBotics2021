@@ -41,7 +41,6 @@ void alinhar_ultra(int distancia)
         }
     }
     parar();
-    delay(5);
 }
 
 void entregar_vitima()

@@ -15,9 +15,8 @@ void alcancar_saida()
 
 void sair()
 {
-
     alinhar_angulo();
-    bc.TurnLedOff();
+    bot.TurnLedOff();
 
     print(1, "BUSCANDO SAÍDA");
 

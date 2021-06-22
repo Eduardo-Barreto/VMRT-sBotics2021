@@ -27,7 +27,7 @@ void Main()
     // Loop principal do programa
     while (!debug)
     {
-        while (lugar == "piso")
+        while (lugar == 0)
         {
             verifica_obstaculo();
             verifica_saida();
@@ -37,37 +37,38 @@ void Main()
             verifica_rampa_resgate();
         }
         limpar_console();
-        console_led(1, "<:SUBINDO A RAMPA!:>", "#28ade2");
+        levantar_atuador();
+        console_led(1, "<size=\"60\"><:SUBINDO A RAMPA!:></size>", "#28ade2");
         som("B2", 500);
-        while (lugar == "rampa resgate")
+        while (lugar == 1)
         {
             velocidade = 250;
             seguir_rampa();
             if ((eixo_y() > 355) || (eixo_y() < 5))
             {
-                lugar = "resgate";
+                lugar = 2;
             }
         }
         limpar_console();
-        while (lugar == "resgate")
+        while (lugar == 2)
         {
-            achar_saida();
-            travar();
+            sair();
             limpar_console();
             while (verde(0) || verde(1) || verde(2) || verde(3))
                 mover(200, 200);
+            delay(150);
             delay(64);
             parar();
             mover(200, 200);
             delay(16);
             parar();
-            lugar = "percurso de saida";
+            lugar = 3;
         }
         abaixar_atuador();
         delay(700);
-        while (lugar == "percurso de saida")
+        while (lugar == 3)
         {
-            if (verifica_saida()) { encoder(300, 15); travar(); }
+            if (verifica_saida()) { return; }
             verifica_obstaculo();
             seguir_linha();
             verifica_calibrar();
@@ -78,13 +79,10 @@ void Main()
     // Loop para debug
     while (debug)
     {
-        limpar_console();
-        alinhar_angulo();
-        alinhar_ultra(124);
-        alinhar_angulo();
-        console_led(1, $"<:ESTOU ALINHADO VADIAS:> ({ultra(0)})", "vermelho");
-        girar_direita(90);
-        print(1, $"{ultra(1)} <> {ultra(2)}");
+        bot.onTF(-1000, 1000);
+        delay(500);
+        mover(-1000, 1000);
+        delay(500);
         travar();
     }
 }
