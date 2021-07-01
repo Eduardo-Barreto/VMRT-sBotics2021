@@ -18,15 +18,16 @@ bool console = true;
 // Método principal
 void Main()
 {
-    if (!debug)
+    if (debug)
+    {
+        mover_tempo(300, 300);
+    }
+    else
     {
         calibrar();
         ultima_correcao = millis();
         abaixar_atuador();
-    }
-    // Loop principal do programa
-    while (!debug)
-    {
+        console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
             verifica_obstaculo();
@@ -36,20 +37,15 @@ void Main()
             verifica_rampa();
             verifica_rampa_resgate();
         }
-        limpar_console();
-        levantar_atuador();
-        console_led(1, "<size=\"60\"><:SUBINDO A RAMPA!:></size>", "#28ade2");
-        som("B2", 500);
         while (lugar == 1)
         {
-            velocidade = 250;
+            limpar_console();
+            levantar_atuador();
+            console_led(1, "<size=\"60\"><:SUBINDO A RAMPA!:></size>", "azul");
+            som("B2", 500);
             seguir_rampa();
-            if ((eixo_y() > 355) || (eixo_y() < 5))
-            {
-                lugar = 2;
-            }
         }
-        limpar_console();
+        console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
         while (lugar == 2)
         {
             sair();
@@ -62,27 +58,18 @@ void Main()
             mover(200, 200);
             delay(16);
             parar();
+            abaixar_atuador();
+            delay(700);
             lugar = 3;
         }
-        abaixar_atuador();
-        delay(700);
+        console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)
         {
-            if (verifica_saida()) { return; }
+            verifica_saida();
             verifica_obstaculo();
             seguir_linha();
             verifica_calibrar();
             verifica_rampa();
         }
-    }
-
-    // Loop para debug
-    while (debug)
-    {
-        bot.onTF(-1000, 1000);
-        delay(500);
-        mover(-1000, 1000);
-        delay(500);
-        travar();
     }
 }

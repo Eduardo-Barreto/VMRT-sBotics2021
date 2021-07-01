@@ -55,7 +55,7 @@ bool verifica_rampa()
             if (flag_subiu && verifica_gangorra()) { break; }
             ultima_correcao = millis();
             seguir_linha();
-            if (verifica_rampa_resgate())
+            if (lugar != 3 && verifica_rampa_resgate())
                 return true;
         }
         parar();

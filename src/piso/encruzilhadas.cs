@@ -16,7 +16,7 @@ bool falso_verde()
         mover(-180, -180);
         if (cor(0) == "PRETO" || cor(3) == "PRETO")
         {
-            encoder(200, 4);
+            mover_tempo(300, 288);
             return true;
         }
     }
@@ -139,7 +139,7 @@ bool verifica_verde()
             som("G3", 100);
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
-            encoder(300, 14);
+            mover_tempo(300, 447);
             girar_direita(30);
             while (!tem_linha(1))
             {
@@ -191,7 +191,7 @@ bool verifica_verde()
             som("G3", 100);
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
-            encoder(300, 14);
+            mover_tempo(300, 447);
             girar_esquerda(30);
             while (!tem_linha(2))
             {
@@ -280,19 +280,19 @@ bool verifica_curva()
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
         {
-            encoder(200, 4);
+            mover_tempo(300, 288);
             return false;
         }
         if (verifica_saida()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
         if (verifica_verde()) { return true; }
-        encoder(-300, 1.5f);
+        mover_tempo(-300, 143);
         if (verifica_verde()) { return true; }
         // Feedbacks visuais e sonoross de que entrou na condição da curva
         console_led(1, "<b>CURVA PRETO</b> - Direita", "preto");
         som("C3", 100);
         // Vai para frente e começa a verificar se não existe uma linha reta na frente
-        encoder(300, 7.5f);
+        mover_tempo(300, 351);
         float objetivo = converter_graus(eixo_x() + 15);
         while (!proximo(eixo_x(), objetivo))
         {
@@ -341,16 +341,16 @@ bool verifica_curva()
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)
         {
-            encoder(200, 4);
+            mover_tempo(300, 288);
             return false;
         }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return true; }
-        encoder(-300, 1.5f);
+        mover_tempo(-300, 143);
         if (verifica_verde()) { return true; }
         console_led(1, "<b>CURVA PRETO</b> - Esquerda", "preto");
         som("C3", 100);
-        encoder(300, 7.5f);
+        mover_tempo(300, 351);
         float objetivo = converter_graus(eixo_x() - 15);
         while (!proximo(eixo_x(), objetivo))
         {

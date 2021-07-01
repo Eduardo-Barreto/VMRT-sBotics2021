@@ -17,3 +17,8 @@ float converter_graus(float graus)
     // converte os graus pra sempre se manterem entre 0~360, uso em calculos para curvas
     return (graus % 360 + 360) % 360;
 }
+
+void erro(object texto)
+{
+    throw new Exception(texto.ToString());
+}

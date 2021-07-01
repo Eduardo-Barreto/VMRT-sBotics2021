@@ -4,10 +4,31 @@ bool verifica_saida()
     {
         if ((vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3)))
         {
+            console_led(1, "<size=\"60\"><:ARENA FINALIZADA:></size>", "vermelho");
+            alinhar_angulo();
             encoder(300, 15);
+            som("C3", 144);
+            som("MUDO", 15);
+            som("D3", 144);
+            som("MUDO", 15);
+            som("C3", 144);
+            som("MUDO", 15);
+            som("D3", 144);
+            som("MUDO", 15);
+            som("C3", 175);
+            som("MUDO", 200);
+
+            som("A#2", 112);
+            som("A2", 112);
+            som("G2", 112);
+            som("MUDO", 15);
+            som("F2", 300);
+            som("MUDO", 150);
+            som("F3", 300);
             travar();
+            return true;
         }
-        return true;
+        return false;
     }
     // Está saindo da pista (detectou o fim da arena)
     else if (vermelho(1) || vermelho(2))
@@ -63,10 +84,10 @@ void seguir_linha()
         }
 
         // Começa a verificar se há linha por perto
-        float objetivo = (lado_ajuste == "d") ? (converter_graus(eixo_x() + 10)) : (converter_graus(eixo_x() - 10));
+        float objetivo = (lado_ajuste == 'd') ? (converter_graus(eixo_x() + 10)) : (converter_graus(eixo_x() - 10));
         while (!proximo(eixo_x(), objetivo))
         {
-            if (lado_ajuste == "d")
+            if (lado_ajuste == 'd')
                 mover(1000, -1000);
             else
                 mover(-1000, 1000);
@@ -79,7 +100,7 @@ void seguir_linha()
                 return;
             }
         }
-        if (lado_ajuste == "d")
+        if (lado_ajuste == 'd')
             girar_esquerda(10);
         else
             girar_direita(10);
@@ -139,7 +160,7 @@ void seguir_linha()
         mover(velocidade, velocidade);
         delay(5);
         ultima_correcao = millis();
-        lado_ajuste = "d";
+        lado_ajuste = 'd';
     }
 
     // Se viu preto no sensor da direita
@@ -165,7 +186,7 @@ void seguir_linha()
         mover(velocidade, velocidade);
         delay(5);
         ultima_correcao = millis();
-        lado_ajuste = "e";
+        lado_ajuste = 'e';
     }
 
     // Se está certo na linha só vai para frente com a velocidade atual

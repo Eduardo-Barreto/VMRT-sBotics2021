@@ -34,4 +34,4 @@ bool preto0 = false,
 
 short[] angulos_retos = { 0, 90, 180, 270 };
 
-string lado_ajuste = "0";
+char lado_ajuste = '0';
