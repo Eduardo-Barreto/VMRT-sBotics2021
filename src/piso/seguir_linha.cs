@@ -4,7 +4,6 @@ bool verifica_saida()
     {
         if ((vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3)))
         {
-            console_led(1, "<size=\"60\"><:ARENA FINALIZADA:></size>", "vermelho");
             alinhar_angulo();
             encoder(300, 15);
             som("C3", 144);
@@ -25,6 +24,7 @@ bool verifica_saida()
             som("F2", 300);
             som("MUDO", 150);
             som("F3", 300);
+            rainbow_console("ARENA FINALIZADA", rainbow);
             travar();
             return true;
         }

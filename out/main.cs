@@ -58,7 +58,37 @@ float converter_graus(float graus)
 void erro(object texto)
 {
     throw new Exception(texto.ToString());
-}// Métodos de leitura e outros
+}
+
+string[] rainbow = { "#f90300", "#f89621", "#fce91f", "#42b253", "#2aaae1", "#0047ab", "#9400d3" };
+
+void rainbow_console(string word, string[] colors, int time = 5000)
+{
+
+    string word_final = "";
+    int colors_index = 0;
+
+    string colorize(char texto, string cor) => $"<color={cor}>{texto}</color>";
+
+    bot.ResetTimer();
+    while (bot.Timer() < time)
+    {
+        colors_index++;
+
+        word_final = "";
+        for (byte i = 0; i < word.Length; i++)
+        {
+            word_final += colorize(word[i], colors[colors_index % colors.Length]);
+            bot.TurnLedOn(colors[colors_index % colors.Length]);
+            colors_index++;
+        }
+
+        bot.Print($"<b><size=60><align=center>{word_final}</align></size></b>\n");
+        bot.Wait(200);
+    }
+
+}
+// Métodos de leitura e outros
 
 int millis() => (int)(bot.Timer());
 bool toque() => (bot.Touch(0));
@@ -434,7 +464,6 @@ bool verifica_saida()
     {
         if ((vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3)))
         {
-            console_led(1, "<size=\"60\"><:ARENA FINALIZADA:></size>", "vermelho");
             alinhar_angulo();
             encoder(300, 15);
             som("C3", 144);
@@ -455,6 +484,7 @@ bool verifica_saida()
             som("F2", 300);
             som("MUDO", 150);
             som("F3", 300);
+            rainbow_console("ARENA FINALIZADA", rainbow);
             travar();
             return true;
         }
@@ -1272,7 +1302,8 @@ void preparar_atuador(bool apenas_sem_vitima = false)
         abaixar_atuador();
         abrir_atuador();
     }
-}void seguir_rampa()
+}
+void seguir_rampa()
 {
     for (; ; )
     {
@@ -1615,6 +1646,7 @@ void achar_saida()
         alinhar_angulo();
     }
 }
+
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
 bool console = true;
@@ -1624,6 +1656,7 @@ void Main()
 {
     if (debug)
     {
+        encoder(-300, 10);
         mover_tempo(300, 300);
     }
     else

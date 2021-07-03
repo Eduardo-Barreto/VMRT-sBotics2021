@@ -22,3 +22,32 @@ void erro(object texto)
 {
     throw new Exception(texto.ToString());
 }
+
+string[] rainbow = { "#f90300", "#f89621", "#fce91f", "#42b253", "#2aaae1", "#0047ab", "#9400d3" };
+
+void rainbow_console(string word, string[] colors, int time = 5000)
+{
+
+    string word_final = "";
+    int colors_index = 0;
+
+    string colorize(char texto, string cor) => $"<color={cor}>{texto}</color>";
+
+    bot.ResetTimer();
+    while (bot.Timer() < time)
+    {
+        colors_index++;
+
+        word_final = "";
+        for (byte i = 0; i < word.Length; i++)
+        {
+            word_final += colorize(word[i], colors[colors_index % colors.Length]);
+            bot.TurnLedOn(colors[colors_index % colors.Length]);
+            colors_index++;
+        }
+
+        bot.Print($"<b><size=60><align=center>{word_final}</align></size></b>\n");
+        bot.Wait(200);
+    }
+
+}

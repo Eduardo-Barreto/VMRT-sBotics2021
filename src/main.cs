@@ -1,15 +1,15 @@
-import("setup/variaveis");
-import("setup/utils");
-import("setup/leituras");
-import("setup/movimentacao");
-import("piso/seguir_linha");
-import("piso/encruzilhadas");
-import("piso/obstaculo");
-import("piso/elevados");
-import("resgate/movimentacao");
-import("resgate/rampa");
-import("resgate/sair");
-import("resgate/achar_saida");
+import("setup/variaveis.cs");
+import("setup/utils.cs");
+import("setup/leituras.cs");
+import("setup/movimentacao.cs");
+import("piso/seguir_linha.cs");
+import("piso/encruzilhadas.cs");
+import("piso/obstaculo.cs");
+import("piso/elevados.cs");
+import("resgate/movimentacao.cs");
+import("resgate/rampa.cs");
+import("resgate/sair.cs");
+import("resgate/achar_saida.cs");
 
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
@@ -20,6 +20,7 @@ void Main()
 {
     if (debug)
     {
+        encoder(-300, 10);
         mover_tempo(300, 300);
     }
     else
