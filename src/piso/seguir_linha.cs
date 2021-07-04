@@ -5,7 +5,6 @@ bool verifica_saida()
         if ((vermelho(0)) || (vermelho(1)) || (vermelho(2)) || (vermelho(3)))
         {
             alinhar_angulo();
-            encoder(300, 15);
             som("C3", 144);
             som("MUDO", 15);
             som("D3", 144);
@@ -24,6 +23,7 @@ bool verifica_saida()
             som("F2", 300);
             som("MUDO", 150);
             som("F3", 300);
+            encoder(300, 15);
             rainbow_console("ARENA FINALIZADA", rainbow);
             travar();
             return true;
@@ -50,7 +50,7 @@ bool verifica_saida()
                 if (vermelho(1) || vermelho(2)) { break; }
             }
         }
-        ajustar_linha();
+        alinhar_linha();
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         return true;
@@ -77,7 +77,7 @@ void seguir_linha()
         // Se tem linha na posição atual, retorna ao normal
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
         {
-            ajustar_linha();
+            alinhar_linha();
             velocidade = (byte)(velocidade - 5);
             ultima_correcao = millis();
             return;
@@ -94,7 +94,7 @@ void seguir_linha()
 
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
-                ajustar_linha();
+                alinhar_linha();
                 velocidade = (byte)(velocidade - 5);
                 ultima_correcao = millis();
                 return;
@@ -123,7 +123,7 @@ void seguir_linha()
             }
         }
         delay(150);
-        ajustar_linha();
+        alinhar_linha();
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
     }

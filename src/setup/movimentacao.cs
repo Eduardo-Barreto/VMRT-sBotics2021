@@ -114,7 +114,7 @@ void alinhar_angulo()
 }
 
 // Ajusta os sensores na linha preta
-void ajustar_linha(bool por_luz = false)
+void alinhar_linha(bool por_luz = false)
 {
     led("amarelo");
 

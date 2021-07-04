@@ -20,8 +20,6 @@ void Main()
 {
     if (debug)
     {
-        encoder(-300, 10);
-        mover_tempo(300, 300);
     }
     else
     {

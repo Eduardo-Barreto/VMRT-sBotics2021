@@ -48,14 +48,14 @@ bool beco()
     if ((verde0 || verde1) && (verde2 || verde3))
     {
         // Ajusta na linha, para e confirma a leitura
-        ajustar_linha();
+        alinhar_linha();
         delay(64);
         ler_cor();
         if ((verde0 || verde1) && (verde2 || verde3))
         {
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição
-            console_led(1, "<:BECO SEM SAÍDA:>", "verde");
+            console_led(1, "<:<b>BECO SEM SAÍDA</b>:>", "verde");
             som("F#3", 100);
             som("D3", 100);
             som("F#3", 100);
@@ -76,7 +76,7 @@ bool beco()
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
-            ajustar_linha();
+            alinhar_linha();
             velocidade = (byte)(velocidade_padrao - 5);
             ultima_correcao = millis();
             calibrar();
@@ -124,9 +124,9 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha e verifica novamente
-        ajustar_linha();
+        alinhar_linha();
         delay(64);
-        ajustar_linha();
+        alinhar_linha();
         ler_cor();
         if (verde0 || verde1)
         {
@@ -134,7 +134,7 @@ bool verifica_verde()
             if (beco()) { return true; }
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
-            console_led(1, "<:CURVA VERDE:> - Direita", "verde");
+            console_led(1, "<:<b>CURVA VERDE</b>:> - Direita", "verde");
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
@@ -155,9 +155,9 @@ bool verifica_verde()
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
-            ajustar_linha();
+            alinhar_linha();
             encoder(-300, 2);
-            ajustar_linha();
+            alinhar_linha();
             velocidade = (byte)(velocidade_padrao - 5);
             ultima_correcao = millis();
             calibrar();
@@ -176,9 +176,9 @@ bool verifica_verde()
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha e verifica novamente
-        ajustar_linha();
+        alinhar_linha();
         delay(64);
-        ajustar_linha();
+        alinhar_linha();
         ler_cor();
         if (verde2 || verde3)
         {
@@ -186,7 +186,7 @@ bool verifica_verde()
             if (beco()) { return true; }
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
-            console_led(1, "<:CURVA VERDE:> - Esquerda", "verde");
+            console_led(1, "<:<b>CURVA VERDE</b>:> - Esquerda", "verde");
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
@@ -207,9 +207,9 @@ bool verifica_verde()
             }
             // Se ajusta na linha e atualiza os valores de correção e velocidade
             delay(200);
-            ajustar_linha();
+            alinhar_linha();
             encoder(-300, 2);
-            ajustar_linha();
+            alinhar_linha();
             velocidade = (byte)(velocidade_padrao - 5);
             ultima_correcao = millis();
             calibrar();
@@ -304,7 +304,7 @@ bool verifica_curva()
         }
         // Confirmada a curva, gira até encontrar uma linha ou passar do ângulo máximo
         objetivo = converter_graus(eixo_x() + 115);
-        while (!tem_linha(1) && !vermelho(1))
+        while (!tem_linha(1) || vermelho(1))
         {
             if (proximo(eixo_x(), objetivo))
             {
@@ -324,10 +324,10 @@ bool verifica_curva()
         }
         // Se ajusta na linha e atualiza os valores de correção e velocidade
         delay(200);
-        ajustar_linha();
+        alinhar_linha();
         encoder(-300, 2);
-        ajustar_linha(true);
-        ajustar_linha(true);
+        alinhar_linha(true);
+        alinhar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         calibrar();
@@ -361,9 +361,8 @@ bool verifica_curva()
             mover(-1000, 1000);
         }
         objetivo = converter_graus(eixo_x() - 115);
-        while (!tem_linha(2) && !vermelho(2))
+        while (!tem_linha(2) || vermelho(2))
         {
-            ler_cor();
             if (proximo(eixo_x(), objetivo))
             {
                 mover_tempo(-300, 239);
@@ -379,10 +378,10 @@ bool verifica_curva()
             mover(-1000, 1000);
         }
         delay(200);
-        ajustar_linha();
+        alinhar_linha();
         encoder(-300, 2);
-        ajustar_linha(true);
-        ajustar_linha(true);
+        alinhar_linha(true);
+        alinhar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
         calibrar();

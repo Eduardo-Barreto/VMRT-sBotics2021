@@ -78,7 +78,7 @@ bool vermelho(byte sensor)
     return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)) || cor(sensor) == "VERMELHO");
 }
 
-bool verde(byte sensor)
+/* bool verde(byte sensor)
 {
     float val_vermelho = bot.ReturnRed(sensor);
     float val_verde = bot.ReturnGreen(sensor);
@@ -88,7 +88,21 @@ bool verde(byte sensor)
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
+    print(1, $"{vermelho} | {verde} | {azul}");
     return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 96) || cor(sensor) == "VERDE");
+} */
+
+bool verde(byte sensor)
+{
+    float val_vermelho = bot.ReturnRed(sensor);
+    float val_verde = bot.ReturnGreen(sensor);
+    float val_azul = bot.ReturnBlue(sensor);
+    byte media_vermelho = 13, media_verde = 82, media_azul = 4;
+    int RGB = (int)(val_vermelho + val_verde + val_azul);
+    sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
+    sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
+    sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
+    return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)) || cor(sensor) == "VERDE");
 }
 
 bool preto(byte sensor)
@@ -131,7 +145,7 @@ bool branco(byte sensor)
 
 void calibrar()
 {
-    ajustar_linha(true);
+    alinhar_linha(true);
     media_meio = (byte)Math.Round((luz(1) + luz(2)) / 3f);
 
     saida1 = converter_graus(eixo_x() + 90);

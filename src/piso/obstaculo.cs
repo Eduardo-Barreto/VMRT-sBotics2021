@@ -1,13 +1,25 @@
-bool verifica_obstaculo()
+bool verifica_obstaculo(bool contar_update = true)
 {
-    if (millis() < update_obstaculo) { return false; }
+    if (contar_update && millis() < update_obstaculo) { return false; }
     if (ultra(0) < 35)
     {
         parar();
-        alinhar_angulo();
+        if (angulo_atuador() >= 0 && angulo_atuador() < 88)
+            mover_tempo(-200, 79);
         levantar_atuador();
-        console_led(1, "<:OBSTÁCULO:>", "azul");
-        encoder(300, 10);
+        console_led(1, "<:POSSÍVEL OBSTÁCULO:>", "azul");
+        while (ultra(0) > 12)
+        {
+            ultima_correcao = millis();
+            seguir_linha();
+        }
+        console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
+        alinhar_angulo();
+        if (ultra(0) < 12)
+            mover_tempo(-200, 159);
+        if (ultra(0) < 12)
+            mover_tempo(-100, 50);
+        parar();
         som("E3", 64);
         som("MUDO", 16);
         som("E3", 64);
@@ -26,14 +38,15 @@ bool verifica_obstaculo()
         int timeout_obstaculo = millis() + 600;
         while (!preto(0) && !preto(1))
         {
-            if(millis() > timeout_obstaculo){
+            if (millis() > timeout_obstaculo)
+            {
                 break;
             }
             mover(200, 200);
         }
         parar();
         som("D3", 32);
-        encoder(300, 10);
+        mover_tempo(300, 399);
         som("E3", 32);
         float objetivo = converter_graus(eixo_x() + 45);
         while (!preto(1))
@@ -59,7 +72,7 @@ bool verifica_obstaculo()
         som("D3", 32);
         som("MUDO", 16);
         som("D3", 32);
-        ajustar_linha();
+        alinhar_linha();
         abaixar_atuador();
         if (proximo(eixo_y(), 350, 3))
             levantar_atuador();

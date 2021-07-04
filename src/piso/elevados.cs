@@ -43,7 +43,7 @@ bool verifica_rampa()
     {
         parar();
         levantar_atuador();
-        int tempo_subir = millis() + 2500;
+        int tempo_subir = millis() + 2300;
         bool flag_subiu = false;
         int tempo_check_gangorra = millis() + 400;
         while (millis() < tempo_subir)
@@ -57,6 +57,21 @@ bool verifica_rampa()
             seguir_linha();
             if (lugar != 3 && verifica_rampa_resgate())
                 return true;
+        }
+        parar();
+        if (eixo_y() < 10 || eixo_y() > 40)
+        {
+            int timeout = millis() + 400;
+            while (eixo_y() < 350 || eixo_y() > 5)
+            {
+                ultima_correcao = millis();
+                seguir_linha();
+                if (verifica_obstaculo(false))
+                    break;
+                if (millis() > timeout)
+                    break;
+
+            }
         }
         parar();
         abaixar_atuador();
