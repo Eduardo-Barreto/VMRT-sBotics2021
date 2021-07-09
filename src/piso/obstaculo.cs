@@ -27,18 +27,18 @@ bool verifica_obstaculo(bool contar_update = true)
         som("E3", 64);
         girar_direita(45);
         som("E3", 32);
-        encoder(300, 20);
+        mover_tempo(300, 735);
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        encoder(300, 15);
+        mover_tempo(300, 575);
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        int timeout_obstaculo = millis() + 600;
-        while (!preto(0) && !preto(1))
+        int timeout_obstaculo = millis() + 591;
+        while (millis() < timeout_obstaculo)
         {
-            if (millis() > timeout_obstaculo)
+            if (preto(0) || preto(1))
             {
                 break;
             }

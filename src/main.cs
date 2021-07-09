@@ -20,6 +20,9 @@ void Main()
 {
     if (debug)
     {
+        encoder(300, 15);
+        mover_tempo(-300, 575);
+        travar();
     }
     else
     {

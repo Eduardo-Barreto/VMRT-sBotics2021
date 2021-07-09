@@ -116,7 +116,7 @@ bool preto(byte sensor)
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((luz(sensor) < 40) || (cor(sensor) == "PRETO") || tem_linha(sensor))
+        if ((luz(sensor) < limite_branco) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -135,7 +135,7 @@ bool branco(byte sensor)
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((luz(sensor) > 40) || (cor(sensor) == "BRANCO"))
+        if ((luz(sensor) > limite_branco) || (cor(sensor) == "BRANCO"))
         {
             return true;
         }

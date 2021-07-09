@@ -5,7 +5,8 @@ byte velocidade_padrao = 185,
         media_meio = 0,
         direcao_triangulo = 0,
         direcao_saida = 0,
-        lugar = 0;
+        lugar = 0,
+        limite_branco = 40; // 40 ou 55 (beta)
 
 float saida1 = 0,
         saida2 = 0,
@@ -206,7 +207,7 @@ bool preto(byte sensor)
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((luz(sensor) < 40) || (cor(sensor) == "PRETO") || tem_linha(sensor))
+        if ((luz(sensor) < limite_branco) || (cor(sensor) == "PRETO") || tem_linha(sensor))
         {
             return true;
         }
@@ -225,7 +226,7 @@ bool branco(byte sensor)
     }
     if (sensor == 0 || sensor == 3)
     {
-        if ((luz(sensor) > 40) || (cor(sensor) == "BRANCO"))
+        if ((luz(sensor) > limite_branco) || (cor(sensor) == "BRANCO"))
         {
             return true;
         }
@@ -521,7 +522,11 @@ bool verifica_saida()
             mover(-velocidade, -velocidade);
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
-                if (vermelho(1) || vermelho(2)) { break; }
+                if (!vermelho(1) && !vermelho(2))
+                {
+                    delay(200);
+                    break;
+                }
             }
         }
         alinhar_linha();
@@ -552,7 +557,6 @@ void seguir_linha()
         if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
         {
             alinhar_linha();
-            velocidade = (byte)(velocidade - 5);
             ultima_correcao = millis();
             return;
         }
@@ -568,8 +572,8 @@ void seguir_linha()
 
             if (tem_linha(0) || tem_linha(1) || tem_linha(2) || tem_linha(3))
             {
+                alinhar_linha(true);
                 alinhar_linha();
-                velocidade = (byte)(velocidade - 5);
                 ultima_correcao = millis();
                 return;
             }
@@ -595,10 +599,16 @@ void seguir_linha()
             {
                 break;
             }
+            if (toque())
+            {
+                parar();
+                break;
+            }
         }
         delay(150);
+        alinhar_linha(true);
         alinhar_linha();
-        velocidade = velocidade_padrao;
+        velocidade = (byte)(velocidade - 15);
         ultima_correcao = millis();
     }
 
@@ -1093,18 +1103,18 @@ bool verifica_obstaculo(bool contar_update = true)
         som("E3", 64);
         girar_direita(45);
         som("E3", 32);
-        encoder(300, 20);
+        mover_tempo(300, 735);
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        encoder(300, 15);
+        mover_tempo(300, 575);
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        int timeout_obstaculo = millis() + 600;
-        while (!preto(0) && !preto(1))
+        int timeout_obstaculo = millis() + 591;
+        while (millis() < timeout_obstaculo)
         {
-            if (millis() > timeout_obstaculo)
+            if (preto(0) || preto(1))
             {
                 break;
             }
@@ -1208,7 +1218,6 @@ bool verifica_rampa()
                 return true;
         }
         parar();
-        print(2, eixo_y());
         if (eixo_y() < 10 || eixo_y() > 40)
         {
             int timeout = millis() + 400;
@@ -1698,6 +1707,9 @@ void Main()
 {
     if (debug)
     {
+        encoder(300, 15);
+        mover_tempo(-300, 575);
+        travar();
     }
     else
     {
