@@ -20,9 +20,8 @@ void Main()
 {
     if (debug)
     {
-        encoder(300, 15);
-        mover_tempo(-300, 575);
-        travar();
+        print(2, "🟪");
+        delay(99999);
     }
     else
     {
@@ -32,6 +31,7 @@ void Main()
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
+            print_luz_marker();
             verifica_obstaculo();
             verifica_saida();
             seguir_linha();

@@ -8,10 +8,18 @@ bool verifica_obstaculo(bool contar_update = true)
             mover_tempo(-200, 79);
         levantar_atuador();
         console_led(1, "<:POSSÍVEL OBSTÁCULO:>", "azul");
+        int timeout = millis() + 1500;
         while (ultra(0) > 12)
         {
             ultima_correcao = millis();
             seguir_linha();
+            if (ultra(0) > 20 && millis() > timeout)
+            {
+                console_led(1, "<:OBSTÁCULO FALSO:>", "vermelho");
+                parar();
+                abaixar_atuador();
+                return false;
+            }
         }
         console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();

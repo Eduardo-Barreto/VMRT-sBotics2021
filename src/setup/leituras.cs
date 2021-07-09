@@ -58,7 +58,7 @@ void console_led(byte linha, object texto, string cor, bool ligar_led = true)
 }
 
 
-void print(byte linha, object texto) { if (console) bot.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bot.Print(linha, ""); }
+void print(byte linha, object texto) { if (console) bot.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
 
 void limpar_console() => bot.ClearConsole();
 void limpar_linha(byte linha) => print((byte)(linha - 1), " ");
@@ -199,4 +199,24 @@ bool angulo_reto()
         }
     }
     return false;
+}
+
+
+string luz_marker(int luz)
+{
+    string hexStr = Convert.ToString(luz, 16);
+    string grayscaleHex = (hexStr.Length < 2) ? ("0" + hexStr) : hexStr;
+    string marker = '#' + grayscaleHex + grayscaleHex + grayscaleHex;
+    return $"<mark={marker}>--</mark>";
+}
+
+void print_luz_marker()
+{
+    string luz0 = ((luz(0).ToString()).Length < 2) ? $"0{luz(0)}" : luz(0).ToString();
+    string luz1 = ((luz(1).ToString()).Length < 2) ? $"0{luz(1)}" : luz(1).ToString();
+    string luz2 = ((luz(2).ToString()).Length < 2) ? $"0{luz(2)}" : luz(2).ToString();
+    string luz3 = ((luz(3).ToString()).Length < 2) ? $"0{luz(3)}" : luz(3).ToString();
+    print(2, $"{luz3} | {luz2} | {luz1} | {luz0}");
+    print(3, $"{luz_marker(luz(3))} | {luz_marker(luz(2))} | {luz_marker(luz(1))} | {luz_marker(luz(0))}");
+    print(4, "");
 }

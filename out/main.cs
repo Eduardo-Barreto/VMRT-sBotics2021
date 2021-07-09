@@ -149,7 +149,7 @@ void console_led(byte linha, object texto, string cor, bool ligar_led = true)
 }
 
 
-void print(byte linha, object texto) { if (console) bot.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); bot.Print(linha, ""); }
+void print(byte linha, object texto) { if (console) bot.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
 
 void limpar_console() => bot.ClearConsole();
 void limpar_linha(byte linha) => print((byte)(linha - 1), " ");
@@ -290,6 +290,26 @@ bool angulo_reto()
         }
     }
     return false;
+}
+
+
+string luz_marker(int luz)
+{
+    string hexStr = Convert.ToString(luz, 16);
+    string grayscaleHex = (hexStr.Length < 2) ? ("0" + hexStr) : hexStr;
+    string marker = '#' + grayscaleHex + grayscaleHex + grayscaleHex;
+    return $"<mark={marker}>--</mark>";
+}
+
+void print_luz_marker()
+{
+    string luz0 = ((luz(0).ToString()).Length < 2) ? $"0{luz(0)}" : luz(0).ToString();
+    string luz1 = ((luz(1).ToString()).Length < 2) ? $"0{luz(1)}" : luz(1).ToString();
+    string luz2 = ((luz(2).ToString()).Length < 2) ? $"0{luz(2)}" : luz(2).ToString();
+    string luz3 = ((luz(3).ToString()).Length < 2) ? $"0{luz(3)}" : luz(3).ToString();
+    print(2, $"{luz3} | {luz2} | {luz1} | {luz0}");
+    print(3, $"{luz_marker(luz(3))} | {luz_marker(luz(2))} | {luz_marker(luz(1))} | {luz_marker(luz(0))}");
+    print(4, "");
 }
 // Métodos de movimentação e outros
 
@@ -958,6 +978,7 @@ bool verifica_curva()
     else if (preto_curva_dir)
     {
         parar(64);
+        print_luz_marker();
         ler_cor();
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
@@ -1019,6 +1040,7 @@ bool verifica_curva()
     else if (preto_curva_esq)
     {
         parar(64);
+        print_luz_marker();
         ler_cor();
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)
@@ -1084,10 +1106,18 @@ bool verifica_obstaculo(bool contar_update = true)
             mover_tempo(-200, 79);
         levantar_atuador();
         console_led(1, "<:POSSÍVEL OBSTÁCULO:>", "azul");
+        int timeout = millis() + 1500;
         while (ultra(0) > 12)
         {
             ultima_correcao = millis();
             seguir_linha();
+            if (ultra(0) > 20 && millis() > timeout)
+            {
+                console_led(1, "<:OBSTÁCULO FALSO:>", "vermelho");
+                parar();
+                abaixar_atuador();
+                return false;
+            }
         }
         console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();
@@ -1707,9 +1737,8 @@ void Main()
 {
     if (debug)
     {
-        encoder(300, 15);
-        mover_tempo(-300, 575);
-        travar();
+        print(2, "🟪");
+        delay(99999);
     }
     else
     {
@@ -1719,6 +1748,7 @@ void Main()
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
+            print_luz_marker();
             verifica_obstaculo();
             verifica_saida();
             seguir_linha();
