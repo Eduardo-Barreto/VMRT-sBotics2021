@@ -5,8 +5,9 @@ byte velocidade_padrao = 185,
         media_meio = 0,
         direcao_triangulo = 0,
         direcao_saida = 0,
-        lugar = 0,
-        limite_branco = 40; // 40 ou 55 (beta)
+        lugar = 0;
+
+const byte limite_branco = 55;
 
 float saida1 = 0,
         saida2 = 0,
@@ -296,19 +297,22 @@ bool angulo_reto()
 string luz_marker(int luz)
 {
     string hexStr = Convert.ToString(luz, 16);
-    string grayscaleHex = (hexStr.Length < 2) ? ("0" + hexStr) : hexStr;
-    string marker = '#' + grayscaleHex + grayscaleHex + grayscaleHex;
-    return $"<mark={marker}>--</mark>";
+    string grayscaleHex = hexStr.PadLeft(2, '0');
+    return '#' + grayscaleHex + grayscaleHex + grayscaleHex;
 }
 
 void print_luz_marker()
 {
-    string luz0 = ((luz(0).ToString()).Length < 2) ? $"0{luz(0)}" : luz(0).ToString();
-    string luz1 = ((luz(1).ToString()).Length < 2) ? $"0{luz(1)}" : luz(1).ToString();
-    string luz2 = ((luz(2).ToString()).Length < 2) ? $"0{luz(2)}" : luz(2).ToString();
-    string luz3 = ((luz(3).ToString()).Length < 2) ? $"0{luz(3)}" : luz(3).ToString();
+    string luz0 = luz(0).ToString().PadLeft(3, '0');
+    string luz1 = luz(1).ToString().PadLeft(3, '0');
+    string luz2 = luz(2).ToString().PadLeft(3, '0');
+    string luz3 = luz(3).ToString().PadLeft(3, '0');
+    string mark0 = (verde0) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(0))}>---</mark>";
+    string mark1 = (verde1) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(1))}>---</mark>";
+    string mark2 = (verde2) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(2))}>---</mark>";
+    string mark3 = (verde3) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(3))}>---</mark>";
     print(2, $"{luz3} | {luz2} | {luz1} | {luz0}");
-    print(3, $"{luz_marker(luz(3))} | {luz_marker(luz(2))} | {luz_marker(luz(1))} | {luz_marker(luz(0))}");
+    print(3, $"{mark3} | {mark2} | {mark1} | {mark0}");
     print(4, "");
 }
 // Métodos de movimentação e outros
@@ -619,11 +623,12 @@ void seguir_linha()
             {
                 break;
             }
-            if (toque())
+            /* if (toque())
             {
+                travar();
                 parar();
                 break;
-            }
+            } */
         }
         delay(150);
         alinhar_linha(true);
@@ -750,11 +755,14 @@ bool beco()
     if ((verde0 || verde1) && (verde2 || verde3))
     {
         // Ajusta na linha, para e confirma a leitura
+        print_luz_marker();
         alinhar_linha();
         delay(64);
         ler_cor();
+        print_luz_marker();
         if ((verde0 || verde1) && (verde2 || verde3))
         {
+            print_luz_marker();
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição
             console_led(1, "<:<b>BECO SEM SAÍDA</b>:>", "verde");
@@ -793,7 +801,6 @@ bool beco()
 // Verificação das condições de verde
 bool verifica_verde()
 {
-
     /*
     Verifica Verde: Verifica se o robô está em uma encruzilhada com verde
         Atualiza as leituras dos sensores
@@ -823,6 +830,7 @@ bool verifica_verde()
     ler_cor();
     if (verde0 || verde1)
     {
+        print_luz_marker();
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha e verifica novamente
@@ -830,6 +838,7 @@ bool verifica_verde()
         delay(64);
         alinhar_linha();
         ler_cor();
+        print_luz_marker();
         if (verde0 || verde1)
         {
             // Nova verificação do beco
@@ -875,6 +884,7 @@ bool verifica_verde()
     // Verifica os sensores da esquerda
     else if (verde2 || verde3)
     {
+        print_luz_marker();
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha e verifica novamente
@@ -882,6 +892,7 @@ bool verifica_verde()
         delay(64);
         alinhar_linha();
         ler_cor();
+        print_luz_marker();
         if (verde2 || verde3)
         {
             // Nova verificação do beco
@@ -947,7 +958,7 @@ bool verifica_curva()
             Confirmando que é uma corva normal, dá os feedbacks visuais e sonoros
             Vai para frente e inicia com uma curva de 15 graus, verificando se há linha na frente (encruz. reta)
             Com a curva totalmente confirmada, continua girando até achar a linha
-            Se passar de 115 graus, assume que é o ladrilho de Curva C com GAP
+            Se passar de 115 graus, asssume que é o ladrilho de Curva C com GAP
                 Se alinha atrás e por graus
                 Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
             Se alinha na linha
@@ -978,7 +989,6 @@ bool verifica_curva()
     else if (preto_curva_dir)
     {
         parar(64);
-        print_luz_marker();
         ler_cor();
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
@@ -1040,7 +1050,6 @@ bool verifica_curva()
     else if (preto_curva_esq)
     {
         parar(64);
-        print_luz_marker();
         ler_cor();
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)
@@ -1526,13 +1535,12 @@ void achar_saida()
 
     const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
                 relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
-                sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo 
+                sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
 
     direcao_saida = 0;      //inicia as localizações zeradas 
     direcao_triangulo = 0;
 
     alinhar_angulo();
-    totozinho();
     alinhar_angulo();
     preparar_atuador();
     alinhar_ultra(255); // vai para o inicio da sala de resgate 
@@ -1566,16 +1574,13 @@ void achar_saida()
     fechar_atuador();
     levantar_atuador();
     alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
-    delay(511);
     alinhar_ultra(85);
-    mover(200, 200);
-    delay(700);
-    parar(64);
+    mover_tempo(200, 688);
     alinhar_angulo();
-    if (luz(4) < 2) // verifica se o triangula esta lá
+    if (luz(4) < 2) // verifica se o triangulo esta lá
     {
         direcao_triangulo = 1; // determina que o triangulo está a esquerda
-        print(2, "TRIÂNGULO ESQUERDA");
+        print(2, "TRIÂNGULO FRONTAL");
         som("D3", 150);
         som("C3", 150);
         if (tem_vitima())
@@ -1593,7 +1598,25 @@ void achar_saida()
             girar_direita(45);
             alinhar_ultra(26);
         }
-        if (direcao_saida != 0) return;
+        if (direcao_saida != 0)
+        {
+            girar_direita(45);
+            alinhar_ultra(124);
+            alinhar_angulo();
+            alinhar_ultra(124);
+            girar_direita(90);
+            int timeout = millis() + 400;
+            while (!toque())
+            {
+                mover(-300, -300);
+                if (millis() > timeout)
+                {
+                    break;
+                }
+            }
+            parar();
+            return;
+        };
 
     }
 
@@ -1737,8 +1760,12 @@ void Main()
 {
     if (debug)
     {
-        print(2, "🟪");
-        delay(99999);
+        for (; ; )
+        {
+            ler_cor();
+            print(2, $"{luz(0)} | {luz(1)} | {luz(2)} | {luz(3)}");
+            mover(-1000, 1000);
+        }
     }
     else
     {
@@ -1784,6 +1811,7 @@ void Main()
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)
         {
+            print_luz_marker();
             verifica_saida();
             verifica_obstaculo();
             seguir_linha();

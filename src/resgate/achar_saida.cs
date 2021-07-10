@@ -4,13 +4,12 @@ void achar_saida()
 
     const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
                 relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
-                sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo 
+                sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
 
     direcao_saida = 0;      //inicia as localizações zeradas 
     direcao_triangulo = 0;
 
     alinhar_angulo();
-    totozinho();
     alinhar_angulo();
     preparar_atuador();
     alinhar_ultra(255); // vai para o inicio da sala de resgate 
@@ -44,16 +43,13 @@ void achar_saida()
     fechar_atuador();
     levantar_atuador();
     alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
-    delay(511);
     alinhar_ultra(85);
-    mover(200, 200);
-    delay(700);
-    parar(64);
+    mover_tempo(200, 688);
     alinhar_angulo();
-    if (luz(4) < 2) // verifica se o triangula esta lá
+    if (luz(4) < 2) // verifica se o triangulo esta lá
     {
         direcao_triangulo = 1; // determina que o triangulo está a esquerda
-        print(2, "TRIÂNGULO ESQUERDA");
+        print(2, "TRIÂNGULO FRONTAL");
         som("D3", 150);
         som("C3", 150);
         if (tem_vitima())
@@ -71,7 +67,25 @@ void achar_saida()
             girar_direita(45);
             alinhar_ultra(26);
         }
-        if (direcao_saida != 0) return;
+        if (direcao_saida != 0)
+        {
+            girar_direita(45);
+            alinhar_ultra(124);
+            alinhar_angulo();
+            alinhar_ultra(124);
+            girar_direita(90);
+            int timeout = millis() + 400;
+            while (!toque())
+            {
+                mover(-300, -300);
+                if (millis() > timeout)
+                {
+                    break;
+                }
+            }
+            parar();
+            return;
+        };
 
     }
 

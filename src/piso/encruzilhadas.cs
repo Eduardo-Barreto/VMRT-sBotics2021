@@ -48,11 +48,14 @@ bool beco()
     if ((verde0 || verde1) && (verde2 || verde3))
     {
         // Ajusta na linha, para e confirma a leitura
+        print_luz_marker();
         alinhar_linha();
         delay(64);
         ler_cor();
+        print_luz_marker();
         if ((verde0 || verde1) && (verde2 || verde3))
         {
+            print_luz_marker();
             if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição
             console_led(1, "<:<b>BECO SEM SAÍDA</b>:>", "verde");
@@ -91,7 +94,6 @@ bool beco()
 // Verificação das condições de verde
 bool verifica_verde()
 {
-
     /*
     Verifica Verde: Verifica se o robô está em uma encruzilhada com verde
         Atualiza as leituras dos sensores
@@ -121,6 +123,7 @@ bool verifica_verde()
     ler_cor();
     if (verde0 || verde1)
     {
+        print_luz_marker();
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha e verifica novamente
@@ -128,6 +131,7 @@ bool verifica_verde()
         delay(64);
         alinhar_linha();
         ler_cor();
+        print_luz_marker();
         if (verde0 || verde1)
         {
             // Nova verificação do beco
@@ -173,6 +177,7 @@ bool verifica_verde()
     // Verifica os sensores da esquerda
     else if (verde2 || verde3)
     {
+        print_luz_marker();
         // Verificação do beco sem saída
         if (beco()) { return true; }
         // Se alinha na linha e verifica novamente
@@ -180,6 +185,7 @@ bool verifica_verde()
         delay(64);
         alinhar_linha();
         ler_cor();
+        print_luz_marker();
         if (verde2 || verde3)
         {
             // Nova verificação do beco
@@ -245,7 +251,7 @@ bool verifica_curva()
             Confirmando que é uma corva normal, dá os feedbacks visuais e sonoros
             Vai para frente e inicia com uma curva de 15 graus, verificando se há linha na frente (encruz. reta)
             Com a curva totalmente confirmada, continua girando até achar a linha
-            Se passar de 115 graus, assume que é o ladrilho de Curva C com GAP
+            Se passar de 115 graus, asssume que é o ladrilho de Curva C com GAP
                 Se alinha atrás e por graus
                 Finaliza ajustando na linha e atualiza os valores de velocidade, última correção e calibração
             Se alinha na linha
@@ -276,7 +282,6 @@ bool verifica_curva()
     else if (preto_curva_dir)
     {
         parar(64);
-        print_luz_marker();
         ler_cor();
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
@@ -338,7 +343,6 @@ bool verifica_curva()
     else if (preto_curva_esq)
     {
         parar(64);
-        print_luz_marker();
         ler_cor();
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)

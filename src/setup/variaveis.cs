@@ -5,8 +5,9 @@ byte velocidade_padrao = 185,
         media_meio = 0,
         direcao_triangulo = 0,
         direcao_saida = 0,
-        lugar = 0,
-        limite_branco = 40; // 40 ou 55 (beta)
+        lugar = 0;
+
+const byte limite_branco = 55;
 
 float saida1 = 0,
         saida2 = 0,

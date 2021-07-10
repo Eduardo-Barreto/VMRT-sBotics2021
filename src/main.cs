@@ -20,8 +20,12 @@ void Main()
 {
     if (debug)
     {
-        print(2, "🟪");
-        delay(99999);
+        for (; ; )
+        {
+            ler_cor();
+            print(2, $"{luz(0)} | {luz(1)} | {luz(2)} | {luz(3)}");
+            mover(-1000, 1000);
+        }
     }
     else
     {
@@ -67,6 +71,7 @@ void Main()
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)
         {
+            print_luz_marker();
             verifica_saida();
             verifica_obstaculo();
             seguir_linha();

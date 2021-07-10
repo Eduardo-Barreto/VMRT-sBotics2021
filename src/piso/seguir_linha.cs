@@ -124,11 +124,12 @@ void seguir_linha()
             {
                 break;
             }
-            if (toque())
+            /* if (toque())
             {
+                travar();
                 parar();
                 break;
-            }
+            } */
         }
         delay(150);
         alinhar_linha(true);
