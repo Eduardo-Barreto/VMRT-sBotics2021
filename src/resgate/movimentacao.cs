@@ -52,8 +52,8 @@ void entregar_vitima()
     {
         if (millis() > timeout_vitima)
         {
-            levantar_atuador();
             fechar_atuador();
+            levantar_atuador();
             abrir_atuador();
             abaixar_atuador();
             timeout_vitima = millis() + 2000;
@@ -61,8 +61,8 @@ void entregar_vitima()
         delay(14);
     }
     delay(350);
-    levantar_atuador();
     fechar_atuador();
+    levantar_atuador();
 }
 
 void totozinho(byte vezes = 1)
@@ -83,15 +83,15 @@ void preparar_atuador(bool apenas_sem_vitima = false)
         {
             totozinho();
             alinhar_angulo();
-            abaixar_atuador();
             abrir_atuador();
+            abaixar_atuador();
         }
     }
     else
     {
         totozinho();
         alinhar_angulo();
-        abaixar_atuador();
         abrir_atuador();
+        abaixar_atuador();
     }
 }

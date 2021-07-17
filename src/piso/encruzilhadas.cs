@@ -283,6 +283,7 @@ bool verifica_curva()
     {
         parar(64);
         ler_cor();
+        print_luz_marker();
         if (vermelho(0)) { return false; }
         if (preto_curva_esq)
         {
@@ -344,6 +345,7 @@ bool verifica_curva()
     {
         parar(64);
         ler_cor();
+        print_luz_marker();
         if (vermelho(3)) { return false; }
         if (preto_curva_dir)
         {

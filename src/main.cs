@@ -13,7 +13,7 @@ import("resgate/achar_saida.cs");
 
 // Variável de controle para ligar/desligar o debug
 bool debug = false;
-bool console = true;
+bool console = false;
 
 // Método principal
 void Main()

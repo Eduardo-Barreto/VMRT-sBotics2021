@@ -3,10 +3,10 @@
 int millis() => (int)(bot.Timer());
 bool toque() => (bot.Touch(0));
 string cor(byte sensor) => bot.ReturnColor(sensor);
-int luz(byte sensor) => (int)bot.Lightness(sensor);
-int ultra(byte sensor) => (int)bot.Distance(sensor);
-float eixo_x() => bot.Compass();
-float eixo_y() => bot.Inclination();
+byte luz(byte sensor) => (byte)bot.Lightness(sensor);
+short ultra(byte sensor) => (short)bot.Distance(sensor);
+short eixo_x() => (short)(bot.Compass());
+short eixo_y() => (short)(bot.Inclination());
 float angulo_atuador() => bot.AngleActuator();
 float angulo_giro_atuador() => bot.AngleScoop();
 bool tem_vitima() => bot.HasVictim();
@@ -191,7 +191,7 @@ void ler_ultra()
 
 bool angulo_reto()
 {
-    foreach (int angulo_verificado in angulos_retos)
+    foreach (short angulo_verificado in angulos_retos)
     {
         if (proximo(eixo_x(), angulo_verificado))
         {
@@ -201,25 +201,21 @@ bool angulo_reto()
     return false;
 }
 
-
 string luz_marker(int luz)
 {
     string hexStr = Convert.ToString(luz, 16);
-    string grayscaleHex = hexStr.PadLeft(2, '0');
-    return '#' + grayscaleHex + grayscaleHex + grayscaleHex;
+    string grayscaleHex = (hexStr.Length < 2) ? ("0" + hexStr) : hexStr;
+    string marker = "#" + grayscaleHex + grayscaleHex + grayscaleHex;
+    return "<" + "mark=" + marker + ">--" + "<" + "/" + "mark>";
 }
 
 void print_luz_marker()
 {
-    string luz0 = luz(0).ToString().PadLeft(3, '0');
-    string luz1 = luz(1).ToString().PadLeft(3, '0');
-    string luz2 = luz(2).ToString().PadLeft(3, '0');
-    string luz3 = luz(3).ToString().PadLeft(3, '0');
-    string mark0 = (verde0) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(0))}>---</mark>";
-    string mark1 = (verde1) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(1))}>---</mark>";
-    string mark2 = (verde2) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(2))}>---</mark>";
-    string mark3 = (verde3) ? "<mark=#009245>---</mark>" : $"<mark={luz_marker(luz(3))}>---</mark>";
+    string luz0 = ((luz(0).ToString()).Length < 2) ? $"0{luz(0)}" : luz(0).ToString();
+    string luz1 = ((luz(1).ToString()).Length < 2) ? $"0{luz(1)}" : luz(1).ToString();
+    string luz2 = ((luz(2).ToString()).Length < 2) ? $"0{luz(2)}" : luz(2).ToString();
+    string luz3 = ((luz(3).ToString()).Length < 2) ? $"0{luz(3)}" : luz(3).ToString();
     print(2, $"{luz3} | {luz2} | {luz1} | {luz0}");
-    print(3, $"{mark3} | {mark2} | {mark1} | {mark0}");
+    print(3, $"{luz_marker(luz(3))} | {luz_marker(luz(2))} | {luz_marker(luz(1))} | {luz_marker(luz(0))}");
     print(4, "");
 }
