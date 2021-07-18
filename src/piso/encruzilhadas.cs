@@ -275,6 +275,9 @@ bool verifica_curva()
     */
 
     // Atualiza leituras de cores, verifica se está no verde e depois no vermelho
+
+    if (millis() < update_curva) { return false; }
+
     ler_cor();
     if (verifica_verde()) { return true; }
     if (verifica_saida()) { return false; }
@@ -284,7 +287,11 @@ bool verifica_curva()
         parar(64);
         ler_cor();
         print_luz_marker();
-        if (vermelho(0)) { return false; }
+        if (vermelho(0) || colorido(0))
+        {
+            update_curva = millis() + 159;
+            return false;
+        }
         if (preto_curva_esq)
         {
             mover_tempo(300, 288);
@@ -346,7 +353,11 @@ bool verifica_curva()
         parar(64);
         ler_cor();
         print_luz_marker();
-        if (vermelho(3)) { return false; }
+        if (vermelho(3) || colorido(3))
+        {
+            update_curva = millis() + 159;
+            return false;
+        }
         if (preto_curva_dir)
         {
             mover_tempo(300, 288);

@@ -19,7 +19,8 @@ int tempo_correcao = 0,
         update_time = 16,
         ultima_correcao = 0,
         update_obstaculo = 0,
-        update_rampa = 0;
+        update_rampa = 0,
+        update_curva = 0;
 
 bool preto0 = false,
         preto1 = false,
@@ -104,7 +105,7 @@ float angulo_giro_atuador() => bot.AngleScoop();
 bool tem_vitima() => bot.HasVictim();
 void delay(int milissegundos) => bot.Wait(milissegundos);
 
-void som(string nota, int tempo) => bot.PlayNote(0, nota, tempo);
+void som(string nota, short tempo) => bot.PlayNote(0, nota, tempo);
 
 Dictionary<string, string> cores = new Dictionary<string, string>(){
     {"preto", "#000000"},
@@ -156,6 +157,8 @@ void limpar_console() => bot.ClearConsole();
 void limpar_linha(byte linha) => print((byte)(linha - 1), " ");
 
 bool tem_linha(byte sensor) => (bot.returnRed(sensor) < 24);
+
+bool colorido(byte sensor) => (bot.returnRed(sensor) != bot.ReturnBlue(sensor));
 
 bool vermelho(byte sensor)
 {
@@ -270,8 +273,8 @@ void ler_cor()
     verde2 = verde(2);
     verde3 = verde(3);
 
-    preto_curva_dir = (preto(0));
-    preto_curva_esq = (preto(3));
+    preto_curva_dir = preto(0);
+    preto_curva_esq = preto(3);
 }
 
 void ler_ultra()
@@ -978,6 +981,9 @@ bool verifica_curva()
     */
 
     // Atualiza leituras de cores, verifica se está no verde e depois no vermelho
+
+    if (millis() < update_curva) { return false; }
+
     ler_cor();
     if (verifica_verde()) { return true; }
     if (verifica_saida()) { return false; }
@@ -987,7 +993,11 @@ bool verifica_curva()
         parar(64);
         ler_cor();
         print_luz_marker();
-        if (vermelho(0)) { return false; }
+        if (vermelho(0) || colorido(0))
+        {
+            update_curva = millis() + 159;
+            return false;
+        }
         if (preto_curva_esq)
         {
             mover_tempo(300, 288);
@@ -1049,7 +1059,11 @@ bool verifica_curva()
         parar(64);
         ler_cor();
         print_luz_marker();
-        if (vermelho(3)) { return false; }
+        if (vermelho(3) || colorido(3))
+        {
+            update_curva = millis() + 159;
+            return false;
+        }
         if (preto_curva_dir)
         {
             mover_tempo(300, 288);

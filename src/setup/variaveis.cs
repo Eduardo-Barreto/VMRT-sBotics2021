@@ -19,7 +19,8 @@ int tempo_correcao = 0,
         update_time = 16,
         ultima_correcao = 0,
         update_obstaculo = 0,
-        update_rampa = 0;
+        update_rampa = 0,
+        update_curva = 0;
 
 bool preto0 = false,
         preto1 = false,
