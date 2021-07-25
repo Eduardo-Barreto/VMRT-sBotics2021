@@ -21,12 +21,10 @@ bool verifica_obstaculo(bool contar_update = true)
                 return false;
             }
         }
+        parar();
         console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();
-        if (ultra(0) < 12)
-            mover_tempo(-200, 159);
-        if (ultra(0) < 12)
-            mover_tempo(-100, 50);
+        alinhar_ultra(12);
         parar();
         som("E3", 64);
         som("MUDO", 16);
@@ -39,12 +37,24 @@ bool verifica_obstaculo(bool contar_update = true)
         som("E3", 32);
         girar_esquerda(45);
         som("E3", 32);
-        mover_tempo(300, 575);
+        // 495
+        timeout = millis() + 559;
+        while (ultra(2) > 15)
+        {
+            if (millis() > timeout) { break; }
+            mover(300, 300);
+        }
+        while (ultra(2) < 15)
+        {
+            if (millis() > timeout) { break; }
+            mover(300, 300);
+        }
+        mover_tempo(300, 127);
         som("E3", 32);
-        girar_esquerda(45);
+        girar_esquerda(60);
         som("E3", 32);
-        int timeout_obstaculo = millis() + 591;
-        while (millis() < timeout_obstaculo)
+        timeout = millis() + 495;
+        while (millis() < timeout)
         {
             if (preto(0) || preto(1))
             {
@@ -54,7 +64,7 @@ bool verifica_obstaculo(bool contar_update = true)
         }
         parar();
         som("D3", 32);
-        mover_tempo(300, 399);
+        mover_tempo(300, 335);
         som("E3", 32);
         float objetivo = converter_graus(eixo_x() + 45);
         while (!preto(1))

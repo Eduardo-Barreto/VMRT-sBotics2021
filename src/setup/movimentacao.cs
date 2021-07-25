@@ -12,6 +12,10 @@ void mover_tempo(int velocidade, int tempo)
     int timeout = bot.Timer() + tempo;
     while (bot.Timer() < timeout)
     {
+        if (velocidade < 0 && toque())
+        {
+            break;
+        }
         mover(velocidade, velocidade);
     }
     parar();

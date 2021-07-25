@@ -22,9 +22,6 @@ void Main()
     {
         for (; ; )
         {
-            ler_cor();
-            print(2, $"{luz(0)} | {luz(1)} | {luz(2)} | {luz(3)}");
-            mover(-1000, 1000);
         }
     }
     else
