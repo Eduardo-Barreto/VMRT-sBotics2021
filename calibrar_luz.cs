@@ -1,5 +1,3 @@
-void Main()
-{
     int maximo = 0;
     int minimo = 100;
     mover(1000, -1000);
@@ -48,4 +46,3 @@ void Main()
         minimo = (luz(3) < minimo) ? luz(3) : minimo;
         print(1, $"min: {minimo} | max: {maximo}");
     }
-}

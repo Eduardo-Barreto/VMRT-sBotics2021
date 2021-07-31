@@ -20,9 +20,6 @@ void Main()
 {
     if (debug)
     {
-        for (; ; )
-        {
-        }
     }
     else
     {
