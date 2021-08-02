@@ -8,10 +8,9 @@ import("piso/obstaculo.cs");
 import("piso/elevados.cs");
 import("resgate/movimentacao.cs");
 import("resgate/rampa.cs");
-import("resgate/sair.cs");
-import("resgate/achar_saida.cs");
+import("resgate/buscar_triangulo/buscar.cs");
 
-// Variável de controle para ligar/desligar o debug
+// Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
 bool console = false;
 
@@ -20,6 +19,11 @@ void Main()
 {
     if (debug)
     {
+        for (; ; )
+        {
+            verde(2);
+
+        }
     }
     else
     {
@@ -48,19 +52,8 @@ void Main()
         console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
         while (lugar == 2)
         {
-            sair();
-            limpar_console();
-            while (verde(0) || verde(1) || verde(2) || verde(3))
-                mover(200, 200);
-            delay(150);
-            delay(64);
-            parar();
-            mover(200, 200);
-            delay(16);
-            parar();
-            abaixar_atuador();
-            delay(700);
-            lugar = 3;
+            primeira_busca();
+            travar();
         }
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)

@@ -1,13 +1,13 @@
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
-byte velocidade_padrao = 185,
-        velocidade = 180,
-        velocidade_max = 220,
+byte velocidade = 180,
         media_meio = 0,
         direcao_triangulo = 0,
         direcao_saida = 0,
         lugar = 0;
 
-const byte limite_branco = 55;
+const byte velocidade_padrao = 185,
+        velocidade_max = 220,
+        limite_branco = 55;
 
 float saida1 = 0,
         saida2 = 0,
@@ -1008,9 +1008,13 @@ bool verifica_curva()
         }
         if (verifica_saida()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
-        if (verifica_verde()) { return true; }
-        mover_tempo(-300, 143);
-        if (verifica_verde()) { return true; }
+        int timeout = millis() + 143;
+        while (millis() < timeout)
+        {
+            mover(-300, -300);
+            if (verifica_verde()) { return true; }
+        }
+        parar();
         // Feedbacks visuais e sonoross de que entrou na condição da curva
         console_led(1, "<b>CURVA PRETO</b> - Direita", "preto");
         som("C3", 100);
@@ -1073,9 +1077,13 @@ bool verifica_curva()
             return false;
         }
         if (verifica_saida()) { return false; }
-        if (verifica_verde()) { return true; }
-        mover_tempo(-300, 143);
-        if (verifica_verde()) { return true; }
+        int timeout = millis() + 143;
+        while (millis() < timeout)
+        {
+            mover(-300, -300);
+            if (verifica_verde()) { return true; }
+        }
+        parar();
         console_led(1, "<b>CURVA PRETO</b> - Esquerda", "preto");
         som("C3", 100);
         mover_tempo(300, 351);
@@ -1323,21 +1331,24 @@ bool verifica_rampa_resgate()
 }
 // metodos de movimentação para a area de resgate
 //;
-void alinhar_ultra(int distancia)
+void alinhar_ultra(int distancia, bool empinada = true)
 {
     if (ultra(0) > distancia)
     {
         while (ultra(0) > distancia + distancia / 6)
         {
             mover(300, 300);
+            if (empinada) { verifica_empinada(); }
         }
         while (ultra(0) > distancia + distancia / 5)
         {
             mover(200, 200);
+            if (empinada) { verifica_empinada(); }
         }
         while (ultra(0) > distancia)
         {
             mover(100, 100);
+            if (empinada) { verifica_empinada(); }
         }
         while (ultra(0) < distancia)
         {
@@ -1392,8 +1403,8 @@ void totozinho(byte vezes = 1)
 { // empurra possiveis bolinhas para frente
     for (byte i = 0; i < vezes; i++)
     {
-        encoder(250, 10);
-        encoder(-300, 10);
+        mover_tempo(250, 300);
+        mover_tempo(-300, 300);
     }
     parar();
 }
@@ -1416,6 +1427,17 @@ void preparar_atuador(bool apenas_sem_vitima = false)
         alinhar_angulo();
         abrir_atuador();
         abaixar_atuador();
+    }
+}
+
+void verifica_empinada(bool alinha = true)
+{
+    if (eixo_y() < 356 && eixo_y() > 330)
+    {
+        mover_tempo(-200, 399);
+        delay(15);
+        mover_tempo(200, 399);
+        if (alinha) { alinhar_angulo(); }
     }
 }
 void seguir_rampa()
@@ -1472,311 +1494,51 @@ void seguir_rampa()
         }
     }
 }
-void alcancar_saida()
+float direcao_inicial = 0; // variavel para a posição inical do robô
+
+const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
+            relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
+            sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
+
+
+void primeira_busca()
 {
-    mover(300, 300);
-    delay(500);
-    mover(-300, -300);
-    delay(550);
-    parar();
-    abaixar_atuador();
-    while (!verde(0) && !verde(1) && !verde(2) && !verde(3))
-        mover(300, 300);
-    limpar_console();
-    print(2, "Saindo!");
-    som("C1", 100);
-}
-
-void sair()
-{
-    alinhar_angulo();
-    bot.TurnLedOff();
-
-    print(1, "BUSCANDO SAÍDA");
-
-    alinhar_ultra(256);
-    while (ultra(0) > 180)
-    {
-        print(2, "Verificando direita");
-        mover(300, 300);
-        if (ultra(1) > 300)
-        {
-            print(3, "Encontrada!");
-            som("B2", 150);
-            alinhar_ultra(224);
-            som("C3", 150);
-            girar_direita(90);
-            alinhar_angulo();
-            alcancar_saida();
-            return;
-        }
-    }
-    print(3, "Saida a direita não encontrada");
-    som("D3", 150);
-    som("C3", 150);
-
-    alinhar_ultra(100);
-    limpar_console();
-    print(1, "BUSCANDO SAÍDA");
-    girar_direita(45);
-    while (ultra(0) > 103)
-    {
-        print(2, "Verificando esquerda");
-        mover(300, 300);
-        if (ultra(2) > 256)
-        {
-            print(3, "Encontrada!");
-            som("B2", 150);
-            girar_esquerda(45);
-            alinhar_ultra(32);
-            som("C3", 150);
-            girar_esquerda(45);
-            encoder(300, 4);
-            girar_esquerda(45);
-            alinhar_angulo();
-            alcancar_saida();
-            return;
-        }
-    }
-    print(3, "Saida a esquerda não encontrada");
-    som("D3", 150);
-    som("C3", 150);
-
-    girar_direita(45);
-    limpar_console();
-    print(2, "indo para saida a frente na direita");
-    alinhar_angulo();
-    alinhar_ultra(32);
-    girar_esquerda(45);
-    encoder(300, 4);
-    girar_esquerda(45);
-    alinhar_angulo();
-    alcancar_saida();
-    return;
-}
-void achar_saida()
-{
-    float direcao_inicial = 0; // variavel para a posição inical do robô
-
-    const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
-                relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
-                sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
-
-    direcao_saida = 0;      //inicia as localizações zeradas 
+    //inicia as localizações zeradas
+    direcao_saida = 0;
     direcao_triangulo = 0;
-
+    // Preparações pra alinhamentno na sala
     alinhar_angulo();
     alinhar_angulo();
     preparar_atuador();
-    alinhar_ultra(255); // vai para o inicio da sala de resgate 
+    alinhar_ultra(255);
     alinhar_angulo();
 
-    direcao_inicial = eixo_x(); // define a posição em que o robô estava ao entrar na sala de resgate
+    // Busca o triângulo ou a saída na direita
     ler_ultra();
-    while (ultra_frente > 180) // enqunto estiver a mais de 180cm da parede frontal busca por saida ou triangulo
+    while (ultra_frente > 180)
     {
         ler_ultra();
         mover(180, 180);
-        if (ultra_direita > 300)  // caso o ultrasonico da lateral direita veja uma distancia muito grande o robô encontrou a saida
+        if (ultra_direita > 300)  // Caso o ultrasonico da lateral direita veja uma distancia muito grande o robô encontrou a saida
         {
-            direcao_saida = 3; // determina que a saida está a direita
+            direcao_saida = 3; // Determina que a saida está a direita
             print(1, "SAÍDA DIREITA");
             som("D3", 300);
             som("C3", 300);
             break;
         }
-        else if (proximo(ultra_direita, (ultra_frente * relacao_sensores_a) + relacao_sensores_b, sense_triangulo)) // realiza equação y = ax + b para identificar o triangulo de resgate
+        else if (proximo(ultra_direita, (ultra_frente * relacao_sensores_a) + relacao_sensores_b, sense_triangulo)) // Realiza equação y = ax + b para identificar o triangulo de resgate
         {
-            direcao_triangulo = 3; // determina que o triangulo está a direita
+            direcao_triangulo = 3; // Determina que o triangulo está a direita
             print(2, "TRIÂNGULO DIREITA");
             som("D3", 150);
             som("C3", 150);
             break;
         }
     }
-    mover(300, 300);
-    delay(1500);
-    fechar_atuador();
-    levantar_atuador();
-    alinhar_ultra(105); // move o robô até o ultrasonico frontal registrar 67cm para iniciar verificação do canto esquerdo
-    alinhar_ultra(85);
-    mover_tempo(200, 688);
-    alinhar_angulo();
-    if (luz(4) < 2) // verifica se o triangulo esta lá
-    {
-        direcao_triangulo = 1; // determina que o triangulo está a esquerda
-        print(2, "TRIÂNGULO FRONTAL");
-        som("D3", 150);
-        som("C3", 150);
-        if (tem_vitima())
-        {
-            encoder(-300, 1.5f);
-            girar_direita(45);
-            alinhar_ultra(65);
-            girar_esquerda(90);
-            entregar_vitima();
-            girar_direita(90);
-            alinhar_ultra(26);
-        }
-        else
-        {
-            girar_direita(45);
-            alinhar_ultra(26);
-        }
-        if (direcao_saida != 0)
-        {
-            girar_direita(45);
-            alinhar_ultra(124);
-            alinhar_angulo();
-            alinhar_ultra(124);
-            girar_direita(90);
-            int timeout = millis() + 400;
-            while (!toque())
-            {
-                mover(-300, -300);
-                if (millis() > timeout)
-                {
-                    break;
-                }
-            }
-            parar();
-            return;
-        };
-
-    }
-
-    else
-    {
-        alinhar_angulo();
-        girar_direita(45); // vira 45º para efetuar verificação com ultrasonico lateral
-        ler_ultra();
-
-        while (ultra_frente > 26) // enqunto estiver a mais de 26cm da parede frontal busca por saida
-        {
-            ler_ultra();
-            mover(200, 200);
-            if (ultra_esquerda > 300 && direcao_saida == 0) // caso o ultrasonico da lateral esquerda veja uma distancia muito grande o robô encontrou a saida
-            {
-                direcao_saida = 1; // determina que a saida está a esquerda
-                print(1, "SAÍDA ESQUERDA");
-                som("D3", 300);
-                som("C3", 300);
-            }
-        }
-    }
-
-    objetivo_direita(converter_graus(direcao_inicial + 90));
-    preparar_atuador(true);
-    mover(300, 300);
-    delay(650);
-    fechar_atuador();
-    levantar_atuador();
-    alinhar_ultra(85);
-    mover(200, 200);
-    delay(700);
-    alinhar_angulo();
-    delay(64);
-
-    if (luz(4) < 2 && direcao_triangulo == 0)
-    {
-        direcao_triangulo = 2; // determina que o triangulo está a direita na frente
-        print(2, "TRIANGULO FRONTAL DIREITA");
-        som("D3", 150);
-        som("C3", 150);
-        if (tem_vitima())
-        {
-            encoder(-300, 1.5f);
-            girar_direita(45);
-            alinhar_ultra(65);
-            girar_esquerda(90);
-            entregar_vitima();
-        }
-    }
-
-    ler_ultra();
-    while (ultra_frente < 65) // anda para tras procurando saida
-    {
-        mover(-250, -250);
-        ler_ultra();
-        if (ultra_esquerda > 300)
-        {
-            direcao_saida = 2; // determina que a saida está na frente a direita
-            print(1, "SAIDA FRONTAL DIREITA");
-            som("D3", 300);
-            som("C3", 300);
-            break;
-        }
-    }
-
-    if (direcao_saida == 0) // se a saida ainda não foi encontrada ela está na ultima posição possivel
-    {
-        direcao_saida = 3; // determina que a saida está a direita
-        print(1, "SAÍDA DIREITA");
-        som("D3", 300);
-        som("C3", 300);
-
-    }
-    if (direcao_triangulo == 0) // se o triangulo ainda não foi encontrado ele está na ultima possição possivel
-    {
-        direcao_triangulo = 3; // determina que o triangulo está a direita
-        print(2, "TRIÂNGULO DIREITA");
-        som("D3", 150);
-        som("C3", 150);
-    }
-
-    if (direcao_triangulo == 1 || direcao_triangulo == 2)
-    {
-        mover(-300, -300);
-        delay(300);
-        girar_esquerda(5);
-        objetivo_direita(converter_graus(direcao_inicial + 90));
-        alinhar_ultra(124);
-        alinhar_angulo();
-        alinhar_ultra(124);
-        girar_direita(90);
-        alinhar_angulo();
-        mover(-300, -300);
-        delay(500);
-        alinhar_angulo();
-        int timeout = millis() + 400;
-        while (!toque())
-        {
-            mover(-300, -300);
-            if (millis() > timeout)
-            {
-                parar();
-                break;
-            }
-        }
-        alinhar_angulo();
-    }
-    else
-    {
-        objetivo_direita(converter_graus(direcao_inicial + 180));
-        alinhar_angulo();
-        alinhar_ultra(124);
-        alinhar_angulo();
-        alinhar_ultra(124);
-        girar_direita(90);
-        alinhar_angulo();
-        mover(-300, -300);
-        delay(750);
-        alinhar_angulo();
-        int timeout = millis() + 300;
-        while (!toque())
-        {
-            mover(-300, -300);
-            if (millis() > timeout)
-            {
-                parar();
-                break;
-            }
-        }
-        alinhar_angulo();
-    }
 }
 
-// Variável de controle para ligar/desligar o debug
+// Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
 bool console = false;
 
@@ -1785,6 +1547,11 @@ void Main()
 {
     if (debug)
     {
+        for (; ; )
+        {
+            verde(2);
+
+        }
     }
     else
     {
@@ -1813,19 +1580,8 @@ void Main()
         console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
         while (lugar == 2)
         {
-            sair();
-            limpar_console();
-            while (verde(0) || verde(1) || verde(2) || verde(3))
-                mover(200, 200);
-            delay(150);
-            delay(64);
-            parar();
-            mover(200, 200);
-            delay(16);
-            parar();
-            abaixar_atuador();
-            delay(700);
-            lugar = 3;
+            primeira_busca();
+            travar();
         }
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)

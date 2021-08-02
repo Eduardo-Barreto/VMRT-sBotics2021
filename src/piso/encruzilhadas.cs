@@ -299,9 +299,13 @@ bool verifica_curva()
         }
         if (verifica_saida()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
-        if (verifica_verde()) { return true; }
-        mover_tempo(-300, 143);
-        if (verifica_verde()) { return true; }
+        int timeout = millis() + 143;
+        while (millis() < timeout)
+        {
+            mover(-300, -300);
+            if (verifica_verde()) { return true; }
+        }
+        parar();
         // Feedbacks visuais e sonoross de que entrou na condição da curva
         console_led(1, "<b>CURVA PRETO</b> - Direita", "preto");
         som("C3", 100);
@@ -364,9 +368,13 @@ bool verifica_curva()
             return false;
         }
         if (verifica_saida()) { return false; }
-        if (verifica_verde()) { return true; }
-        mover_tempo(-300, 143);
-        if (verifica_verde()) { return true; }
+        int timeout = millis() + 143;
+        while (millis() < timeout)
+        {
+            mover(-300, -300);
+            if (verifica_verde()) { return true; }
+        }
+        parar();
         console_led(1, "<b>CURVA PRETO</b> - Esquerda", "preto");
         som("C3", 100);
         mover_tempo(300, 351);

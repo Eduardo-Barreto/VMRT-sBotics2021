@@ -10,7 +10,7 @@ direcao_triangulo = 0;
 alinhar_angulo();
 alinhar_angulo();
 preparar_atuador();
-alinhar_ultra(255); // vai para o inicio da sala de resgate 
+alinhar_ultra(255); // vai para o inicio da sala de resgate
 alinhar_angulo();
 
 direcao_inicial = eixo_x(); // define a posição em que o robô estava ao entrar na sala de resgate
@@ -82,15 +82,7 @@ void primeira_busca()
             alinhar_angulo();
             alinhar_ultra(124);
             girar_direita(90);
-            int timeout = millis() + 400;
-            while (!toque())
-            {
-                mover(-300, -300);
-                if (millis() > timeout)
-                {
-                    break;
-                }
-            }
+            mover_tempo(-300, 400);
             parar();
             return;
         };
@@ -128,6 +120,7 @@ void segunda_busca()
     objetivo_direita(converter_graus(direcao_inicial + 90));
     preparar_atuador(true);
     mover(300, 300);
+    delay(650);
     fechar_atuador();
     levantar_atuador();
     alinhar_ultra(85);
@@ -152,6 +145,11 @@ void segunda_busca()
             girar_esquerda(90);
             entregar_vitima();
         }
+    }
+
+    ler_ultra();
+    while (ultra_frente < 65)
+    {
 
     }
 

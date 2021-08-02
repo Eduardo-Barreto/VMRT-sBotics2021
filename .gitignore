@@ -1,4 +1,4 @@
 .vscode/
-./out/
 sbotics-file-modulator.exe
+sbotics-file-modulator_linux
 .env

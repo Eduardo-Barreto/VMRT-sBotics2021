@@ -1,13 +1,13 @@
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
-byte velocidade_padrao = 185,
-        velocidade = 180,
-        velocidade_max = 220,
+byte velocidade = 180,
         media_meio = 0,
         direcao_triangulo = 0,
         direcao_saida = 0,
         lugar = 0;
 
-const byte limite_branco = 55;
+const byte velocidade_padrao = 185,
+        velocidade_max = 220,
+        limite_branco = 55;
 
 float saida1 = 0,
         saida2 = 0,

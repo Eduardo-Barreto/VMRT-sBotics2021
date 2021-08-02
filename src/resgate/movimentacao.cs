@@ -1,20 +1,23 @@
 // metodos de movimentação para a area de resgate
 //;
-void alinhar_ultra(int distancia)
+void alinhar_ultra(int distancia, bool empinada = true)
 {
     if (ultra(0) > distancia)
     {
         while (ultra(0) > distancia + distancia / 6)
         {
             mover(300, 300);
+            if (empinada) { verifica_empinada(); }
         }
         while (ultra(0) > distancia + distancia / 5)
         {
             mover(200, 200);
+            if (empinada) { verifica_empinada(); }
         }
         while (ultra(0) > distancia)
         {
             mover(100, 100);
+            if (empinada) { verifica_empinada(); }
         }
         while (ultra(0) < distancia)
         {
@@ -69,8 +72,8 @@ void totozinho(byte vezes = 1)
 { // empurra possiveis bolinhas para frente
     for (byte i = 0; i < vezes; i++)
     {
-        encoder(250, 10);
-        encoder(-300, 10);
+        mover_tempo(250, 300);
+        mover_tempo(-300, 300);
     }
     parar();
 }
@@ -93,5 +96,16 @@ void preparar_atuador(bool apenas_sem_vitima = false)
         alinhar_angulo();
         abrir_atuador();
         abaixar_atuador();
+    }
+}
+
+void verifica_empinada(bool alinha = true)
+{
+    if (eixo_y() < 356 && eixo_y() > 330)
+    {
+        mover_tempo(-200, 399);
+        delay(15);
+        mover_tempo(200, 399);
+        if (alinha) { alinhar_angulo(); }
     }
 }
