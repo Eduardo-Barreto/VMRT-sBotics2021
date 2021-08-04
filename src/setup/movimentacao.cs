@@ -9,7 +9,7 @@ void travar() { bot.MoveFrontal(0, 0); delay(999999999); }
 
 void mover_tempo(int velocidade, int tempo)
 {
-    int timeout = bot.Timer() + tempo;
+    timeout = bot.Timer() + tempo;
     while (bot.Timer() < timeout)
     {
         if (velocidade < 0 && toque())

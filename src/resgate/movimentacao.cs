@@ -109,3 +109,24 @@ void verifica_empinada(bool alinha = true)
         if (alinha) { alinhar_angulo(); }
     }
 }
+
+void pegar_vitima()
+{
+    parar();
+    girar_esquerda(90);
+    mover_tempo(-300, 511);
+    preparar_atuador();
+    timeout = millis() + 3000;
+    while (!tem_vitima() && millis() < timeout)
+    {
+        mover(300, 300);
+    }
+    fechar_atuador();
+    levantar_atuador();
+    parar();
+    if (direcao_triangulo == 2)
+    {
+        objetivo_esquerda(converter_graus(direcao_inicial + 45));
+        mover(300, 300);
+    }
+}

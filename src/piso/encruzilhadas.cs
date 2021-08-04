@@ -10,13 +10,16 @@ bool falso_verde()
             Senão, continua a movimentação, retorna falso (falso falso verde = verde verdadeiro), e realiza a curva
     */
     parar();
-    int tempo_check_preto = millis() + 200;
+    mover_tempo(-180, 63);
+    int tempo_check_preto = millis() + 127;
     while (millis() < tempo_check_preto)
     {
         mover(-180, -180);
         if (cor(0) == "PRETO" || cor(3) == "PRETO")
         {
             mover_tempo(300, 288);
+            print(1, "FALSO VERDE");
+            travar();
             return true;
         }
     }
@@ -294,13 +297,22 @@ bool verifica_curva()
         }
         if (preto_curva_esq)
         {
-            mover_tempo(300, 288);
+            if (verifica_verde()) { return false; }
+            // Verifica o verde mais uma vez, vai para trás e verifica novamente
+            timeout = millis() + 143;
+            while (millis() < timeout)
+            {
+                mover(-300, -300);
+                if (verifica_verde()) { return true; }
+            }
+            parar();
+            mover_tempo(300, 431);
             return false;
         }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
-        int timeout = millis() + 143;
+        timeout = millis() + 143;
         while (millis() < timeout)
         {
             mover(-300, -300);
@@ -365,12 +377,21 @@ bool verifica_curva()
         }
         if (preto_curva_dir)
         {
-            mover_tempo(300, 288);
+            if (verifica_verde()) { return false; }
+            // Verifica o verde mais uma vez, vai para trás e verifica novamente
+            timeout = millis() + 143;
+            while (millis() < timeout)
+            {
+                mover(-300, -300);
+                if (verifica_verde()) { return true; }
+            }
+            parar();
+            mover_tempo(300, 431);
             return false;
         }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return false; }
-        int timeout = millis() + 143;
+        timeout = millis() + 143;
         while (millis() < timeout)
         {
             mover(-300, -300);

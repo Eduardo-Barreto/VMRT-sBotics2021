@@ -1,7 +1,5 @@
 void achar_saida()
 {
-    float direcao_inicial = 0; // variavel para a posição inical do robô
-
     const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
                 relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
                 sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
@@ -58,7 +56,7 @@ void achar_saida()
             encoder(-300, 1.5f);
             girar_direita(45);
             alinhar_ultra(65);
-            girar_esquerda(90);
+            objetivo_esquerda(converter_graus(direcao_inicial - 45));
             entregar_vitima();
             girar_direita(90);
             alinhar_ultra(26);
@@ -75,7 +73,7 @@ void achar_saida()
             alinhar_angulo();
             alinhar_ultra(124);
             girar_direita(90);
-            int timeout = millis() + 400;
+            timeout = millis() + 400;
             while (!toque())
             {
                 mover(-300, -300);
@@ -133,7 +131,7 @@ void achar_saida()
             encoder(-300, 1.5f);
             girar_direita(45);
             alinhar_ultra(65);
-            girar_esquerda(90);
+            objetivo_esquerda(converter_graus(direcao_inicial + 45));
             entregar_vitima();
         }
     }
@@ -183,7 +181,7 @@ void achar_saida()
         mover(-300, -300);
         delay(500);
         alinhar_angulo();
-        int timeout = millis() + 1000;
+        timeout = millis() + 1000;
         while (!toque())
         {
             mover(-300, -300);
@@ -219,7 +217,7 @@ void achar_saida()
         mover(-300, -300);
         delay(750);
         alinhar_angulo();
-        int timeout = millis() + 1000;
+        timeout = millis() + 1000;
         while (!toque())
         {
             mover(-300, -300);

@@ -13,14 +13,16 @@ float saida1 = 0,
         saida2 = 0,
         ultra_frente = 0,
         ultra_direita = 0,
-        ultra_esquerda = 0;
+        ultra_esquerda = 0,
+        direcao_inicial = 0; // variavel para a posição inical do robô no resgate
 
 int tempo_correcao = 0,
         update_time = 16,
         ultima_correcao = 0,
         update_obstaculo = 0,
         update_rampa = 0,
-        update_curva = 0;
+        update_curva = 0,
+        timeout = 0;
 
 bool preto0 = false,
         preto1 = false,

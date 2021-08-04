@@ -13,14 +13,16 @@ float saida1 = 0,
         saida2 = 0,
         ultra_frente = 0,
         ultra_direita = 0,
-        ultra_esquerda = 0;
+        ultra_esquerda = 0,
+        direcao_inicial = 0; // variavel para a posição inical do robô no resgate
 
 int tempo_correcao = 0,
         update_time = 16,
         ultima_correcao = 0,
         update_obstaculo = 0,
         update_rampa = 0,
-        update_curva = 0;
+        update_curva = 0,
+        timeout = 0;
 
 bool preto0 = false,
         preto1 = false,
@@ -298,20 +300,24 @@ bool angulo_reto()
 
 string luz_marker(int luz)
 {
-    string hexStr = Convert.ToString(luz, 16);
-    string grayscaleHex = (hexStr.Length < 2) ? ("0" + hexStr) : hexStr;
+    string hex_str = Convert.ToString(luz, 16);
+    string grayscaleHex = hex_str.PadLeft(2, '0');
     string marker = "#" + grayscaleHex + grayscaleHex + grayscaleHex;
-    return "<" + "mark=" + marker + ">--" + "<" + "/" + "mark>";
+    return "<" + "mark=" + marker + ">---" + "<" + "/" + "mark>";
 }
 
 void print_luz_marker()
 {
-    string luz0 = ((luz(0).ToString()).Length < 2) ? $"0{luz(0)}" : luz(0).ToString();
-    string luz1 = ((luz(1).ToString()).Length < 2) ? $"0{luz(1)}" : luz(1).ToString();
-    string luz2 = ((luz(2).ToString()).Length < 2) ? $"0{luz(2)}" : luz(2).ToString();
-    string luz3 = ((luz(3).ToString()).Length < 2) ? $"0{luz(3)}" : luz(3).ToString();
+    string luz0 = (luz(0).ToString()).PadLeft(3, '0');
+    string luz1 = (luz(1).ToString()).PadLeft(3, '0');
+    string luz2 = (luz(2).ToString()).PadLeft(3, '0');
+    string luz3 = (luz(3).ToString()).PadLeft(3, '0');
+    string marker0 = (verde0) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(0)));
+    string marker1 = (verde1) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(1)));
+    string marker2 = (verde2) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(2)));
+    string marker3 = (verde3) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(3)));
     print(2, $"{luz3} | {luz2} | {luz1} | {luz0}");
-    print(3, $"{luz_marker(luz(3))} | {luz_marker(luz(2))} | {luz_marker(luz(1))} | {luz_marker(luz(0))}");
+    print(3, $"{marker3} | {marker2} | {marker1} | {marker0}");
     print(4, "");
 }
 // Métodos de movimentação e outros
@@ -325,7 +331,7 @@ void travar() { bot.MoveFrontal(0, 0); delay(999999999); }
 
 void mover_tempo(int velocidade, int tempo)
 {
-    int timeout = bot.Timer() + tempo;
+    timeout = bot.Timer() + tempo;
     while (bot.Timer() < timeout)
     {
         if (velocidade < 0 && toque())
@@ -719,13 +725,16 @@ bool falso_verde()
             Senão, continua a movimentação, retorna falso (falso falso verde = verde verdadeiro), e realiza a curva
     */
     parar();
-    int tempo_check_preto = millis() + 200;
+    mover_tempo(-180, 63);
+    int tempo_check_preto = millis() + 127;
     while (millis() < tempo_check_preto)
     {
         mover(-180, -180);
         if (cor(0) == "PRETO" || cor(3) == "PRETO")
         {
             mover_tempo(300, 288);
+            print(1, "FALSO VERDE");
+            travar();
             return true;
         }
     }
@@ -1003,13 +1012,22 @@ bool verifica_curva()
         }
         if (preto_curva_esq)
         {
-            mover_tempo(300, 288);
+            if (verifica_verde()) { return false; }
+            // Verifica o verde mais uma vez, vai para trás e verifica novamente
+            timeout = millis() + 143;
+            while (millis() < timeout)
+            {
+                mover(-300, -300);
+                if (verifica_verde()) { return true; }
+            }
+            parar();
+            mover_tempo(300, 431);
             return false;
         }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
-        int timeout = millis() + 143;
+        timeout = millis() + 143;
         while (millis() < timeout)
         {
             mover(-300, -300);
@@ -1074,12 +1092,21 @@ bool verifica_curva()
         }
         if (preto_curva_dir)
         {
-            mover_tempo(300, 288);
+            if (verifica_verde()) { return false; }
+            // Verifica o verde mais uma vez, vai para trás e verifica novamente
+            timeout = millis() + 143;
+            while (millis() < timeout)
+            {
+                mover(-300, -300);
+                if (verifica_verde()) { return true; }
+            }
+            parar();
+            mover_tempo(300, 431);
             return false;
         }
         if (verifica_saida()) { return false; }
         if (verifica_verde()) { return false; }
-        int timeout = millis() + 143;
+        timeout = millis() + 143;
         while (millis() < timeout)
         {
             mover(-300, -300);
@@ -1140,7 +1167,7 @@ bool verifica_obstaculo(bool contar_update = true)
             mover_tempo(-200, 79);
         levantar_atuador();
         console_led(1, "<:POSSÍVEL OBSTÁCULO:>", "azul");
-        int timeout = millis() + 1500;
+        timeout = millis() + 1500;
         while (ultra(0) > 12)
         {
             ultima_correcao = millis();
@@ -1294,7 +1321,7 @@ bool verifica_rampa()
         parar();
         if (eixo_y() < 10 || eixo_y() > 40)
         {
-            int timeout = millis() + 400;
+            timeout = millis() + 400;
             while (eixo_y() < 350 || eixo_y() > 5)
             {
                 ultima_correcao = millis();
@@ -1442,6 +1469,27 @@ void verifica_empinada(bool alinha = true)
         if (alinha) { alinhar_angulo(); }
     }
 }
+
+void pegar_vitima()
+{
+    parar();
+    girar_esquerda(90);
+    mover_tempo(-300, 511);
+    preparar_atuador();
+    timeout = millis() + 3000;
+    while (!tem_vitima() && millis() < timeout)
+    {
+        mover(300, 300);
+    }
+    fechar_atuador();
+    levantar_atuador();
+    parar();
+    if (direcao_triangulo == 2)
+    {
+        objetivo_esquerda(converter_graus(direcao_inicial + 45));
+        mover(300, 300);
+    }
+}
 void seguir_rampa()
 {
     for (; ; )
@@ -1498,8 +1546,6 @@ void seguir_rampa()
 }
 void achar_saida()
 {
-    float direcao_inicial = 0; // variavel para a posição inical do robô
-
     const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
                 relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
                 sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
@@ -1556,7 +1602,7 @@ void achar_saida()
             encoder(-300, 1.5f);
             girar_direita(45);
             alinhar_ultra(65);
-            girar_esquerda(90);
+            objetivo_esquerda(converter_graus(direcao_inicial - 45));
             entregar_vitima();
             girar_direita(90);
             alinhar_ultra(26);
@@ -1573,7 +1619,7 @@ void achar_saida()
             alinhar_angulo();
             alinhar_ultra(124);
             girar_direita(90);
-            int timeout = millis() + 400;
+            timeout = millis() + 400;
             while (!toque())
             {
                 mover(-300, -300);
@@ -1631,7 +1677,7 @@ void achar_saida()
             encoder(-300, 1.5f);
             girar_direita(45);
             alinhar_ultra(65);
-            girar_esquerda(90);
+            objetivo_esquerda(converter_graus(direcao_inicial + 45));
             entregar_vitima();
         }
     }
@@ -1681,7 +1727,7 @@ void achar_saida()
         mover(-300, -300);
         delay(500);
         alinhar_angulo();
-        int timeout = millis() + 1000;
+        timeout = millis() + 1000;
         while (!toque())
         {
             mover(-300, -300);
@@ -1717,7 +1763,7 @@ void achar_saida()
         mover(-300, -300);
         delay(750);
         alinhar_angulo();
-        int timeout = millis() + 1000;
+        timeout = millis() + 1000;
         while (!toque())
         {
             mover(-300, -300);
@@ -1744,11 +1790,6 @@ void achar_saida()
 }
 void resgatar()
 {
-
-    //direcao_triangulo 
-    //direcao_saida 
-    //corrigir entrega para angulo absoluto
-
     const float relacao_sensores_a = -0.9950166112957f,   // constante A da equação para achar o triangulo de resgate
                   relacao_sensores_b = 301.0867774086379f,  // constante B da equação para achar o triangulo de resgate
                   sensibilidade = 5f; // constante de sensibilidade para encontrar triangulo
@@ -1762,14 +1803,20 @@ void resgatar()
             ler_ultra();
             print(1, (ultra_frente * relacao_sensores_a) + relacao_sensores_b);
             print(2, ultra_esquerda);
-            while (ultra_frente > 171)
+            while (ultra_frente > 173)
             {
                 if (!proximo(ultra_esquerda, (ultra_frente * relacao_sensores_a) + relacao_sensores_b, sensibilidade)) // realiza equação y = ax + b para verificar se ha vitimas no lado do triangulo
                 {
-                    travar();
+                    pegar_vitima();
                 }
                 ler_ultra();
             }
+            ler_ultra();
+            if (ultra_esquerda < 100)
+            {
+                pegar_vitima();
+            }
+            ler_ultra();
         }
     }
 }

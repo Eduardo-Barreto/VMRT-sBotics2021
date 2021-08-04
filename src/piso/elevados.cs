@@ -61,7 +61,7 @@ bool verifica_rampa()
         parar();
         if (eixo_y() < 10 || eixo_y() > 40)
         {
-            int timeout = millis() + 400;
+            timeout = millis() + 400;
             while (eixo_y() < 350 || eixo_y() > 5)
             {
                 ultima_correcao = millis();

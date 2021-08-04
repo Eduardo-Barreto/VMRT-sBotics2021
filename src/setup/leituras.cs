@@ -205,19 +205,23 @@ bool angulo_reto()
 
 string luz_marker(int luz)
 {
-    string hexStr = Convert.ToString(luz, 16);
-    string grayscaleHex = (hexStr.Length < 2) ? ("0" + hexStr) : hexStr;
+    string hex_str = Convert.ToString(luz, 16);
+    string grayscaleHex = hex_str.PadLeft(2, '0');
     string marker = "#" + grayscaleHex + grayscaleHex + grayscaleHex;
-    return "<" + "mark=" + marker + ">--" + "<" + "/" + "mark>";
+    return "<" + "mark=" + marker + ">---" + "<" + "/" + "mark>";
 }
 
 void print_luz_marker()
 {
-    string luz0 = ((luz(0).ToString()).Length < 2) ? $"0{luz(0)}" : luz(0).ToString();
-    string luz1 = ((luz(1).ToString()).Length < 2) ? $"0{luz(1)}" : luz(1).ToString();
-    string luz2 = ((luz(2).ToString()).Length < 2) ? $"0{luz(2)}" : luz(2).ToString();
-    string luz3 = ((luz(3).ToString()).Length < 2) ? $"0{luz(3)}" : luz(3).ToString();
+    string luz0 = (luz(0).ToString()).PadLeft(3, '0');
+    string luz1 = (luz(1).ToString()).PadLeft(3, '0');
+    string luz2 = (luz(2).ToString()).PadLeft(3, '0');
+    string luz3 = (luz(3).ToString()).PadLeft(3, '0');
+    string marker0 = (verde0) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(0)));
+    string marker1 = (verde1) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(1)));
+    string marker2 = (verde2) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(2)));
+    string marker3 = (verde3) ? ("<mark=#009245>---</mark>") : (luz_marker(luz(3)));
     print(2, $"{luz3} | {luz2} | {luz1} | {luz0}");
-    print(3, $"{luz_marker(luz(3))} | {luz_marker(luz(2))} | {luz_marker(luz(1))} | {luz_marker(luz(0))}");
+    print(3, $"{marker3} | {marker2} | {marker1} | {marker0}");
     print(4, "");
 }
