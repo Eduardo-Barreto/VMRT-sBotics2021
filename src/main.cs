@@ -8,11 +8,13 @@ import("piso/obstaculo.cs");
 import("piso/elevados.cs");
 import("resgate/movimentacao.cs");
 import("resgate/rampa.cs");
-import("resgate/buscar_triangulo/buscar.cs");
+import("resgate/achar_saida.cs");
+import("resgate/resgatar.cs");
+
 
 // Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
-bool console = false;
+bool console = true;
 
 // Método principal
 void Main()
@@ -52,7 +54,8 @@ void Main()
         console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
         while (lugar == 2)
         {
-            primeira_busca();
+            achar_saida();
+            resgatar();
             travar();
         }
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);

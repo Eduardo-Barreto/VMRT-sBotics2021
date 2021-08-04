@@ -9,7 +9,8 @@ void achar_saida()
     direcao_saida = 0;      //inicia as localizações zeradas 
     direcao_triangulo = 0;
 
-    alinhar_angulo();
+    totozinho();
+    encoder(300, 3);
     alinhar_angulo();
     preparar_atuador();
     alinhar_ultra(255); // vai para o inicio da sala de resgate 
@@ -182,7 +183,19 @@ void achar_saida()
         mover(-300, -300);
         delay(500);
         alinhar_angulo();
-        int timeout = millis() + 400;
+        int timeout = millis() + 1000;
+        while (!toque())
+        {
+            mover(-300, -300);
+            if (millis() > timeout)
+            {
+                parar();
+                break;
+            }
+        }
+        alinhar_angulo();
+        delay(300);
+        timeout = millis() + 1000;
         while (!toque())
         {
             mover(-300, -300);
@@ -206,7 +219,19 @@ void achar_saida()
         mover(-300, -300);
         delay(750);
         alinhar_angulo();
-        int timeout = millis() + 300;
+        int timeout = millis() + 1000;
+        while (!toque())
+        {
+            mover(-300, -300);
+            if (millis() > timeout)
+            {
+                parar();
+                break;
+            }
+        }
+        alinhar_angulo();
+        delay(300);
+        timeout = millis() + 1000;
         while (!toque())
         {
             mover(-300, -300);
