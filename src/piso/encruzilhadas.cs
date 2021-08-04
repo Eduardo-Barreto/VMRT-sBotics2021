@@ -298,6 +298,7 @@ bool verifica_curva()
             return false;
         }
         if (verifica_saida()) { return false; }
+        if (verifica_verde()) { return false; }
         // Verifica o verde mais uma vez, vai para trás e verifica novamente
         int timeout = millis() + 143;
         while (millis() < timeout)
@@ -368,6 +369,7 @@ bool verifica_curva()
             return false;
         }
         if (verifica_saida()) { return false; }
+        if (verifica_verde()) { return false; }
         int timeout = millis() + 143;
         while (millis() < timeout)
         {
