@@ -11,6 +11,7 @@ float angulo_atuador() => bot.AngleActuator();
 float angulo_giro_atuador() => bot.AngleScoop();
 bool tem_vitima() => bot.HasVictim();
 void delay(int milissegundos) => bot.Wait(milissegundos);
+float forca_motor() => bot.RobotSpeed();
 
 void som(string nota, short tempo) => bot.PlayNote(0, nota, tempo);
 
@@ -58,7 +59,7 @@ void console_led(byte linha, object texto, string cor, bool ligar_led = true)
 }
 
 
-void print(byte linha, object texto) { if (console) bot.Print(linha - 1, "<align=center>" + texto.ToString() + "</align>"); }
+void print(byte linha, object texto, string align = "center") { if (console) bot.Print(linha - 1, $"<align={align}>" + texto.ToString()); }
 
 void limpar_console() => bot.ClearConsole();
 void limpar_linha(byte linha) => print((byte)(linha - 1), " ");

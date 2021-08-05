@@ -4,9 +4,10 @@ void seguir_rampa()
     {
         ler_cor();
 
-        if ((eixo_y() > 355) || (eixo_y() < 5))
+        if ((eixo_y() > 355) || (eixo_y() < 5) || ultra(1) > 50)
         {
             lugar = 2;
+            parar();
             return;
         }
 

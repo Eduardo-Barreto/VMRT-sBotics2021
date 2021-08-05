@@ -21,11 +21,7 @@ void Main()
 {
     if (debug)
     {
-        for (; ; )
-        {
-            verde(2);
 
-        }
     }
     else
     {
