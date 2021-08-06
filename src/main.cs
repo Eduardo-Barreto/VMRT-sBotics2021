@@ -6,10 +6,12 @@ import("piso/seguir_linha.cs");
 import("piso/encruzilhadas.cs");
 import("piso/obstaculo.cs");
 import("piso/elevados.cs");
-import("resgate/movimentacao.cs");
+import("resgate/setup/movimentacao.cs");
 import("resgate/rampa.cs");
 import("resgate/achar_saida.cs");
-import("resgate/resgatar.cs");
+import("resgate/triangulos/triangulo1.cs");
+import("resgate/triangulos/triangulo2.cs");
+import("resgate/triangulos/triangulo3.cs");
 
 
 // Variáveis de controle para ligar/desligar o debug e console
@@ -51,7 +53,6 @@ void Main()
         while (lugar == 2)
         {
             achar_saida();
-            resgatar();
             travar();
         }
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
