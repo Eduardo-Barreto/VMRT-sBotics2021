@@ -121,130 +121,35 @@ void achar_saida()
         if (ultra(2) > 50)
         {
             direcao_saida = 1;
-            if (!tem_vitima()) // caso o robô não esteja carregando nenhuma vitima ele ira direto para o posicionamento de resgate 
-            {
-                mover_tempo(-250, 255); // se afasta levemente da parede para virar
-                objetivo_direita(converter_graus(direcao_inicial + 90)); // vira a direita 
-                preparar_atuador(); //abaixa o atuador para pegar possiveis vitimas 
-                ler_ultra();
-                while (ultra_frente >= 124) // enquanto o robô não estiver no meio da area de rasgate move para frente
-                {
-                    mover(250, 250);
-                    if (tem_vitima()) // caso tenha alguma vitima sobe o atuador
-                    {
-                        fechar_atuador();
-                        levantar_atuador();
-                    }
-                    ler_ultra();
-                }
-                parar();
-                fechar_atuador(); // fecha e levanta o atuador para fazer a curva
-                levantar_atuador();
-                objetivo_esquerda(direcao_inicial); // vira para se alinhar no meio da area 
-                while (ultra_frente < 228) // anda para tras até chegar proximo a parede
-                {
-                    mover(-250, -250);
-                    ler_ultra();
-                }
-                mover_tempo(-250, 1000); // move até encostar na parede ou dar o tempo de timeout
-                alinhar_angulo();
-            }
-            else // caso o robô esteja carregando uma vitima ele ira entregala e depois se posicionar para o resgate
-            {
-                mover_tempo(-250, 255); // se afasta levemente da parede para virar
-                objetivo_direita(converter_graus(direcao_inicial + 135)); // faz a curva para o angulo que esta o triangulo 
-                ler_ultra();
-                while (ultra_frente >= 100) // move o o robô até se aproximar do triangulo
-                {
-                    mover(250, 250);
-                    ler_ultra();
-                }
-                mover_tempo(250, 1000); // encosta no triangulo
-                entregar_vitima();
-                mover_tempo(-250, 511); // se afasta levemente do triangulo para virar 
-                objetivo_esquerda(converter_graus(direcao_inicial + 90)); // se virar para ir até o centro da area 
-                alinhar_ultra(124); // se alinha no centro da area
-                objetivo_esquerda(direcao_inicial); // se vira para encostar na parede
-                mover_tempo(-250, 1700); // encosta na parede e está pronto para o resgate
-            }
+            posicao_triangulo3();
             triangulo3();
             return;
         }
         else
         {
             direcao_saida = 2;
-            if (!tem_vitima()) // caso o robô não esteja carregando nenhuma vitima ele ira direto para o posicionamento de resgate 
-            {
-                mover_tempo(-250, 255); // se afasta levemente da parede para virar
-                objetivo_direita(converter_graus(direcao_inicial + 90)); // vira a direita 
-                preparar_atuador(); //abaixa o atuador para pegar possiveis vitimas 
-                ler_ultra();
-                while (ultra_frente >= 124) // enquanto o robô não estiver no meio da area de rasgate move para frente
-                {
-                    mover(250, 250);
-                    if (tem_vitima()) // caso tenha alguma vitima sobe o atuador
-                    {
-                        fechar_atuador();
-                        levantar_atuador();
-                    }
-                    ler_ultra();
-                }
-                parar();
-                fechar_atuador(); // fecha e levanta o atuador para fazer a curva
-                levantar_atuador();
-                objetivo_esquerda(direcao_inicial); // vira para se alinhar no meio da area 
-                while (ultra_frente < 228) // anda para tras até chegar proximo a parede
-                {
-                    mover(-250, -250);
-                    ler_ultra();
-                }
-                mover_tempo(-250, 1000); // move até encostar na parede ou dar o tempo de timeout
-                alinhar_angulo();
-            }
-            else // caso o robô esteja carregando uma vitima ele ira entregala e depois se posicionar para o resgate
-            {
-                mover_tempo(-250, 255); // se afasta levemente da parede para virar
-                objetivo_direita(converter_graus(direcao_inicial + 135)); // faz a curva para o angulo que esta o triangulo 
-                ler_ultra();
-                while (ultra_frente >= 100) // move o o robô até se aproximar do triangulo
-                {
-                    mover(250, 250);
-                    ler_ultra();
-                }
-                mover_tempo(250, 1000); // encosta no triangulo
-                entregar_vitima();
-                mover_tempo(-250, 511); // se afasta levemente do triangulo para virar 
-                objetivo_esquerda(converter_graus(direcao_inicial + 90)); // se virar para ir até o centro da area 
-                alinhar_ultra(124); // se alinha no centro da area
-                objetivo_esquerda(direcao_inicial); // se vira para encostar na parede
-                mover_tempo(-250, 1700); // encosta na parede e está pronto para o resgate
-            }
+            posicao_triangulo3();
             triangulo3();
             return;
         }
     }
     else if (direcao_saida == 3)
     {
-        //TODO: alinhar pro triangulo 2
         direcao_triangulo = 2;
-
+        posicao_triangulo2();
         triangulo2();
         return;
     }
     else
     {
-        //TODO: alinhar pro triangulo 2
         direcao_saida = 1;
         direcao_triangulo = 2;
+        posicao_triangulo2();
         triangulo2();
         return;
     }
 
-
-
-
-
-    // triangulo 2{
+    // caso tenha faltado algo
     print(1, "PERA LA AMIGAO FALTOU ESSA");
     travar();
 }

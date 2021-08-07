@@ -8,6 +8,7 @@ import("piso/obstaculo.cs");
 import("piso/elevados.cs");
 import("resgate/setup/movimentacao.cs");
 import("resgate/rampa.cs");
+import("resgate/posicionamentos.cs");
 import("resgate/achar_saida.cs");
 import("resgate/triangulos/triangulo1.cs");
 import("resgate/triangulos/triangulo2.cs");
