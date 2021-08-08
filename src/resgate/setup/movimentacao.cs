@@ -211,3 +211,57 @@ void mover_travar_ultra(short velocidade = 300, short alvo = 25)
     // Para o robô e alinha o robô no ângulo reto mais próximo
     alinhar_angulo();
 }
+
+void meio_triangulo()
+{
+    print(2, "Alinhando para o triângulo");
+    girar_direita(90);
+    alinhar_ultra(124);
+    print(2, "Girando para o triângulo");
+    girar_direita(45);
+    print(2, "Indo para o triângulo");
+    while (ultra(0) > 80)
+    {
+        mover(300, 300);
+    }
+    mover_tempo(250, 500);
+    print(2, "Entregando vítima");
+    entregar_vitima();
+    print(1, "Voltando à busca");
+    print(2, "Indo ao meio");
+    while (ultra(0) < 175)
+    {
+        mover(-300, -300);
+    }
+    print(2, "Alinhando...");
+    girar_esquerda(45);
+    alinhar_angulo();
+    alinhar_ultra(124);
+    girar_esquerda(90);
+}
+
+void alcancar_saida()
+{
+    mover_tempo(300, 500);
+    mover_tempo(-300, 500);
+    parar();
+    abaixar_atuador();
+    delay(300);
+    while (!verde(0) && !verde(1) && !verde(2) && !verde(3))
+    {
+        mover(300, 300);
+    }
+    limpar_console();
+    print(2, "Saindo!");
+    som("C2", 100);
+
+    while (verde(0) || verde(1) || verde(2) || verde(3))
+        mover(200, 200);
+    delay(150);
+    parar();
+    mover(200, 200);
+    delay(16);
+    parar();
+    delay(300);
+    lugar = 3;
+}

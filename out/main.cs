@@ -22,7 +22,8 @@ int tempo_correcao = 0,
         update_obstaculo = 0,
         update_rampa = 0,
         update_curva = 0,
-        timeout = 0;
+        timeout = 0,
+        init_time = 0;
 
 bool preto0 = false,
         preto1 = false,
@@ -734,8 +735,6 @@ bool falso_verde()
         if (cor(0) == "PRETO" || cor(3) == "PRETO")
         {
             mover_tempo(300, 288);
-            print(1, "FALSO VERDE");
-            travar();
             return true;
         }
     }
@@ -1193,9 +1192,13 @@ bool verifica_obstaculo(bool contar_update = true)
         som("E3", 64);
         girar_direita(45);
         som("E3", 32);
-        mover_tempo(300, 735);
+        mover_tempo(300, 543);
         som("E3", 32);
-        girar_esquerda(45);
+        girar_esquerda(15);
+        mover_tempo(300, 239);
+        girar_esquerda(15);
+        mover_tempo(300, 239);
+        girar_esquerda(15);
         som("E3", 32);
         // 495
         timeout = millis() + 559;
@@ -1209,7 +1212,7 @@ bool verifica_obstaculo(bool contar_update = true)
             if (millis() > timeout) { break; }
             mover(300, 300);
         }
-        mover_tempo(300, 127);
+        mover_tempo(300, 127);//alsuagfalgbasjpiasdfjkadfsajkl todo
         som("E3", 32);
         girar_esquerda(60);
         som("E3", 32);
@@ -1572,6 +1575,60 @@ void mover_travar_ultra(short velocidade = 300, short alvo = 25)
     // Para o robô e alinha o robô no ângulo reto mais próximo
     alinhar_angulo();
 }
+
+void meio_triangulo()
+{
+    print(2, "Alinhando para o triângulo");
+    girar_direita(90);
+    alinhar_ultra(124);
+    print(2, "Girando para o triângulo");
+    girar_direita(45);
+    print(2, "Indo para o triângulo");
+    while (ultra(0) > 80)
+    {
+        mover(300, 300);
+    }
+    mover_tempo(250, 500);
+    print(2, "Entregando vítima");
+    entregar_vitima();
+    print(1, "Voltando à busca");
+    print(2, "Indo ao meio");
+    while (ultra(0) < 175)
+    {
+        mover(-300, -300);
+    }
+    print(2, "Alinhando...");
+    girar_esquerda(45);
+    alinhar_angulo();
+    alinhar_ultra(124);
+    girar_esquerda(90);
+}
+
+void alcancar_saida()
+{
+    mover_tempo(300, 500);
+    mover_tempo(-300, 500);
+    parar();
+    abaixar_atuador();
+    delay(300);
+    while (!verde(0) && !verde(1) && !verde(2) && !verde(3))
+    {
+        mover(300, 300);
+    }
+    limpar_console();
+    print(2, "Saindo!");
+    som("C2", 100);
+
+    while (verde(0) || verde(1) || verde(2) || verde(3))
+        mover(200, 200);
+    delay(150);
+    parar();
+    mover(200, 200);
+    delay(16);
+    parar();
+    delay(300);
+    lugar = 3;
+}
 void seguir_rampa()
 {
     for (; ; )
@@ -1633,7 +1690,7 @@ void posicao_triangulo2() // posiciona o robo para regate caso o triangulo estej
     mover_tempo(-250, 255); // se afasta levemente da parede para virar
     alinhar_ultra(30);
     alinhar_angulo();
-    if (tem_vitima()) // caso tenha vitima o robô ira entregala antes de se posicionar para o resgate
+    if (tem_vitima()) // caso tenha vitima o robô ira entregá-la antes de se posicionar para o resgate
     {
         objetivo_direita(converter_graus(direcao_inicial + 90)); // robo vira e vai em direção ao triangulo 
         alinhar_ultra(70); // robo se aproxima do triangulo
@@ -1870,26 +1927,534 @@ void achar_saida()
         triangulo2();
         return;
     }
-
-    // caso tenha faltado algo
-    print(1, "PERA LA AMIGAO FALTOU ESSA");
-    travar();
 }
+
 
 void triangulo1()
 {
-    print(1, $"Triangulo: {direcao_triangulo} | Saida: {direcao_saida}");
-    travar();
+    alinhar_angulo();
+    abrir_atuador();
+    abaixar_atuador();
+    bool alinhou_angulo_meio = false;
+    ler_ultra();
+    while (ultra_frente > 30)
+    {
+        ler_ultra();
+        mover(250, 250);
+
+        // Alinhhar o ângulo no meio da arena
+        if (!alinhou_angulo_meio && ultra_frente < 140)
+        {
+            // Se ainda não alinhou e o robô está mais ou menos no meio
+            // Alinha e indica que ja alinhou
+            alinhar_angulo();
+            alinhou_angulo_meio = true;
+        }
+
+        // Se encontra vítima no atuador indo para frente
+        if (tem_vitima())
+        {
+            limpar_console();
+            print(1, "Encontrei vítima no meio do caminho");
+            fechar_atuador();
+            levantar_atuador();
+            print(2, "Alinhando ao meio");
+            alinhar_ultra(124);
+            meio_triangulo();
+            print(2, "Voltando até a parede");
+            mover_tempo(-300, 2000);
+            preparar_atuador();
+            alinhou_angulo_meio = false;
+            limpar_console();
+        }
+
+        // Se já saiu do alcance do triângulo e encontra algo na direita
+        if (ultra_frente < 160 && ultra_direita < 122)
+        {
+            limpar_console();
+            print(1, $"Vítima encontrada na direita ({ultra_direita})zm");
+            delay(63);
+            parar();
+            print(2, "Indo buscar");
+            // Levanta o atuador pra nao bater na vitima
+            fechar_atuador();
+            levantar_atuador();
+            // Gira em direção da vítima
+            girar_direita(90);
+            // Prepara o atuador para pegar
+            mover_tempo(-300, 447);
+            alinhar_angulo();
+            abrir_atuador();
+            abaixar_atuador();
+            // Enquanto não chega perto da parede
+            while (ultra(0) > 30)
+            {
+                // Vai pra frente
+                mover(300, 300);
+                // Se identificar vítima, espera um pouco e sai do loop
+                if (tem_vitima())
+                {
+                    delay(127);
+                    break;
+                }
+            }
+            // Retorna o atuador e se alinha no meios
+            fechar_atuador();
+            levantar_atuador();
+            alinhar_ultra(124);
+            girar_esquerda(90);
+            alinhar_angulo();
+            // Se tiver vítima, coloca na área segura
+            if (tem_vitima())
+            {
+                print(1, "Peguei! Levando à área segura");
+                alinhar_ultra(124);
+                meio_triangulo();
+            }
+            // Se não, só avisa
+            else
+            {
+                print(1, "Ih rapaz ela fugiu...");
+            }
+            print(2, "Voltando até a parede");
+            mover_tempo(-300, 2000);
+            preparar_atuador();
+            alinhou_angulo_meio = false;
+            limpar_console();
+        }
+
+        // Se já saiu do alcance do triângulo e encontra algo na esquerda
+        if (ultra_esquerda < 122)
+        {
+            limpar_console();
+            print(1, $"Vítima encontrada na esquerda ({ultra_esquerda})zm");
+            delay(63);
+            parar();
+            print(2, "Indo buscar");
+            // Levanta o atuador pra nao bater na vitima
+            fechar_atuador();
+            levantar_atuador();
+            // Gira em direção da vítima
+            girar_esquerda(90);
+            // Prepara o atuador para pegar
+            mover_tempo(-300, 447);
+            alinhar_angulo();
+            abrir_atuador();
+            abaixar_atuador();
+            // Enquanto não chega perto da parede
+            init_time = millis();
+            while (ultra(0) > 30)
+            {
+                // Vai pra frente
+                mover(300, 300);
+                // Se identificar vítima, espera um pouco e sai do loop
+                if (tem_vitima())
+                {
+                    delay(127);
+                    break;
+                }
+                if (millis() > init_time + 1695)
+                {
+                    break;
+                }
+            }
+            int tempo_voltar = millis() - init_time;
+            // Retorna o atuador e se alinha no meio
+            fechar_atuador();
+            levantar_atuador();
+            if (ultra(0) > 150)
+            {
+                mover_tempo(-300, tempo_voltar);
+            }
+            else
+            {
+                alinhar_ultra(124);
+            }
+            alinhar_angulo();
+            // Se tiver vítima, coloca na área segura
+            if (tem_vitima())
+            {
+                print(1, "Peguei! Levando à área segura");
+                girar_direita(90);
+                alinhar_ultra(124);
+                meio_triangulo();
+            }
+            // Se não, só avisa
+            else
+            {
+                print(1, "Ih rapaz ela fugiu...");
+                if (ultra(0) > 200)
+                {
+                    girar_direita(180);
+                    alinhar_ultra(124);
+                    girar_esquerda(90);
+                }
+            }
+            print(2, "Voltando até a parede");
+            mover_tempo(-300, 2000);
+            preparar_atuador();
+            alinhou_angulo_meio = false;
+            limpar_console();
+        }
+
+
+        print(1, "Procurando vítimas...");
+        print(2, $"Direita: {ultra_direita} | Esquerda: {ultra_esquerda}");
+    }
+
+    // TERMINOU DE IR PRA FRENTE
+    fechar_atuador();
+    levantar_atuador();
+    if (tem_vitima())
+    {
+        limpar_console();
+        print(1, "Encontrei vítima no fim do caminho");
+        print(2, "Alinhando ao meio");
+        alinhar_ultra(124);
+        print(2, "Girando para o triângulo");
+        girar_direita(135);
+        print(2, "Indo para o triângulo");
+        while (ultra(0) > 80)
+        {
+            mover(300, 300);
+        }
+        mover_tempo(250, 500);
+        print(2, "Entregando vítima");
+        entregar_vitima();
+        print(1, "Voltando à busca");
+        print(2, "Indo ao meio");
+        while (ultra(0) < 175)
+        {
+            mover(-300, -300);
+        }
+        print(2, "Alinhando...");
+        girar_esquerda(45);
+        alinhar_angulo();
+        alinhar_ultra(124);
+        girar_esquerda(90);
+        limpar_console();
+        print(1, "Fim da varredura, saindo da sala de salvamento");
+        alinhar_ultra(124);
+    }
+    else
+    {
+        limpar_console();
+        print(1, "Fim da varredura, saindo da sala de salvamento");
+        alinhar_ultra(124);
+    }
+
+    if (direcao_saida == 3)
+    {
+        alinhar_angulo();
+        girar_esquerda(45);
+        while (ultra(0) > 40)
+        {
+            mover(300, 300);
+        }
+        alinhar_ultra(35);
+        girar_esquerda(45);
+        alinhar_angulo();
+        alcancar_saida();
+    }
+    else
+    {
+        girar_esquerda(90);
+        alinhar_ultra(124);
+        girar_esquerda(45);
+        while (ultra(0) > 40)
+        {
+            mover(300, 300);
+        }
+        alinhar_ultra(35);
+        girar_esquerda(45);
+        alinhar_angulo();
+        alcancar_saida();
+    }
 }
 void triangulo2()
 {
-    print(1, $"Triangulo: {direcao_triangulo} | Saida: {direcao_saida}");
-    travar();
+    alinhar_angulo();
+    abrir_atuador();
+    abaixar_atuador();
+    bool alinhou_angulo_meio = false;
+    ler_ultra();
+    while (ultra_frente > 30)
+    {
+        ler_ultra();
+        mover(250, 250);
+
+        // Alinhhar o ângulo no meio da arena
+        if (!alinhou_angulo_meio && ultra_frente < 140)
+        {
+            // Se ainda não alinhou e o robô está mais ou menos no meio
+            // Alinha e indica que ja alinhou
+            alinhar_angulo();
+            alinhou_angulo_meio = true;
+        }
+
+        // Se encontra vítima no atuador indo para frente
+        if (tem_vitima())
+        {
+            limpar_console();
+            print(1, "Encontrei vítima no meio do caminho");
+            fechar_atuador();
+            levantar_atuador();
+            print(2, "Alinhando ao meio");
+            alinhar_ultra(124);
+            meio_triangulo();
+            print(2, "Voltando até a parede");
+            mover_tempo(-300, 2000);
+            preparar_atuador();
+            alinhou_angulo_meio = false;
+            limpar_console();
+        }
+
+        // Se já saiu do alcance do triângulo e encontra algo na direita
+        if (ultra_frente < 160 && ultra_direita < 122)
+        {
+            limpar_console();
+            print(1, $"Vítima encontrada na direita ({ultra_direita})zm");
+            delay(63);
+            parar();
+            print(2, "Indo buscar");
+            // Levanta o atuador pra nao bater na vitima
+            fechar_atuador();
+            levantar_atuador();
+            // Gira em direção da vítima
+            girar_direita(90);
+            // Prepara o atuador para pegar
+            mover_tempo(-300, 447);
+            alinhar_angulo();
+            abrir_atuador();
+            abaixar_atuador();
+            init_time = millis();
+            while (ultra(0) > 30)
+            {
+                // Vai pra frente
+                mover(300, 300);
+                // Se identificar vítima, espera um pouco e sai do loop
+                if (tem_vitima())
+                {
+                    delay(127);
+                    break;
+                }
+                if (millis() > init_time + 1695)
+                {
+                    break;
+                }
+            }
+            int tempo_voltar = millis() - init_time;
+            // Retorna o atuador e se alinha no meio
+            fechar_atuador();
+            levantar_atuador();
+            if (ultra(0) > 150)
+            {
+                mover_tempo(-300, tempo_voltar);
+            }
+            else
+            {
+                alinhar_ultra(124);
+            }
+
+
+
+            alinhar_angulo();
+            // Se tiver vítima, coloca na área segura
+            if (tem_vitima())
+            {
+                limpar_console();
+                print(1, "Peguei! Levando à área segura");
+                girar_esquerda(90);
+                alinhar_angulo();
+                alinhar_ultra(124);
+                meio_triangulo();
+            }
+            // Se não, só avisa
+            else
+            {
+                print(1, "Ih rapaz ela fugiu...");
+                if (ultra(0) > 200)
+                {
+                    girar_direita(180);
+                    alinhar_ultra(124);
+                    girar_direita(90);
+                }
+                else
+                {
+                    girar_esquerda(90);
+                }
+            }
+            print(2, "Voltando até a parede");
+            mover_tempo(-300, 2000);
+            preparar_atuador();
+            alinhou_angulo_meio = false;
+            limpar_console();
+        }
+
+
+
+        // Se já saiu do alcance do triângulo e encontra algo na esquerda
+        if (ultra_esquerda < 122)
+        {
+            limpar_console();
+            print(1, $"Vítima encontrada na esquerda ({ultra_esquerda})zm");
+            delay(63);
+            parar();
+            print(2, "Indo buscar");
+            // Levanta o atuador pra nao bater na vitima
+            fechar_atuador();
+            levantar_atuador();
+            // Gira em direção da vítima
+            girar_esquerda(90);
+            // Prepara o atuador para pegar
+            mover_tempo(-300, 447);
+            alinhar_angulo();
+            abrir_atuador();
+            abaixar_atuador();
+            init_time = millis();
+            while (ultra(0) > 30)
+            {
+                // Vai pra frente
+                mover(300, 300);
+                // Se identificar vítima, espera um pouco e sai do loop
+                if (tem_vitima())
+                {
+                    delay(127);
+                    break;
+                }
+                if (millis() > init_time + 1695)
+                {
+                    break;
+                }
+            }
+            int tempo_voltar = millis() - init_time;
+            // Retorna o atuador e se alinha no meios
+            fechar_atuador();
+            levantar_atuador();
+            alinhar_angulo();
+
+            if (ultra(0) > 150)
+            {
+                mover_tempo(-300, tempo_voltar);
+            }
+            else
+            {
+                alinhar_ultra(124);
+            }
+
+            // Se tiver vítima, coloca na área segura
+            if (tem_vitima())
+            {
+                limpar_console();
+                print(1, "Peguei! Levando à área segura");
+                girar_direita(90);
+                alinhar_angulo();
+                alinhar_ultra(124);
+                meio_triangulo();
+            }
+            // Se não, só avisa
+            else
+            {
+                print(1, "Ih rapaz ela fugiu...");
+
+                if (ultra(0) > 200)
+                {
+                    girar_direita(180);
+                    alinhar_ultra(124);
+                    girar_esquerda(90);
+                }
+                else
+                {
+                    alinhar_ultra(124);
+                    girar_direita(90);
+                }
+            }
+            print(2, "Voltando até a parede");
+            mover_tempo(-300, 2000);
+            preparar_atuador();
+            alinhou_angulo_meio = false;
+            limpar_console();
+        }
+
+
+        print(1, "Procurando vítimas...");
+        print(2, $"Direita: {ultra_direita} | Esquerda: {ultra_esquerda}");
+    }
+
+
+
+
+    // TERMINOU DE IR PRA FRENTE
+    fechar_atuador();
+    levantar_atuador();
+    if (tem_vitima())
+    {
+        limpar_console();
+        print(1, "Encontrei vítima no fim do caminho");
+        print(2, "Alinhando ao meio");
+        alinhar_ultra(124);
+        print(2, "Girando para o triângulo");
+        girar_direita(135);
+        print(2, "Indo para o triângulo");
+        while (ultra(0) > 80)
+        {
+            mover(300, 300);
+        }
+        mover_tempo(250, 500);
+        print(2, "Entregando vítima");
+        entregar_vitima();
+        print(1, "Voltando à busca");
+        print(2, "Indo ao meio");
+        while (ultra(0) < 175)
+        {
+            mover(-300, -300);
+        }
+        print(2, "Alinhando...");
+        girar_esquerda(45);
+        alinhar_angulo();
+        alinhar_ultra(124);
+        girar_esquerda(90);
+        limpar_console();
+        print(1, "Fim da varredura, saindo da sala de salvamento");
+        alinhar_ultra(124);
+    }
+    else
+    {
+        limpar_console();
+        print(1, "Fim da varredura, saindo da sala de salvamento");
+        alinhar_ultra(124);
+    }
+
+    if (direcao_saida == 1)//aaaaaaaaaa
+    {
+        alinhar_angulo();
+        girar_direita(45);
+        while (ultra(0) > 40)
+        {
+            mover(300, 300);
+        }
+        alinhar_ultra(35);
+        girar_esquerda(45);
+        alinhar_angulo();
+        alcancar_saida();
+    }
+    else
+    {
+        alinhar_angulo();
+        girar_esquerda(90);
+        while (ultra(0) > 30)
+        {
+            mover(300, 300);
+        }
+        alinhar_ultra(23);
+        girar_esquerda(90);
+        alinhar_angulo();
+        alcancar_saida();
+    }
 }
 void triangulo3()
 {
-    print(1, $"Triangulo: {direcao_triangulo} | Saida: {direcao_saida}");
-    travar();
+
 }
 
 
@@ -1902,12 +2467,15 @@ void Main()
 {
     if (debug)
     {
+        alinhar_angulo();
+        girar_esquerda(45);
 
     }
     else
     {
         calibrar();
         ultima_correcao = millis();
+        fechar_atuador();
         abaixar_atuador();
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
@@ -1932,7 +2500,6 @@ void Main()
         while (lugar == 2)
         {
             achar_saida();
-            travar();
         }
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)

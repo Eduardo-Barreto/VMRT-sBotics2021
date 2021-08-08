@@ -18,8 +18,6 @@ bool falso_verde()
         if (cor(0) == "PRETO" || cor(3) == "PRETO")
         {
             mover_tempo(300, 288);
-            print(1, "FALSO VERDE");
-            travar();
             return true;
         }
     }

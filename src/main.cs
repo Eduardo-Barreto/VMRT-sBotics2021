@@ -24,12 +24,15 @@ void Main()
 {
     if (debug)
     {
+        alinhar_angulo();
+        girar_esquerda(45);
 
     }
     else
     {
         calibrar();
         ultima_correcao = millis();
+        fechar_atuador();
         abaixar_atuador();
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
@@ -54,7 +57,6 @@ void Main()
         while (lugar == 2)
         {
             achar_saida();
-            travar();
         }
         console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
         while (lugar == 3)

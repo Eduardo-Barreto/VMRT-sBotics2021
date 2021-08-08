@@ -4,7 +4,7 @@ void posicao_triangulo2() // posiciona o robo para regate caso o triangulo estej
     mover_tempo(-250, 255); // se afasta levemente da parede para virar
     alinhar_ultra(30);
     alinhar_angulo();
-    if (tem_vitima()) // caso tenha vitima o robô ira entregala antes de se posicionar para o resgate
+    if (tem_vitima()) // caso tenha vitima o robô ira entregá-la antes de se posicionar para o resgate
     {
         objetivo_direita(converter_graus(direcao_inicial + 90)); // robo vira e vai em direção ao triangulo 
         alinhar_ultra(70); // robo se aproxima do triangulo

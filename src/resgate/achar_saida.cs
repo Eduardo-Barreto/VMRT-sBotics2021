@@ -148,9 +148,5 @@ void achar_saida()
         triangulo2();
         return;
     }
-
-    // caso tenha faltado algo
-    print(1, "PERA LA AMIGAO FALTOU ESSA");
-    travar();
 }
 

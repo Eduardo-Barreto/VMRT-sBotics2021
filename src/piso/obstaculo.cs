@@ -33,9 +33,13 @@ bool verifica_obstaculo(bool contar_update = true)
         som("E3", 64);
         girar_direita(45);
         som("E3", 32);
-        mover_tempo(300, 735);
+        mover_tempo(300, 543);
         som("E3", 32);
-        girar_esquerda(45);
+        girar_esquerda(15);
+        mover_tempo(300, 239);
+        girar_esquerda(15);
+        mover_tempo(300, 239);
+        girar_esquerda(15);
         som("E3", 32);
         // 495
         timeout = millis() + 559;
@@ -49,7 +53,7 @@ bool verifica_obstaculo(bool contar_update = true)
             if (millis() > timeout) { break; }
             mover(300, 300);
         }
-        mover_tempo(300, 127);
+        mover_tempo(300, 127);//alsuagfalgbasjpiasdfjkadfsajkl todo
         som("E3", 32);
         girar_esquerda(60);
         som("E3", 32);
