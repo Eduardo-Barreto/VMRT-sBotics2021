@@ -63,7 +63,7 @@ void posicao_triangulo3() // posiciona o robo para regate caso o triangulo estej
             mover(-250, -250);
             ler_ultra();
         }
-        mover_tempo(-250, 1000); // move até encostar na parede ou dar o tempo de timeout          
+        mover_tempo(-250, 1000); // move até encostar na parede ou dar o tempo de timeout
         alinhar_angulo(); // alinha o angulo cado esbarre em alguma vitima 
         mover_tempo(-250, 255); // caso o robo tenha esbarrado em alguma vitima ele ira se forçar contra a parede
     }

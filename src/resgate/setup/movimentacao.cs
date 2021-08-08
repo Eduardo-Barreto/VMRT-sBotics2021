@@ -86,7 +86,6 @@ void preparar_atuador(bool apenas_sem_vitima = false)
         if (!tem_vitima())
         {
             totozinho();
-            alinhar_angulo();
             abrir_atuador();
             abaixar_atuador();
         }
@@ -94,7 +93,6 @@ void preparar_atuador(bool apenas_sem_vitima = false)
     else
     {
         totozinho();
-        alinhar_angulo();
         abrir_atuador();
         abaixar_atuador();
     }
