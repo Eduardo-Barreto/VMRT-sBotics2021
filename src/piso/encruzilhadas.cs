@@ -44,7 +44,7 @@ bool beco()
     */
 
     // Para, lê as cores e verifica se está na condição do beco
-    parar(64);
+    parar();
     ler_cor();
     if ((verde0 || verde1) && (verde2 || verde3))
     {
@@ -124,27 +124,21 @@ bool verifica_verde()
     ler_cor();
     if (verde0 || verde1)
     {
+        parar();
+        alinhar_linha();
         print_luz_marker();
-        // Verificação do beco sem saída
         if (beco()) { return true; }
-        // Se alinha na linha e verifica novamente
-        alinhar_linha();
-        delay(64);
-        alinhar_linha();
-        ler_cor();
-        print_luz_marker();
         if (verde0 || verde1)
         {
             // Nova verificação do beco
             if (beco()) { return true; }
-            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:<b>CURVA VERDE</b>:> - Direita", "verde");
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
-            mover_tempo(300, 447);
+            mover_tempo(300, 431);
             girar_direita(30);
             while (!tem_linha(1))
             {
@@ -178,27 +172,22 @@ bool verifica_verde()
     // Verifica os sensores da esquerda
     else if (verde2 || verde3)
     {
+        parar();
+        alinhar_linha();
         print_luz_marker();
         // Verificação do beco sem saída
         if (beco()) { return true; }
-        // Se alinha na linha e verifica novamente
-        alinhar_linha();
-        delay(64);
-        alinhar_linha();
-        ler_cor();
-        print_luz_marker();
         if (verde2 || verde3)
         {
             // Nova verificação do beco
             if (beco()) { return true; }
-            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:<b>CURVA VERDE</b>:> - Esquerda", "verde");
             som("F3", 100);
             som("G3", 100);
             som("A3", 100);
             // Vai para frente e realiza a curva, girando até encontrar a linha ou um ângulo ortogonal
-            mover_tempo(300, 447);
+            mover_tempo(300, 431);
             girar_esquerda(30);
             while (!tem_linha(2))
             {
@@ -285,7 +274,6 @@ bool verifica_curva()
 
     else if (preto_curva_dir)
     {
-        parar(64);
         ler_cor();
         print_luz_marker();
         if (vermelho(0) || colorido(0))
@@ -335,27 +323,43 @@ bool verifica_curva()
         objetivo = converter_graus(eixo_x() + 115);
         while (!tem_linha(1) || vermelho(1))
         {
+            mover(1000, -1000);
             if (proximo(eixo_x(), objetivo))
             {
-                /* Se chegar ao ângulo máximo, é uma curva com um gap no final
-                Se alinha e arruma a curva de 90 somente com a referência de graus*/
-                mover_tempo(-300, 239);
-                mover(-1000, 1000);
-                delay(650);
-                alinhar_angulo();
+                mover_tempo(-300, 223);
+                objetivo = converter_graus(eixo_x() - 115);
+                while (!tem_linha(2) || vermelho(2))
+                {
+                    mover(-1000, 1000);
+                    if (proximo(eixo_x(), objetivo))
+                    {
+                        mover_tempo(-300, 111);
+                        while (!tem_linha(1) || vermelho(1))
+                        {
+                            mover(1000, -1000);
+                        }
+                        delay(159);
+                        alinhar_angulo();
+                        parar();
+                        mover_tempo(300, 181);
+                        velocidade = (byte)(velocidade_padrao - 5);
+                        ultima_correcao = millis();
+                        calibrar();
+                        return true;
+                    }
+                }
+                delay(150);
+                parar();
                 mover_tempo(300, 181);
                 velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
                 calibrar();
                 return true;
             }
-            mover(1000, -1000);
         }
         // Se ajusta na linha e atualiza os valores de correção e velocidade
         delay(200);
         alinhar_linha();
-        encoder(-300, 2);
-        alinhar_linha(true);
         alinhar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();
@@ -411,24 +415,42 @@ bool verifica_curva()
         objetivo = converter_graus(eixo_x() - 115);
         while (!tem_linha(2) || vermelho(2))
         {
+            mover(-1000, 1000);
             if (proximo(eixo_x(), objetivo))
             {
-                mover_tempo(-300, 239);
-                mover(1000, -1000);
-                delay(650);
-                alinhar_angulo();
+                mover_tempo(-300, 223);
+                objetivo = converter_graus(eixo_x() + 115);
+                while (!tem_linha(1) || vermelho(1))
+                {
+                    mover(1000, -1000);
+                    if (proximo(eixo_x(), objetivo))
+                    {
+                        mover_tempo(-300, 111);
+                        while (!tem_linha(2) || vermelho(2))
+                        {
+                            mover(-1000, 1000);
+                        }
+                        delay(159);
+                        alinhar_angulo();
+                        parar();
+                        mover_tempo(300, 181);
+                        velocidade = (byte)(velocidade_padrao - 5);
+                        ultima_correcao = millis();
+                        calibrar();
+                        return true;
+                    }
+                }
+                delay(150);
+                parar();
                 mover_tempo(300, 181);
                 velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
                 calibrar();
                 return true;
             }
-            mover(-1000, 1000);
         }
         delay(200);
         alinhar_linha();
-        encoder(-300, 2);
-        alinhar_linha(true);
         alinhar_linha(true);
         velocidade = velocidade_padrao;
         ultima_correcao = millis();

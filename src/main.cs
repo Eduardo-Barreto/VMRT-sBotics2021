@@ -16,7 +16,7 @@ import("resgate/triangulos/triangulo3.cs");
 
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = false;
+bool debug = true;
 bool console = true;
 
 // Método principal
@@ -24,8 +24,9 @@ void Main()
 {
     if (debug)
     {
-        alinhar_angulo();
-        girar_esquerda(45);
+        for(;;){
+            vermelho(2);
+        }
 
     }
     else
