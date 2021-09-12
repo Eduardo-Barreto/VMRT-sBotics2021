@@ -1387,7 +1387,7 @@ bool verifica_rampa_resgate()
 }
 // metodos de movimentação para a area de resgate
 //;
-void alinhar_ultra(int distancia, bool empinada = true)
+void alinhar_ultra(float distancia, bool empinada = true)
 {
     if (ultra(0) > distancia)
     {
@@ -1650,1114 +1650,135 @@ void alcancar_saida()
     delay(300);
     lugar = 3;
 }
-void seguir_rampa()
+void mover_para(int posI, int posF)
 {
-    for (; ; )
-    {
-        ler_cor();
+    float anguloObjetivo = 0,
+    distanciaAlinhamento = 0;
 
-        if ((eixo_y() <= 1) || ultra(1) > 50)
-        {
-            lugar = 2;
-            parar();
-            return;
-        }
+    int posIx = 0,
+         posIy = 0,
+         posFx = 0,
+         posFy = 0,
+         objX = 0,
+         objY = 0;
 
-        if (preto0 || preto1)
-        {
-            // Inicia a correção e gira até encontrar a linha novamente ou estourar o tempo
-            tempo_correcao = millis() + 210;
-            while (tempo_correcao > millis())
-            {
-                if (branco(1) || preto(2))
-                {
-                    break;
-                }
-                mover(1000, -1000);
-            }
-            // Vai para a frente por um pequeno tempo e atualiza a última correção
-            mover(300, 300);
-            delay(5);
-        }
-
-        // Se viu preto no sensor da direita
-        else if (preto2 || preto3)
-        {
-            // Inicia a correção e gira até encontrar a linha novamente ou estourar o tempo
-            tempo_correcao = millis() + 210;
-            while (tempo_correcao > millis())
-            {
-                if (branco(2) || preto(1))
-                {
-                    break;
-                }
-                mover(-1000, 1000);
-            }
-            // Vai para a frente por um pequeno tempo e atualiza a última correção
-            mover(300, 300);
-            delay(5);
-        }
-
-        // Se está certo na linha só vai para frente com a velocidade atual
-        else
-        {
-            mover(300, 300);
-        }
-    }
-}
-void posicao_triangulo2() // posiciona o robo para regate caso o triangulo esteja na posicao 2
-{
-    alinhar_angulo();
-    mover_tempo(-250, 255); // se afasta levemente da parede para virar
-    alinhar_ultra(30);
-    alinhar_angulo();
-    if (tem_vitima()) // caso tenha vitima o robô ira entregá-la antes de se posicionar para o resgate
+    switch (posI)
     {
-        objetivo_direita(converter_graus(direcao_inicial + 90)); // robo vira e vai em direção ao triangulo 
-        alinhar_ultra(70); // robo se aproxima do triangulo
-        alinhar_angulo();
-        mover_tempo(150, 511);
-        objetivo_esquerda(converter_graus(direcao_inicial + 45)); // gira pra ficar no angulo correto de entregar as vitimas
-        mover_tempo(250, 700); // encosta no triangulo 
-        entregar_vitima();
-        objetivo_esquerda(direcao_inicial); // robo se vira pra ir de costas até a posição de inicio do resgate
-        alinhar_ultra(124); // robo vai para o centro da area de resgate
-        objetivo_esquerda(converter_graus(direcao_inicial - 90)); // vira pra encostar na parede 
-        mover_tempo(-250, 1700); // encosta na parede
-        alinhar_angulo(); //alinha o angulo caso tenha esbarrado em uma vitima
-        mover_tempo(-300, 255); // força contra a parede caso tenha esbarrado em uma vitima
-    }
-    else // caso o robô não esteja carregando nenhuma vitima ele ira dar re e ir direto para a posição de resgate
-    {
-        ler_ultra();
-        while (ultra_frente <= 124) // move o robo d ecosta até chegar no meio da area de resgate
-        {
-            mover(-250, -250);
-            ler_ultra();
-        }
-        alinhar_ultra(124); // alinha o robo com precisão no meio da arena
-        objetivo_esquerda(converter_graus(direcao_inicial - 90)); // posiciona o robo de costas para a parede que ele deve encostar
-        ler_ultra();
-        while (ultra_frente <= 230) // move o robo para tras até ele chegar proximo a parede
-        {
-            mover(-250, -250);
-            ler_ultra();
-        }
-        mover_tempo(-250, 1000); // encosta o robo na parede
-        alinhar_angulo(); // alinha o angulo cado esbarre em alguma vitima 
-        mover_tempo(-250, 255); // caso o robo tenha esbarrado em alguma vitima ele ira se forçar contra a parede
-    }
-}
-
-void posicao_triangulo3() // posiciona o robo para regate caso o triangulo esteja na posicao 3
-{
-    alinhar_angulo();
-    mover_tempo(-250, 255); // se afasta levemente da parede para virar
-    alinhar_ultra(30);
-    alinhar_angulo();
-    if (!tem_vitima()) // caso o robô não esteja carregando nenhuma vitima ele ira direto para o posicionamento de resgate 
-    {
-        objetivo_direita(converter_graus(direcao_inicial + 90)); // vira a direita                 
-        ler_ultra();
-        while (ultra_frente >= 124) // enquanto o robô não estiver no meio da area de rasgate move para frente
-        {
-            mover(250, 250);
-            ler_ultra();
-        }
-        objetivo_esquerda(direcao_inicial); // vira para se alinhar no meio da area 
-        while (ultra_frente < 228) // anda para tras até chegar proximo a parede
-        {
-            mover(-250, -250);
-            ler_ultra();
-        }
-        mover_tempo(-250, 1000); // move até encostar na parede ou dar o tempo de timeout
-        alinhar_angulo(); // alinha o angulo cado esbarre em alguma vitima 
-        mover_tempo(-250, 255); // caso o robo tenha esbarrado em alguma vitima ele ira se forçar contra a parede
-    }
-    else // caso o robô esteja carregando uma vitima ele ira entregala e depois se posicionar para o resgate
-    {
-        mover_tempo(-250, 255); // se afasta levemente da parede para virar
-        objetivo_direita(converter_graus(direcao_inicial + 135)); // faz a curva para o angulo que esta o triangulo 
-        preparar_atuador();
-        ler_ultra();
-        while (ultra_frente >= 105) // move o o robô até se aproximar do triangulo
-        {
-            mover(250, 250);
-            ler_ultra();
-        }
-        fechar_atuador();
-        levantar_atuador();
-        mover_tempo(250, 1700); // encosta no triangulo
-        entregar_vitima();
-        mover_tempo(-250, 511); // se afasta levemente do triangulo para virar 
-        objetivo_esquerda(converter_graus(direcao_inicial + 90)); // se virar para ir até o centro da area 
-        alinhar_ultra(124); // se alinha no centro da area
-        objetivo_esquerda(direcao_inicial); // se vira para encostar na parede
-        mover_tempo(-250, 1700); // encosta na parede e está pronto para o resgate
-        alinhar_angulo(); // alinha o angulo cado esbarre em alguma vitima 
-        mover_tempo(-250, 255); // caso o robo tenha esbarrado em alguma vitima ele ira se forçar contra a parede
-    }
-}
-void achar_saida()
-{
-    const float relacao_sensores_a = -1.0102681118083f,   // constante A da equação para achar o triangulo de resgate
-                relacao_sensores_b = 401.7185510553336f,  // constante B da equação para achar o triangulo de resgate
-                sense_triangulo = 10f; // constante de sensibilidade para encontrar triangulo
-    limpar_console();
-    print(1, "[ ] Alinhando no piso", "left");
-    print(2, "[ ] Alinhando no início da arena", "left");
-    print(3, "[ ] Verificando saída e triângulo", "left");
-    alinhar_angulo();
-    // Enquanto não alinhou reto no piso
-    while (ultra(0) > 400)
-    {
-        mover(150, 150);
-    }
-    print(1, "[X] Alinhando no piso", "left");
-    alinhar_angulo();
-    // Alinha no início da sala de salvamento
-    alinhar_ultra(250, false);
-    print(2, "[X] Alinhando no início da arena", "left");
-    preparar_atuador();
-    alinhar_angulo();
-
-    direcao_inicial = eixo_x(); // define a posição em que o robô estava ao entrar na sala de resgate
-
-    // Inicia a verificação de saída ou triângulo na direita
-    ler_ultra();
-    while (ultra_frente > 180) // enqunto estiver a mais de 180zm da parede frontal busca por saida ou triangulo
-    {
-        ler_ultra();
-        check_subida_frente();
-        mover(250, 250);
-        if (ultra_direita > 300)  // caso o ultrasonico da lateral direita veja uma distancia muito grande o robô encontrou a saida
-        {
-            direcao_saida = 3; // determina que a saida está a direita
-            print(3, "[X] Verificando saída e triângulo - Saída direita", "left");
-            som("D3", 300);
-            som("C3", 300);
+        case 0:
+            posIx = 3;
+            posIy = 1;
             break;
-        }
-        else if (proximo(ultra_direita, (ultra_frente * relacao_sensores_a) + relacao_sensores_b, sense_triangulo)) // realiza equação y = ax + b para identificar o triangulo de resgate
-        {
-            direcao_triangulo = 3; // determina que o triangulo está a direita
-            print(3, "[X] Verificando saída e triângulo - Triângulo direita", "left");
-            som("D3", 150);
-            som("C3", 150);
+        case 1:
+            posIx = 3;
+            posIy = 2;
             break;
-        }
+        case 2:
+            posIx = 3;
+            posIy = 3;
+            break;
+        case 3:
+            posIx = 3;
+            posIy = 4;
+            break;
+        case 4:
+            posIx = 2;
+            posIy = 4;
+            break;
+        case 5:
+            posIx = 1;
+            posIy = 4;
+            break;
+        case 6:
+            posIx = 1;
+            posIy = 3;
+            break;
+        case 7:
+            posIx = 1;
+            posIy = 2;
+            break;
+        case 8:
+            posIx = 1;
+            posIy = 1;
+            break;
+        case 9:
+            posIx = 2;
+            posIy = 1;
+            break;
     }
-    if (direcao_triangulo == 0 && direcao_saida == 0)
+    switch (posF)
     {
-        print(3, "[X] Verificando saída e triângulo - Nada encontrado", "left");
+        case 0:
+            posFx = 3;
+            posFy = 1;
+            break;
+        case 1:
+            posFx = 3;
+            posFy = 2;
+            break;
+        case 2:
+            posFx = 3;
+            posFy = 3;
+            break;
+        case 3:
+            posFx = 3;
+            posFy = 4;
+            break;
+        case 4:
+            posFx = 2;
+            posFy = 4;
+            break;
+        case 5:
+            posFx = 1;
+            posFy = 4;
+            break;
+        case 6:
+            posFx = 1;
+            posFy = 3;
+            break;
+        case 7:
+            posFx = 1;
+            posFy = 2;
+            break;
+        case 8:
+            posFx = 1;
+            posFy = 1;
+            break;
+        case 9:
+            posFx = 2;
+            posFy = 1;
+            break;
     }
-    print(4, "[ ] Alinhar robô a 150 zm", "left");
-    print(5, "[ ] Alinhar robô no triângulo", "left");
-    print(6, "[ ] Verificar posição do triângulo", "left");
-    ler_ultra();
-    while (ultra_frente > 150) // Alinha a 150 zm da parede
-    {
-        ler_ultra();
-        mover(300, 300);
-    }
-    print(4, "[X] Alinhar robô a 150 zm", "left");
-    fechar_atuador();
+
+    objX = posFx - posIx;
+    objY = posFy - posIy;
+
+    anguloObjetivo = (float)(Math.Atan2(objX, objY) * (180 / Math.PI));
+    anguloObjetivo = converter_graus(direcao_inicial + anguloObjetivo);
+
     levantar_atuador();
-    alinhar_angulo();
-    while (ultra_frente > 100) // Alinha a 100 zm da parede
+
+    if (((Math.Abs(eixo_x() - anguloObjetivo)) > 180))
     {
-        ler_ultra();
-        if (tem_vitima())
-        {
-            mover(200, 200);
-        }
-        else
-        {
-            mover(300, 300);
-            check_subida_frente();
-        }
-    }
-    mover_travar_ultra(250, 90);
-    mover_travar_tempo(200, 377);
-    delay(63);
-    mover_travar_tempo(200, 377);
-    alinhar_angulo();
-    print(5, "[X] Alinhar robô no triângulo", "left");
-    print(6, $"[X] Verificar posição do triângulo", "left");
-    limpar_console();
-    if (direcao_triangulo != 3 && luz(4) < 2)
-    {
-        direcao_triangulo = 1;
-        if (direcao_saida == 0)
-        {
-            direcao_saida = 2;
-        }
-        if (tem_vitima())
-        {
-            print(1, "[ ] Entregar vítima no atuador", "left");
-            print(2, "  └ [ ] Alinhar no centro do triângulo", "left");
-            print(3, "  └ [ ] Girar 90° esquerda", "left");
-            mover_tempo(-250, 127);
-            girar_direita(45);
-            alinhar_ultra(65, false);
-            print(2, "  └ [X] Alinhar no centro do triângulo", "left");
-            girar_esquerda(90);
-            print(3, "  └ [X] Girar 90° esquerda", "left");
-            mover_tempo(250, 127);
-            print(1, "[X] Entregar vítima no atuador", "left");
-            entregar_vitima();
-        }
-        objetivo_direita(converter_graus(direcao_inicial + 45));
-        alinhar_ultra(26);
-        girar_direita(45);
-        alinhar_ultra(124);
-        girar_direita(90);
-        mover_tempo(300, 239);
-        mover_tempo(-300, 750);
-        triangulo1();
-    }
-    else if (direcao_triangulo == 3)
-    {
-        if (ultra(2) > 50)
-        {
-            direcao_saida = 1;
-            posicao_triangulo3();
-            triangulo3();
-            return;
-        }
-        else
-        {
-            direcao_saida = 2;
-            posicao_triangulo3();
-            triangulo3();
-            return;
-        }
-    }
-    else if (direcao_saida == 3)
-    {
-        direcao_triangulo = 2;
-        posicao_triangulo2();
-        triangulo2();
-        return;
+        objetivo_direita(anguloObjetivo);
     }
     else
     {
-        direcao_saida = 1;
-        direcao_triangulo = 2;
-        posicao_triangulo2();
-        triangulo2();
-        return;
+        objetivo_esquerda(anguloObjetivo);
     }
+
+    distanciaAlinhamento = (float)(50 / (Math.Cos((Math.Atan2(objX, objY)))));
+    alinhar_ultra(((float)Math.Abs(distanciaAlinhamento)) - 10);
+
 }
-
-
-void triangulo1()
+void varredura()
 {
-    alinhar_angulo();
-    abrir_atuador();
-    abaixar_atuador();
-    bool alinhou_angulo_meio = false;
-    ler_ultra();
-    while (ultra_frente > 30)
-    {
-        ler_ultra();
-        mover(250, 250);
-
-        // Alinhhar o ângulo no meio da arena
-        if (!alinhou_angulo_meio && ultra_frente < 140)
-        {
-            // Se ainda não alinhou e o robô está mais ou menos no meio
-            // Alinha e indica que ja alinhou
-            alinhar_angulo();
-            alinhou_angulo_meio = true;
-        }
-
-        // Se encontra vítima no atuador indo para frente
-        if (tem_vitima())
-        {
-            limpar_console();
-            print(1, "Encontrei vítima no meio do caminho");
-            fechar_atuador();
-            levantar_atuador();
-            print(2, "Alinhando ao meio");
-            alinhar_ultra(124);
-            meio_triangulo();
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-        // Se já saiu do alcance do triângulo e encontra algo na direita
-        if (ultra_frente < 160 && ultra_direita < 122)
-        {
-            limpar_console();
-            print(1, $"Vítima encontrada na direita ({ultra_direita})zm");
-            delay(63);
-            parar();
-            print(2, "Indo buscar");
-            // Levanta o atuador pra nao bater na vitima
-            fechar_atuador();
-            levantar_atuador();
-            // Gira em direção da vítima
-            girar_direita(90);
-            // Prepara o atuador para pegar
-            mover_tempo(-300, 447);
-            alinhar_angulo();
-            abrir_atuador();
-            abaixar_atuador();
-            // Enquanto não chega perto da parede
-            while (ultra(0) > 30)
-            {
-                // Vai pra frente
-                mover(300, 300);
-                // Se identificar vítima, espera um pouco e sai do loop
-                if (tem_vitima())
-                {
-                    delay(127);
-                    break;
-                }
-            }
-            // Retorna o atuador e se alinha no meios
-            fechar_atuador();
-            levantar_atuador();
-            alinhar_ultra(124);
-            girar_esquerda(90);
-            alinhar_angulo();
-            // Se tiver vítima, coloca na área segura
-            if (tem_vitima())
-            {
-                print(1, "Peguei! Levando à área segura");
-                alinhar_ultra(124);
-                meio_triangulo();
-            }
-            // Se não, só avisa
-            else
-            {
-                print(1, "Ih rapaz ela fugiu...");
-            }
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-        // Se já saiu do alcance do triângulo e encontra algo na esquerda
-        if (ultra_esquerda < 122)
-        {
-            limpar_console();
-            print(1, $"Vítima encontrada na esquerda ({ultra_esquerda})zm");
-            delay(63);
-            parar();
-            print(2, "Indo buscar");
-            // Levanta o atuador pra nao bater na vitima
-            fechar_atuador();
-            levantar_atuador();
-            // Gira em direção da vítima
-            girar_esquerda(90);
-            // Prepara o atuador para pegar
-            mover_tempo(-300, 447);
-            alinhar_angulo();
-            abrir_atuador();
-            abaixar_atuador();
-            // Enquanto não chega perto da parede
-            init_time = millis();
-            while (ultra(0) > 30)
-            {
-                // Vai pra frente
-                mover(300, 300);
-                // Se identificar vítima, espera um pouco e sai do loop
-                if (tem_vitima())
-                {
-                    delay(127);
-                    break;
-                }
-                if (millis() > init_time + 1695)
-                {
-                    break;
-                }
-            }
-            int tempo_voltar = millis() - init_time;
-            // Retorna o atuador e se alinha no meio
-            fechar_atuador();
-            levantar_atuador();
-            if (ultra(0) > 150)
-            {
-                mover_tempo(-300, tempo_voltar);
-            }
-            else
-            {
-                alinhar_ultra(124);
-            }
-            alinhar_angulo();
-            // Se tiver vítima, coloca na área segura
-            if (tem_vitima())
-            {
-                print(1, "Peguei! Levando à área segura");
-                girar_direita(90);
-                alinhar_ultra(124);
-                meio_triangulo();
-            }
-            // Se não, só avisa
-            else
-            {
-                print(1, "Ih rapaz ela fugiu...");
-                if (ultra(0) > 200)
-                {
-                    girar_direita(180);
-                    alinhar_ultra(124);
-                    girar_esquerda(90);
-                }
-            }
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-
-        print(1, "Procurando vítimas...");
-        print(2, $"Direita: {ultra_direita} | Esquerda: {ultra_esquerda}");
-    }
-
-    // TERMINOU DE IR PRA FRENTE
-    fechar_atuador();
-    levantar_atuador();
-    if (tem_vitima())
-    {
-        limpar_console();
-        print(1, "Encontrei vítima no fim do caminho");
-        print(2, "Alinhando ao meio");
-        alinhar_ultra(124);
-        print(2, "Girando para o triângulo");
-        girar_direita(135);
-        print(2, "Indo para o triângulo");
-        while (ultra(0) > 80)
-        {
-            mover(300, 300);
-        }
-        mover_tempo(250, 500);
-        print(2, "Entregando vítima");
-        entregar_vitima();
-        print(1, "Voltando à busca");
-        print(2, "Indo ao meio");
-        while (ultra(0) < 175)
-        {
-            mover(-300, -300);
-        }
-        print(2, "Alinhando...");
-        girar_esquerda(45);
-        alinhar_angulo();
-        alinhar_ultra(124);
-        girar_esquerda(90);
-        limpar_console();
-        print(1, "Fim da varredura, saindo da sala de salvamento");
-        alinhar_ultra(124);
-    }
-    else
-    {
-        limpar_console();
-        print(1, "Fim da varredura, saindo da sala de salvamento");
-        alinhar_ultra(124);
-    }
-
-    if (direcao_saida == 3)
-    {
-        alinhar_angulo();
-        girar_esquerda(45);
-        while (ultra(0) > 40)
-        {
-            mover(300, 300);
-        }
-        alinhar_ultra(35);
-        girar_esquerda(45);
-        alinhar_angulo();
-        alcancar_saida();
-    }
-    else
-    {
-        girar_esquerda(90);
-        alinhar_ultra(124);
-        girar_esquerda(45);
-        while (ultra(0) > 40)
-        {
-            mover(300, 300);
-        }
-        alinhar_ultra(35);
-        girar_esquerda(45);
-        alinhar_angulo();
-        alcancar_saida();
-    }
-}
-void triangulo2()
-{
-    alinhar_angulo();
-    abrir_atuador();
-    abaixar_atuador();
-    bool alinhou_angulo_meio = false;
-    ler_ultra();
-    while (ultra_frente > 30)
-    {
-        ler_ultra();
-        mover(250, 250);
-
-        // Alinhhar o ângulo no meio da arena
-        if (!alinhou_angulo_meio && ultra_frente < 140)
-        {
-            // Se ainda não alinhou e o robô está mais ou menos no meio
-            // Alinha e indica que ja alinhou
-            alinhar_angulo();
-            alinhou_angulo_meio = true;
-        }
-
-        // Se encontra vítima no atuador indo para frente
-        if (tem_vitima())
-        {
-            limpar_console();
-            print(1, "Encontrei vítima no meio do caminho");
-            fechar_atuador();
-            levantar_atuador();
-            print(2, "Alinhando ao meio");
-            alinhar_ultra(124);
-            meio_triangulo();
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-        // Se já saiu do alcance do triângulo e encontra algo na direita
-        if (ultra_frente < 160 && ultra_direita < 122)
-        {
-            limpar_console();
-            print(1, $"Vítima encontrada na direita ({ultra_direita})zm");
-            delay(63);
-            parar();
-            print(2, "Indo buscar");
-            // Levanta o atuador pra nao bater na vitima
-            fechar_atuador();
-            levantar_atuador();
-            // Gira em direção da vítima
-            girar_direita(90);
-            // Prepara o atuador para pegar
-            mover_tempo(-300, 447);
-            alinhar_angulo();
-            abrir_atuador();
-            abaixar_atuador();
-            init_time = millis();
-            while (ultra(0) > 30)
-            {
-                // Vai pra frente
-                mover(300, 300);
-                // Se identificar vítima, espera um pouco e sai do loop
-                if (tem_vitima())
-                {
-                    delay(127);
-                    break;
-                }
-                if (millis() > init_time + 1695)
-                {
-                    break;
-                }
-            }
-            int tempo_voltar = millis() - init_time;
-            // Retorna o atuador e se alinha no meio
-            fechar_atuador();
-            levantar_atuador();
-            if (ultra(0) > 150)
-            {
-                mover_tempo(-300, tempo_voltar);
-            }
-            else
-            {
-                alinhar_ultra(124);
-            }
-
-
-
-            alinhar_angulo();
-            // Se tiver vítima, coloca na área segura
-            if (tem_vitima())
-            {
-                limpar_console();
-                print(1, "Peguei! Levando à área segura");
-                girar_esquerda(90);
-                alinhar_angulo();
-                alinhar_ultra(124);
-                meio_triangulo();
-            }
-            // Se não, só avisa
-            else
-            {
-                print(1, "Ih rapaz ela fugiu...");
-                if (ultra(0) > 200)
-                {
-                    girar_direita(180);
-                    alinhar_ultra(124);
-                    girar_direita(90);
-                }
-                else
-                {
-                    girar_esquerda(90);
-                }
-            }
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-
-
-        // Se já saiu do alcance do triângulo e encontra algo na esquerda
-        if (ultra_esquerda < 122)
-        {
-            limpar_console();
-            print(1, $"Vítima encontrada na esquerda ({ultra_esquerda})zm");
-            delay(63);
-            parar();
-            print(2, "Indo buscar");
-            // Levanta o atuador pra nao bater na vitima
-            fechar_atuador();
-            levantar_atuador();
-            // Gira em direção da vítima
-            girar_esquerda(90);
-            // Prepara o atuador para pegar
-            mover_tempo(-300, 447);
-            alinhar_angulo();
-            abrir_atuador();
-            abaixar_atuador();
-            init_time = millis();
-            while (ultra(0) > 30)
-            {
-                // Vai pra frente
-                mover(300, 300);
-                // Se identificar vítima, espera um pouco e sai do loop
-                if (tem_vitima())
-                {
-                    delay(127);
-                    break;
-                }
-                if (millis() > init_time + 1695)
-                {
-                    break;
-                }
-            }
-            int tempo_voltar = millis() - init_time;
-            // Retorna o atuador e se alinha no meios
-            fechar_atuador();
-            levantar_atuador();
-            alinhar_angulo();
-
-            if (ultra(0) > 150)
-            {
-                mover_tempo(-300, tempo_voltar);
-            }
-            else
-            {
-                alinhar_ultra(124);
-            }
-
-            // Se tiver vítima, coloca na área segura
-            if (tem_vitima())
-            {
-                limpar_console();
-                print(1, "Peguei! Levando à área segura");
-                girar_direita(90);
-                alinhar_angulo();
-                alinhar_ultra(124);
-                meio_triangulo();
-            }
-            // Se não, só avisa
-            else
-            {
-                print(1, "Ih rapaz ela fugiu...");
-
-                if (ultra(0) > 200)
-                {
-                    girar_direita(180);
-                    alinhar_ultra(124);
-                    girar_esquerda(90);
-                }
-                else
-                {
-                    alinhar_ultra(124);
-                    girar_direita(90);
-                }
-            }
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-
-        print(1, "Procurando vítimas...");
-        print(2, $"Direita: {ultra_direita} | Esquerda: {ultra_esquerda}");
-    }
-
-
-
-
-    // TERMINOU DE IR PRA FRENTE
-    fechar_atuador();
-    levantar_atuador();
-    if (tem_vitima())
-    {
-        limpar_console();
-        print(1, "Encontrei vítima no fim do caminho");
-        print(2, "Alinhando ao meio");
-        alinhar_ultra(124);
-        print(2, "Girando para o triângulo");
-        girar_direita(135);
-        print(2, "Indo para o triângulo");
-        while (ultra(0) > 80)
-        {
-            mover(300, 300);
-        }
-        mover_tempo(250, 500);
-        print(2, "Entregando vítima");
-        entregar_vitima();
-        print(1, "Voltando à busca");
-        print(2, "Indo ao meio");
-        while (ultra(0) < 175)
-        {
-            mover(-300, -300);
-        }
-        print(2, "Alinhando...");
-        girar_esquerda(45);
-        alinhar_angulo();
-        alinhar_ultra(124);
-        girar_esquerda(90);
-        limpar_console();
-        print(1, "Fim da varredura, saindo da sala de salvamento");
-        alinhar_ultra(124);
-    }
-    else
-    {
-        limpar_console();
-        print(1, "Fim da varredura, saindo da sala de salvamento");
-        alinhar_ultra(124);
-    }
-
-    if (direcao_saida == 1)//aaaaaaaaaa
-    {
-        alinhar_angulo();
-        girar_direita(45);
-        while (ultra(0) > 40)
-        {
-            mover(300, 300);
-        }
-        alinhar_ultra(35);
-        girar_esquerda(45);
-        alinhar_angulo();
-        alcancar_saida();
-    }
-    else
-    {
-        alinhar_angulo();
-        girar_esquerda(90);
-        while (ultra(0) > 30)
-        {
-            mover(300, 300);
-        }
-        alinhar_ultra(23);
-        girar_esquerda(90);
-        alinhar_angulo();
-        alcancar_saida();
-    }
-}
-void triangulo3()
-{
-    alinhar_angulo();
-    abrir_atuador();
-    abaixar_atuador();
-    bool alinhou_angulo_meio = false;
-    ler_ultra();
-    while (ultra_frente > 30)
-    {
-        ler_ultra();
-        mover(250, 250);
-
-        // Alinhhar o ângulo no meio da arena
-        if (!alinhou_angulo_meio && ultra_frente < 140)
-        {
-            // Se ainda não alinhou e o robô está mais ou menos no meio
-            // Alinha e indica que ja alinhou
-            alinhar_angulo();
-            alinhou_angulo_meio = true;
-        }
-
-        // Se encontra vítima no atuador indo para frente
-        if (tem_vitima())
-        {
-            limpar_console();
-            print(1, "Encontrei vítima no meio do caminho");
-            fechar_atuador();
-            levantar_atuador();
-            print(2, "Alinhando ao meio");
-            alinhar_ultra(124);
-            meio_triangulo();
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-        // Se já saiu do alcance do triângulo e encontra algo na direita
-        if (ultra_frente < 160 && ultra_direita < 122)
-        {
-            limpar_console();
-            print(1, $"Vítima encontrada na direita ({ultra_direita})zm");
-            delay(63);
-            parar();
-            print(2, "Indo buscar");
-            // Levanta o atuador pra nao bater na vitima
-            fechar_atuador();
-            levantar_atuador();
-            // Gira em direção da vítima
-            girar_direita(90);
-            // Prepara o atuador para pegar
-            mover_tempo(-300, 447);
-            alinhar_angulo();
-            abrir_atuador();
-            abaixar_atuador();
-            init_time = millis();
-            while (ultra(0) > 30)
-            {
-                // Vai pra frente
-                mover(300, 300);
-                // Se identificar vítima, espera um pouco e sai do loop
-                if (tem_vitima())
-                {
-                    delay(127);
-                    break;
-                }
-                if (millis() > init_time + 1695)
-                {
-                    break;
-                }
-            }
-            int tempo_voltar = millis() - init_time;
-            // Retorna o atuador e se alinha no meio
-            fechar_atuador();
-            levantar_atuador();
-            if (ultra(0) > 150)
-            {
-                mover_tempo(-300, tempo_voltar);
-            }
-            else
-            {
-                alinhar_ultra(124);
-            }
-
-
-
-            alinhar_angulo();
-            // Se tiver vítima, coloca na área segura
-            if (tem_vitima())
-            {
-                limpar_console();
-                print(1, "Peguei! Levando à área segura");
-                girar_esquerda(90);
-                alinhar_angulo();
-                alinhar_ultra(124);
-                meio_triangulo();
-            }
-            // Se não, só avisa
-            else
-            {
-                print(1, "Ih rapaz ela fugiu...");
-                if (ultra(0) > 200)
-                {
-                    girar_direita(180);
-                    alinhar_ultra(124);
-                    girar_direita(90);
-                }
-                else
-                {
-                    girar_esquerda(90);
-                }
-            }
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-
-
-        // Se já saiu do alcance do triângulo e encontra algo na esquerda
-        if (ultra_esquerda < 122)
-        {
-            limpar_console();
-            print(1, $"Vítima encontrada na esquerda ({ultra_esquerda})zm");
-            delay(63);
-            parar();
-            print(2, "Indo buscar");
-            // Levanta o atuador pra nao bater na vitima
-            fechar_atuador();
-            levantar_atuador();
-            // Gira em direção da vítima
-            girar_esquerda(90);
-            // Prepara o atuador para pegar
-            mover_tempo(-300, 447);
-            alinhar_angulo();
-            abrir_atuador();
-            abaixar_atuador();
-            init_time = millis();
-            while (ultra(0) > 30)
-            {
-                // Vai pra frente
-                mover(300, 300);
-                // Se identificar vítima, espera um pouco e sai do loop
-                if (tem_vitima())
-                {
-                    delay(127);
-                    break;
-                }
-                if (millis() > init_time + 1695)
-                {
-                    break;
-                }
-            }
-            int tempo_voltar = millis() - init_time;
-            // Retorna o atuador e se alinha no meios
-            fechar_atuador();
-            levantar_atuador();
-            alinhar_angulo();
-
-            if (ultra(0) > 150)
-            {
-                mover_tempo(-300, tempo_voltar);
-            }
-            else
-            {
-                alinhar_ultra(124);
-            }
-
-            // Se tiver vítima, coloca na área segura
-            if (tem_vitima())
-            {
-                limpar_console();
-                print(1, "Peguei! Levando à área segura");
-                girar_direita(90);
-                alinhar_angulo();
-                alinhar_ultra(124);
-                meio_triangulo();
-            }
-            // Se não, só avisa
-            else
-            {
-                print(1, "Ih rapaz ela fugiu...");
-
-                if (ultra(0) > 200)
-                {
-                    girar_direita(180);
-                    alinhar_ultra(124);
-                    girar_esquerda(90);
-                }
-                else
-                {
-                    alinhar_ultra(124);
-                    girar_direita(90);
-                }
-            }
-            print(2, "Voltando até a parede");
-            mover_tempo(-300, 2000);
-            preparar_atuador();
-            alinhou_angulo_meio = false;
-            limpar_console();
-        }
-
-
-        print(1, "Procurando vítimas...");
-        print(2, $"Direita: {ultra_direita} | Esquerda: {ultra_esquerda}");
-    }
-
-
-
-
-    // TERMINOU DE IR PRA FRENTE
-    fechar_atuador();
-    levantar_atuador();
-    if (tem_vitima())
-    {
-        limpar_console();
-        print(1, "Encontrei vítima no fim do caminho");
-        print(2, "Alinhando ao meio");
-        alinhar_ultra(124);
-        print(2, "Girando para o triângulo");
-        girar_direita(135);
-        print(2, "Indo para o triângulo");
-        while (ultra(0) > 80)
-        {
-            mover(300, 300);
-        }
-        mover_tempo(250, 500);
-        print(2, "Entregando vítima");
-        entregar_vitima();
-        print(1, "Voltando à busca");
-        print(2, "Indo ao meio");
-        while (ultra(0) < 175)
-        {
-            mover(-300, -300);
-        }
-        print(2, "Alinhando...");
-        girar_esquerda(45);
-        alinhar_angulo();
-        alinhar_ultra(124);
-        girar_esquerda(90);
-        limpar_console();
-        print(1, "Fim da varredura, saindo da sala de salvamento");
-        alinhar_ultra(124);
-    }
-    else
-    {
-        limpar_console();
-        print(1, "Fim da varredura, saindo da sala de salvamento");
-        alinhar_ultra(124);
-    }
-
-    if (direcao_saida == 1)
-    {
-        alinhar_angulo();
-        girar_esquerda(45);
-        while (ultra(0) > 40)
-        {
-            mover(300, 300);
-        }
-        alinhar_ultra(35);
-        girar_esquerda(45);
-        alinhar_angulo();
-        alcancar_saida();
-    }
-    else
-    {
-        alinhar_angulo();
-        girar_direita(90);
-        while (ultra(0) > 30)
-        {
-            mover(300, 300);
-        }
-        alinhar_ultra(23);
-        girar_esquerda(90);
-        alinhar_angulo();
-        alcancar_saida();
-    }
+    direcao_inicial = eixo_x();
+    mover_para(1, 5);
 }
 
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = false;
+bool debug = true;
 bool console = true;
 
 // Método principal
@@ -2765,50 +1786,48 @@ void Main()
 {
     if (debug)
     {
-        for(;;){
-            vermelho(2);
-        }
-
+        varredura();
+        travar();
     }
     else
     {
-        calibrar();
-        ultima_correcao = millis();
-        fechar_atuador();
-        abaixar_atuador();
-        console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
-        while (lugar == 0)
-        {
-            print_luz_marker();
-            verifica_obstaculo();
-            verifica_saida();
-            seguir_linha();
-            verifica_calibrar();
-            verifica_rampa();
-            verifica_rampa_resgate();
-        }
-        while (lugar == 1)
-        {
-            limpar_console();
-            levantar_atuador();
-            console_led(1, "<size=\"60\"><:SUBINDO A RAMPA!:></size>", "azul");
-            som("B2", 500);
-            seguir_rampa();
-        }
-        console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
-        while (lugar == 2)
-        {
-            achar_saida();
-        }
-        console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
-        while (lugar == 3)
-        {
-            print_luz_marker();
-            verifica_saida();
-            verifica_obstaculo();
-            seguir_linha();
-            verifica_calibrar();
-            verifica_rampa();
-        }
+        //     calibrar();
+        //     ultima_correcao = millis();
+        //     fechar_atuador();
+        //     abaixar_atuador();
+        //     console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
+        //     while (lugar == 0)
+        //     {
+        //         print_luz_marker();
+        //         verifica_obstaculo();
+        //         verifica_saida();
+        //         seguir_linha();
+        //         verifica_calibrar();
+        //         verifica_rampa();
+        //         verifica_rampa_resgate();
+        //     }
+        //     while (lugar == 1)
+        //     {
+        //         limpar_console();
+        //         levantar_atuador();
+        //         console_led(1, "<size=\"60\"><:SUBINDO A RAMPA!:></size>", "azul");
+        //         som("B2", 500);
+        //         seguir_rampa();
+        //     }
+        //     console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
+        //     while (lugar == 2)
+        //     {
+        //         achar_saida();
+        //     }
+        //     console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
+        //     while (lugar == 3)
+        //     {
+        //         print_luz_marker();
+        //         verifica_saida();
+        //         verifica_obstaculo();
+        //         seguir_linha();
+        //         verifica_calibrar();
+        //         verifica_rampa();
+        //     }
     }
 }

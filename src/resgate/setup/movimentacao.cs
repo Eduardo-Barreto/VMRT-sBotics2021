@@ -1,6 +1,6 @@
 // metodos de movimentação para a area de resgate
 //;
-void alinhar_ultra(int distancia, bool empinada = true)
+void alinhar_ultra(float distancia, bool empinada = true)
 {
     if (ultra(0) > distancia)
     {
