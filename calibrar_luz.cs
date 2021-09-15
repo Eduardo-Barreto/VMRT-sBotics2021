@@ -1,48 +1,89 @@
-int maximo = 0;
-int minimo = 100;
-mover(1000, -1000);
-delay(100);
+float maximo = 0,
+    timeout = 0,
+    minimo = 100;
 
-while (eixo_x() < 45)
-{
-    mover(1000, -1000);
-    maximo = (luz(0) > maximo) ? luz(0) : maximo;
-    maximo = (luz(1) > maximo) ? luz(1) : maximo;
-    maximo = (luz(2) > maximo) ? luz(2) : maximo;
-    maximo = (luz(3) > maximo) ? luz(3) : maximo;
+void Main(){
+    bot.ActuatorSpeed(150);
+    bot.ActuatorUp(600);
+    bot.Move(1000, -1000);
+    bot.Wait(100);
 
-    minimo = (luz(0) < minimo) ? luz(0) : minimo;
-    minimo = (luz(1) < minimo) ? luz(1) : minimo;
-    minimo = (luz(2) < minimo) ? luz(2) : minimo;
-    minimo = (luz(3) < minimo) ? luz(3) : minimo;
-    print(1, $"min: {minimo} | max: {maximo}");
-}
-timeout = millis() + 10000;
-while (millis() < timeout)
-{
-    mover(200, 200);
-    maximo = (luz(0) > maximo) ? luz(0) : maximo;
-    maximo = (luz(1) > maximo) ? luz(1) : maximo;
-    maximo = (luz(2) > maximo) ? luz(2) : maximo;
-    maximo = (luz(3) > maximo) ? luz(3) : maximo;
+    while (bot.Compass() < 45)
+    {
+        bot.Move(1000, -1000);
+        maximo = (bot.Lightness(0) > maximo) ? bot.Lightness(0) : maximo;
+        maximo = (bot.Lightness(1) > maximo) ? bot.Lightness(1) : maximo;
+        maximo = (bot.Lightness(2) > maximo) ? bot.Lightness(2) : maximo;
+        maximo = (bot.Lightness(3) > maximo) ? bot.Lightness(3) : maximo;
 
-    minimo = (luz(0) < minimo) ? luz(0) : minimo;
-    minimo = (luz(1) < minimo) ? luz(1) : minimo;
-    minimo = (luz(2) < minimo) ? luz(2) : minimo;
-    minimo = (luz(3) < minimo) ? luz(3) : minimo;
-    print(1, $"min: {minimo} | max: {maximo}");
-}
-for (; ; )
-{
-    mover(1000, -1000);
-    maximo = (luz(0) > maximo) ? luz(0) : maximo;
-    maximo = (luz(1) > maximo) ? luz(1) : maximo;
-    maximo = (luz(2) > maximo) ? luz(2) : maximo;
-    maximo = (luz(3) > maximo) ? luz(3) : maximo;
+        minimo = (bot.Lightness(0) < minimo) ? bot.Lightness(0) : minimo;
+        minimo = (bot.Lightness(1) < minimo) ? bot.Lightness(1) : minimo;
+        minimo = (bot.Lightness(2) < minimo) ? bot.Lightness(2) : minimo;
+        minimo = (bot.Lightness(3) < minimo) ? bot.Lightness(3) : minimo;
+        bot.Print(1, $"min: {minimo} | max: {maximo}");
+    }
+    timeout = bot.Timer() + 10000;
+    while (bot.Timer() < timeout)
+    {
+        bot.Move(200, 200);
+        maximo = (bot.Lightness(0) > maximo) ? bot.Lightness(0) : maximo;
+        maximo = (bot.Lightness(1) > maximo) ? bot.Lightness(1) : maximo;
+        maximo = (bot.Lightness(2) > maximo) ? bot.Lightness(2) : maximo;
+        maximo = (bot.Lightness(3) > maximo) ? bot.Lightness(3) : maximo;
 
-    minimo = (luz(0) < minimo) ? luz(0) : minimo;
-    minimo = (luz(1) < minimo) ? luz(1) : minimo;
-    minimo = (luz(2) < minimo) ? luz(2) : minimo;
-    minimo = (luz(3) < minimo) ? luz(3) : minimo;
-    print(1, $"min: {minimo} | max: {maximo}");
+        minimo = (bot.Lightness(0) < minimo) ? bot.Lightness(0) : minimo;
+        minimo = (bot.Lightness(1) < minimo) ? bot.Lightness(1) : minimo;
+        minimo = (bot.Lightness(2) < minimo) ? bot.Lightness(2) : minimo;
+        minimo = (bot.Lightness(3) < minimo) ? bot.Lightness(3) : minimo;
+        bot.Print(1, $"min: {minimo} | max: {maximo}");
+    }
+    bot.Move(1000, -1000);
+    bot.Wait(100);
+    while((bot.Compass() > 46) || (bot.Compass() < 44))
+    {
+        bot.Move(1000, -1000);
+        maximo = (bot.Lightness(0) > maximo) ? bot.Lightness(0) : maximo;
+        maximo = (bot.Lightness(1) > maximo) ? bot.Lightness(1) : maximo;
+        maximo = (bot.Lightness(2) > maximo) ? bot.Lightness(2) : maximo;
+        maximo = (bot.Lightness(3) > maximo) ? bot.Lightness(3) : maximo;
+
+        minimo = (bot.Lightness(0) < minimo) ? bot.Lightness(0) : minimo;
+        minimo = (bot.Lightness(1) < minimo) ? bot.Lightness(1) : minimo;
+        minimo = (bot.Lightness(2) < minimo) ? bot.Lightness(2) : minimo;
+        minimo = (bot.Lightness(3) < minimo) ? bot.Lightness(3) : minimo;
+        bot.Print(1, $"min: {minimo} | max: {maximo}");
+    }
+    timeout = bot.Timer() + 8000;
+    while (bot.Timer() < timeout)
+    {
+        bot.Move(200, 200);
+        maximo = (bot.Lightness(0) > maximo) ? bot.Lightness(0) : maximo;
+        maximo = (bot.Lightness(1) > maximo) ? bot.Lightness(1) : maximo;
+        maximo = (bot.Lightness(2) > maximo) ? bot.Lightness(2) : maximo;
+        maximo = (bot.Lightness(3) > maximo) ? bot.Lightness(3) : maximo;
+
+        minimo = (bot.Lightness(0) < minimo) ? bot.Lightness(0) : minimo;
+        minimo = (bot.Lightness(1) < minimo) ? bot.Lightness(1) : minimo;
+        minimo = (bot.Lightness(2) < minimo) ? bot.Lightness(2) : minimo;
+        minimo = (bot.Lightness(3) < minimo) ? bot.Lightness(3) : minimo;
+        bot.Print(1, $"min: {minimo} | max: {maximo}");
+    }
+    bot.Move(1000, -1000);
+    bot.Wait(100);
+    while((bot.Compass() > 46) || (bot.Compass() < 44))
+    {
+        bot.Move(1000, -1000);
+        maximo = (bot.Lightness(0) > maximo) ? bot.Lightness(0) : maximo;
+        maximo = (bot.Lightness(1) > maximo) ? bot.Lightness(1) : maximo;
+        maximo = (bot.Lightness(2) > maximo) ? bot.Lightness(2) : maximo;
+        maximo = (bot.Lightness(3) > maximo) ? bot.Lightness(3) : maximo;
+
+        minimo = (bot.Lightness(0) < minimo) ? bot.Lightness(0) : minimo;
+        minimo = (bot.Lightness(1) < minimo) ? bot.Lightness(1) : minimo;
+        minimo = (bot.Lightness(2) < minimo) ? bot.Lightness(2) : minimo;
+        minimo = (bot.Lightness(3) < minimo) ? bot.Lightness(3) : minimo;
+        bot.Print(1, $"min: {minimo} | max: {maximo}");
+    }
+    bot.Print(2, "finalizado");
+    bot.Move(0, 0);
 }
