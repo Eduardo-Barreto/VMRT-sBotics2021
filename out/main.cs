@@ -174,7 +174,6 @@ bool vermelho(byte sensor)
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
-    print(1, $"{vermelho} | {verde} | {azul}");
     return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)) || cor(sensor) == "VERMELHO");
 }
 
@@ -1778,7 +1777,7 @@ void varredura()
 
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = true;
+bool debug = false;
 bool console = true;
 
 // Método principal
@@ -1786,48 +1785,26 @@ void Main()
 {
     if (debug)
     {
-        varredura();
+        print(2, "debug");
         travar();
     }
     else
     {
-        //     calibrar();
-        //     ultima_correcao = millis();
-        //     fechar_atuador();
-        //     abaixar_atuador();
-        //     console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
-        //     while (lugar == 0)
-        //     {
-        //         print_luz_marker();
-        //         verifica_obstaculo();
-        //         verifica_saida();
-        //         seguir_linha();
-        //         verifica_calibrar();
-        //         verifica_rampa();
-        //         verifica_rampa_resgate();
-        //     }
-        //     while (lugar == 1)
-        //     {
-        //         limpar_console();
-        //         levantar_atuador();
-        //         console_led(1, "<size=\"60\"><:SUBINDO A RAMPA!:></size>", "azul");
-        //         som("B2", 500);
-        //         seguir_rampa();
-        //     }
-        //     console_led(3, "<:Local atual: RESGATE:>", "cinza claro", false);
-        //     while (lugar == 2)
-        //     {
-        //         achar_saida();
-        //     }
-        //     console_led(3, "<:Local atual: PERCURSO DE SAÍDA:>", "cinza claro", false);
-        //     while (lugar == 3)
-        //     {
-        //         print_luz_marker();
-        //         verifica_saida();
-        //         verifica_obstaculo();
-        //         seguir_linha();
-        //         verifica_calibrar();
-        //         verifica_rampa();
-        //     }
+        calibrar();
+        ultima_correcao = millis();
+        fechar_atuador();
+        abaixar_atuador();
+        console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
+        while (lugar == 0)
+        {
+            print_luz_marker();
+            verifica_obstaculo();
+            verifica_saida();
+            seguir_linha();
+            verifica_calibrar();
+            verifica_rampa();
+            verifica_rampa_resgate();
+        }
+        travar();
     }
 }
