@@ -36,7 +36,9 @@ bool preto0 = false,
         verde3 = false,
 
         preto_curva_dir = false,
-        preto_curva_esq = false;
+        preto_curva_esq = false,
+
+        pegou_kit = false;
 
 short[] angulos_retos = { 0, 90, 180, 270 };
 
@@ -106,6 +108,7 @@ short eixo_y() => (short)(bot.Inclination());
 float angulo_atuador() => bot.AngleActuator();
 float angulo_giro_atuador() => bot.AngleScoop();
 bool tem_vitima() => bot.HasVictim();
+bool tem_kit() => bot.HasRescueKit();
 void delay(int milissegundos) => bot.Wait(milissegundos);
 float forca_motor() => bot.RobotSpeed();
 
@@ -177,19 +180,18 @@ bool vermelho(byte sensor)
     return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)) || cor(sensor) == "VERMELHO");
 }
 
-/* bool verde(byte sensor)
+bool kit_frente()
 {
-    float val_vermelho = bot.ReturnRed(sensor);
-    float val_verde = bot.ReturnGreen(sensor);
-    float val_azul = bot.ReturnBlue(sensor);
-    byte media_vermelho = 20, media_verde = 65, media_azul = 14;
+    float val_vermelho = bot.ReturnRed(4);
+    float val_verde = bot.ReturnGreen(4);
+    float val_azul = bot.ReturnBlue(4);
+    byte media_vermelho = 16, media_verde = 34, media_azul = 48;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
-    print(1, $"{vermelho} | {verde} | {azul}");
-    return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 96) || cor(sensor) == "VERDE");
-} */
+    return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)));
+}
 
 bool verde(byte sensor)
 {
@@ -574,6 +576,32 @@ bool verifica_saida()
         return false;
     }
 }
+
+bool verifica_fita_cinza()
+{
+    bool fita_cinza(int sensor)
+    {
+        float val_vermelho = bot.ReturnRed(sensor);
+        float val_verde = bot.ReturnGreen(sensor);
+        float val_azul = bot.ReturnBlue(sensor);
+        byte media_vermelho = 30, media_verde = 32, media_azul = 37;
+        int RGB = (int)(val_vermelho + val_verde + val_azul);
+        sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
+        sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
+        sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
+        return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)));
+    }
+    if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
+    {
+        lugar = 2;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 // Segue as linhas
 void seguir_linha()
@@ -1184,11 +1212,15 @@ bool verifica_obstaculo(bool contar_update = true)
     if (contar_update && millis() < update_obstaculo) { return false; }
     if (ultra(0) < 35)
     {
+        limpar_console();
         parar();
-        if (angulo_atuador() >= 0 && angulo_atuador() < 88)
-            mover_tempo(-200, 79);
-        levantar_atuador();
-        console_led(1, "<:POSSÍVEL OBSTÁCULO:>", "azul");
+        mover_tempo(-200, 79);
+        if (!tem_kit())
+        {
+            fechar_atuador();
+            levantar_atuador();
+        }
+        console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
         timeout = millis() + 1500;
         while (ultra(0) > 12)
         {
@@ -1198,89 +1230,107 @@ bool verifica_obstaculo(bool contar_update = true)
             {
                 console_led(1, "<:OBSTÁCULO FALSO:>", "vermelho");
                 parar();
-                abaixar_atuador();
+                if (!tem_kit())
+                {
+                    abrir_atuador();
+                    abaixar_atuador();
+                }
                 return false;
             }
         }
         parar();
+        limpar_console();
         console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();
         alinhar_ultra(12);
-        parar();
-        som("E3", 64);
-        som("MUDO", 16);
-        som("E3", 64);
-        som("MUDO", 16);
-        som("E3", 64);
+
+        void alinhar_pos_obstaculo()
+        {
+            mover_tempo(300, 335);
+            girar_direita(30);
+            while (!tem_linha(1))
+            {
+                mover(1000, -1000);
+                if (angulo_reto())
+                {
+                    break;
+                }
+            }
+            alinhar_angulo();
+            mover_tempo(-150, 159);
+            alinhar_linha();
+            if (ultra(0) > 35 && !tem_kit())
+            {
+                abrir_atuador();
+                abaixar_atuador();
+                update_obstaculo = millis() + 100;
+            }
+            ultima_correcao = millis();
+            velocidade = velocidade_padrao;
+        }
+
+        print(2, "Verificando desvio à direita...");
         girar_direita(45);
-        som("E3", 32);
-        mover_tempo(300, 543);
-        som("E3", 32);
+        mover_tempo(300, 367);
         girar_esquerda(15);
-        mover_tempo(300, 239);
-        girar_esquerda(15);
-        mover_tempo(300, 239);
-        girar_esquerda(15);
-        som("E3", 32);
-        // 495
-        timeout = millis() + 559;
-        while (ultra(2) > 15)
-        {
-            if (millis() > timeout) { break; }
-            mover(300, 300);
-        }
-        while (ultra(2) < 15)
-        {
-            if (millis() > timeout) { break; }
-            mover(300, 300);
-        }
-        mover_tempo(300, 127);//alsuagfalgbasjpiasdfjkadfsajkl todo
-        som("E3", 32);
-        girar_esquerda(60);
-        som("E3", 32);
-        timeout = millis() + 495;
+
+        timeout = millis() + 239;
         while (millis() < timeout)
         {
-            if (preto(0) || preto(1))
+            mover(250, 250);
+            if (preto(1) || preto(2))
             {
-                break;
+                parar();
+                print(2, "Desvio à direita confirmado");
+                girar_direita(15);
+                mover_tempo(300, 159);
+                alinhar_pos_obstaculo();
+                return true;
             }
-            mover(200, 200);
         }
         parar();
-        som("D3", 32);
-        mover_tempo(300, 335);
-        som("E3", 32);
-        float objetivo = converter_graus(eixo_x() + 45);
-        while (!preto(1))
-        {
-            if (proximo(eixo_x(), objetivo))
-            {
-                break;
-            }
-            mover(1000, -1000);
-        }
-        delay(200);
+        print(2, "Verificando desvio reto...");
+        girar_esquerda(5);
+        mover_tempo(300, 303);
+        girar_esquerda(25);
         alinhar_angulo();
-        tempo_correcao = millis() + 350;
-        while (millis() < tempo_correcao)
+        mover_tempo(300, 399);
+        girar_esquerda(60);
+
+        timeout = millis() + 399;
+        while (millis() < timeout)
         {
-            if (toque())
+            mover(250, 250);
+            if (preto(1) || preto(2))
+            {
+                parar();
+                print(2, "Desvio reto confirmado");
+                alinhar_pos_obstaculo();
+                return true;
+            }
+        }
+        parar();
+
+        print(2, "Desvio à esquerda");
+        girar_esquerda(30);
+        alinhar_angulo();
+        mover_tempo(300, 399);
+        girar_esquerda(45);
+        timeout = millis() + 399;
+        while (!(preto(1) || preto(2)))
+        {
+            mover(250, 250);
+            if (millis() > timeout)
             {
                 break;
             }
-            mover(-150, -150);
         }
         parar();
-        som("D3", 32);
-        som("MUDO", 16);
-        som("D3", 32);
-        alinhar_linha();
-        abaixar_atuador();
-        if (proximo(eixo_y(), 350, 3))
-            levantar_atuador();
-        update_obstaculo = millis() + 100;
+        mover_tempo(300, 127);
+        alinhar_pos_obstaculo();
         return true;
+
+        travar();
     }
     return false;
 }
@@ -1328,7 +1378,11 @@ bool verifica_rampa()
     if (proximo(eixo_y(), 350))
     {
         parar();
-        levantar_atuador();
+        if (!tem_kit())
+        {
+            fechar_atuador();
+            levantar_atuador();
+        }
         int tempo_subir = millis() + 2300;
         bool flag_subiu = false;
         int tempo_check_gangorra = millis() + 400;
@@ -1341,8 +1395,6 @@ bool verifica_rampa()
             if (flag_subiu && verifica_gangorra()) { break; }
             ultima_correcao = millis();
             seguir_linha();
-            if (lugar != 3 && verifica_rampa_resgate())
-                return true;
         }
         parar();
         if (eixo_y() < 10 || eixo_y() > 40)
@@ -1360,29 +1412,16 @@ bool verifica_rampa()
             }
         }
         parar();
-        abaixar_atuador();
+        if (!tem_kit())
+        {
+            abrir_atuador();
+            abaixar_atuador();
+        }
         update_rampa = millis() + 2000;
         return true;
     }
     return false;
 
-}
-
-bool verifica_rampa_resgate()
-{
-    /*
-    Verifica rampa resgate: Verifica se o robô está na rampa do resgate
-        Se o eixo y (inclinação) estiver próximo de 340 com uma sensibilidade de 10
-        e os dois ultrassônicos do lado estiverem tampados (com parede)
-            Define o lugar global como a rampa do resgate e retorna
-    */
-
-    if ((proximo(eixo_y(), 340, 10)) && (ultra(1) < 40 && ultra(2) < 40))
-    {
-        lugar = 1;
-        return true;
-    }
-    return false;
 }
 // metodos de movimentação para a area de resgate
 //;
@@ -1785,26 +1824,42 @@ void Main()
 {
     if (debug)
     {
-        print(2, "debug");
-        travar();
+        for (; ; )
+        {
+            kit_frente();
+        }
     }
     else
     {
         calibrar();
         ultima_correcao = millis();
-        fechar_atuador();
+        bot.ActuatorSpeed(150);
         abaixar_atuador();
+        abrir_atuador();
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
+            if (pegou_kit == false && tem_kit())
+            {
+                timeout = millis() + 1000;
+                while (millis() < timeout)
+                {
+                    seguir_linha();
+                }
+                fechar_atuador();
+                levantar_atuador();
+                parar();
+                pegou_kit = true;
+            }
             print_luz_marker();
             verifica_obstaculo();
             verifica_saida();
             seguir_linha();
             verifica_calibrar();
             verifica_rampa();
-            verifica_rampa_resgate();
+            verifica_fita_cinza();
         }
+        print(1, "detectou");
         travar();
     }
 }

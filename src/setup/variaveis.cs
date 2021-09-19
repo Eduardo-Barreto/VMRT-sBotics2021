@@ -36,7 +36,9 @@ bool preto0 = false,
         verde3 = false,
 
         preto_curva_dir = false,
-        preto_curva_esq = false;
+        preto_curva_esq = false,
+
+        pegou_kit = false;
 
 short[] angulos_retos = { 0, 90, 180, 270 };
 

@@ -10,6 +10,7 @@ short eixo_y() => (short)(bot.Inclination());
 float angulo_atuador() => bot.AngleActuator();
 float angulo_giro_atuador() => bot.AngleScoop();
 bool tem_vitima() => bot.HasVictim();
+bool tem_kit() => bot.HasRescueKit();
 void delay(int milissegundos) => bot.Wait(milissegundos);
 float forca_motor() => bot.RobotSpeed();
 
@@ -81,19 +82,18 @@ bool vermelho(byte sensor)
     return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)) || cor(sensor) == "VERMELHO");
 }
 
-/* bool verde(byte sensor)
+bool kit_frente()
 {
-    float val_vermelho = bot.ReturnRed(sensor);
-    float val_verde = bot.ReturnGreen(sensor);
-    float val_azul = bot.ReturnBlue(sensor);
-    byte media_vermelho = 20, media_verde = 65, media_azul = 14;
+    float val_vermelho = bot.ReturnRed(4);
+    float val_verde = bot.ReturnGreen(4);
+    float val_azul = bot.ReturnBlue(4);
+    byte media_vermelho = 16, media_verde = 34, media_azul = 48;
     int RGB = (int)(val_vermelho + val_verde + val_azul);
     sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
     sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
     sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
-    print(1, $"{vermelho} | {verde} | {azul}");
-    return ((vermelho < media_vermelho) && (verde > media_verde) && (azul < media_azul) && (verde < 96) || cor(sensor) == "VERDE");
-} */
+    return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)));
+}
 
 bool verde(byte sensor)
 {

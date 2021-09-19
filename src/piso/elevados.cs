@@ -42,7 +42,11 @@ bool verifica_rampa()
     if (proximo(eixo_y(), 350))
     {
         parar();
-        levantar_atuador();
+        if (!tem_kit())
+        {
+            fechar_atuador();
+            levantar_atuador();
+        }
         int tempo_subir = millis() + 2300;
         bool flag_subiu = false;
         int tempo_check_gangorra = millis() + 400;
@@ -55,8 +59,6 @@ bool verifica_rampa()
             if (flag_subiu && verifica_gangorra()) { break; }
             ultima_correcao = millis();
             seguir_linha();
-            if (lugar != 3 && verifica_rampa_resgate())
-                return true;
         }
         parar();
         if (eixo_y() < 10 || eixo_y() > 40)
@@ -74,27 +76,14 @@ bool verifica_rampa()
             }
         }
         parar();
-        abaixar_atuador();
+        if (!tem_kit())
+        {
+            abrir_atuador();
+            abaixar_atuador();
+        }
         update_rampa = millis() + 2000;
         return true;
     }
     return false;
 
-}
-
-bool verifica_rampa_resgate()
-{
-    /*
-    Verifica rampa resgate: Verifica se o robô está na rampa do resgate
-        Se o eixo y (inclinação) estiver próximo de 340 com uma sensibilidade de 10
-        e os dois ultrassônicos do lado estiverem tampados (com parede)
-            Define o lugar global como a rampa do resgate e retorna
-    */
-
-    if ((proximo(eixo_y(), 340, 10)) && (ultra(1) < 40 && ultra(2) < 40))
-    {
-        lugar = 1;
-        return true;
-    }
-    return false;
 }

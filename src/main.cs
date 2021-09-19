@@ -20,26 +20,42 @@ void Main()
 {
     if (debug)
     {
-        print(2, "debug");
-        travar();
+        for (; ; )
+        {
+            kit_frente();
+        }
     }
     else
     {
         calibrar();
         ultima_correcao = millis();
-        fechar_atuador();
+        bot.ActuatorSpeed(150);
         abaixar_atuador();
+        abrir_atuador();
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
+            if (pegou_kit == false && tem_kit())
+            {
+                timeout = millis() + 1000;
+                while (millis() < timeout)
+                {
+                    seguir_linha();
+                }
+                fechar_atuador();
+                levantar_atuador();
+                parar();
+                pegou_kit = true;
+            }
             print_luz_marker();
             verifica_obstaculo();
             verifica_saida();
             seguir_linha();
             verifica_calibrar();
             verifica_rampa();
-            verifica_rampa_resgate();
+            verifica_fita_cinza();
         }
+        print(1, "detectou");
         travar();
     }
 }
