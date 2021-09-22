@@ -1071,7 +1071,7 @@ bool verifica_curva()
             mover(1000, -1000);
             if (proximo(eixo_x(), objetivo))
             {
-                mover_tempo(-300, 223);
+                mover_tempo(-300, 207);
                 objetivo = converter_graus(eixo_x() - 115);
                 while (!tem_linha(2) || vermelho(2))
                 {
@@ -1163,7 +1163,7 @@ bool verifica_curva()
             mover(-1000, 1000);
             if (proximo(eixo_x(), objetivo))
             {
-                mover_tempo(-300, 223);
+                mover_tempo(-300, 207);
                 objetivo = converter_graus(eixo_x() + 115);
                 while (!tem_linha(1) || vermelho(1))
                 {
@@ -1215,7 +1215,7 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         parar();
         mover_tempo(-200, 79);
-        if (!tem_kit())
+        if (!pegou_kit)
         {
             fechar_atuador();
             levantar_atuador();
@@ -1230,7 +1230,7 @@ bool verifica_obstaculo(bool contar_update = true)
             {
                 console_led(1, "<:OBSTÁCULO FALSO:>", "vermelho");
                 parar();
-                if (!tem_kit())
+                if (!pegou_kit)
                 {
                     abrir_atuador();
                     abaixar_atuador();
@@ -1259,10 +1259,15 @@ bool verifica_obstaculo(bool contar_update = true)
             alinhar_angulo();
             mover_tempo(-150, 159);
             alinhar_linha();
-            if (ultra(0) > 35 && !tem_kit())
+            if (ultra(0) > 35 && !pegou_kit)
             {
                 abrir_atuador();
                 abaixar_atuador();
+                if (proximo(eixo_y(), 350, 3))
+                {
+                    fechar_atuador();
+                    levantar_atuador();
+                }
                 update_obstaculo = millis() + 100;
             }
             ultima_correcao = millis();
@@ -1271,7 +1276,7 @@ bool verifica_obstaculo(bool contar_update = true)
 
         print(2, "Verificando desvio à direita...");
         girar_direita(45);
-        mover_tempo(300, 367);
+        mover_tempo(300, 383);
         girar_esquerda(15);
 
         timeout = millis() + 239;
@@ -1859,7 +1864,8 @@ void Main()
             verifica_rampa();
             verifica_fita_cinza();
         }
-        print(1, "detectou");
+        limpar_console();
+        print(2, "Sala de salvamento identificada");
         travar();
     }
 }

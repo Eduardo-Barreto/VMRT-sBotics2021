@@ -55,7 +55,8 @@ void Main()
             verifica_rampa();
             verifica_fita_cinza();
         }
-        print(1, "detectou");
+        limpar_console();
+        print(2, "Sala de salvamento identificada");
         travar();
     }
 }

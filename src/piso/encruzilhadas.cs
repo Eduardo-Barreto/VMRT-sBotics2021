@@ -326,7 +326,7 @@ bool verifica_curva()
             mover(1000, -1000);
             if (proximo(eixo_x(), objetivo))
             {
-                mover_tempo(-300, 223);
+                mover_tempo(-300, 207);
                 objetivo = converter_graus(eixo_x() - 115);
                 while (!tem_linha(2) || vermelho(2))
                 {
@@ -418,7 +418,7 @@ bool verifica_curva()
             mover(-1000, 1000);
             if (proximo(eixo_x(), objetivo))
             {
-                mover_tempo(-300, 223);
+                mover_tempo(-300, 207);
                 objetivo = converter_graus(eixo_x() + 115);
                 while (!tem_linha(1) || vermelho(1))
                 {
