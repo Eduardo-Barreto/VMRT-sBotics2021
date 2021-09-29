@@ -1217,7 +1217,6 @@ bool verifica_obstaculo(bool contar_update = true)
     {
         limpar_console();
         parar();
-        mover_tempo(-200, 79);
         console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
         timeout = millis() + 1500;
         while (ultra(0) > 12)
