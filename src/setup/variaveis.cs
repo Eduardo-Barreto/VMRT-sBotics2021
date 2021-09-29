@@ -1,8 +1,9 @@
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
 byte velocidade = 180,
         media_meio = 0,
-        direcao_triangulo = 0,
-        direcao_saida = 0,
+        direcao_triangulo = 255,
+        direcao_saida = 255,
+        direcao_entrada = 255,
         lugar = 0;
 
 const byte velocidade_padrao = 185,

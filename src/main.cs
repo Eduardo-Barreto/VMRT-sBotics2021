@@ -9,6 +9,7 @@ import("piso/elevados.cs");
 import("resgate/setup/movimentacao.cs");
 import("resgate/mover_para.cs");
 import("resgate/varredura.cs");
+import("resgate/posicionar_zero.cs");
 
 
 // Variáveis de controle para ligar/desligar o debug e console
@@ -22,7 +23,13 @@ void Main()
     {
         for (; ; )
         {
-            kit_frente();
+            timeout = millis() + 5000;
+            while (timeout > millis() || !(toque()))
+            {
+                mover(-300, -300);
+            }
+            print(1, "bah");
+            travar();
         }
     }
     else
@@ -57,6 +64,7 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
+        posicionar_zero();
         travar();
     }
 }
