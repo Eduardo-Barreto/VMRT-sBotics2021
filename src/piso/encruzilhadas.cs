@@ -348,8 +348,9 @@ bool verifica_curva()
                         return true;
                     }
                 }
-                delay(150);
+                delay(175);
                 parar();
+                alinhar_angulo();
                 mover_tempo(300, 181);
                 velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
@@ -440,8 +441,9 @@ bool verifica_curva()
                         return true;
                     }
                 }
-                delay(150);
+                delay(175);
                 parar();
+                alinhar_angulo();
                 mover_tempo(300, 181);
                 velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();

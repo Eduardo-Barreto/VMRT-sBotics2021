@@ -37,22 +37,15 @@ void Main()
         calibrar();
         ultima_correcao = millis();
         bot.ActuatorSpeed(150);
-        abaixar_atuador();
-        abrir_atuador();
+        levantar_atuador();
+        fechar_atuador();
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
-            if (pegou_kit == false && tem_kit())
+            if (kit_frente())
             {
-                timeout = millis() + 1000;
-                while (millis() < timeout)
-                {
-                    seguir_linha();
-                }
-                fechar_atuador();
-                levantar_atuador();
-                parar();
-                pegou_kit = true;
+                print(1, "identificou kit");
+                travar();
             }
             print_luz_marker();
             verifica_obstaculo();

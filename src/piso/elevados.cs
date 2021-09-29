@@ -42,11 +42,6 @@ bool verifica_rampa()
     if (proximo(eixo_y(), 350))
     {
         parar();
-        if (!tem_kit())
-        {
-            fechar_atuador();
-            levantar_atuador();
-        }
         int tempo_subir = millis() + 2300;
         bool flag_subiu = false;
         int tempo_check_gangorra = millis() + 400;
@@ -76,11 +71,6 @@ bool verifica_rampa()
             }
         }
         parar();
-        if (!tem_kit())
-        {
-            abrir_atuador();
-            abaixar_atuador();
-        }
         update_rampa = millis() + 2000;
         return true;
     }

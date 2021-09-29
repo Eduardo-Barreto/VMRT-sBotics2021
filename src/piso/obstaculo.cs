@@ -6,11 +6,6 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         parar();
         mover_tempo(-200, 79);
-        if (!pegou_kit)
-        {
-            fechar_atuador();
-            levantar_atuador();
-        }
         console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
         timeout = millis() + 1500;
         while (ultra(0) > 12)
@@ -21,11 +16,6 @@ bool verifica_obstaculo(bool contar_update = true)
             {
                 console_led(1, "<:OBSTÁCULO FALSO:>", "vermelho");
                 parar();
-                if (!pegou_kit)
-                {
-                    abrir_atuador();
-                    abaixar_atuador();
-                }
                 return false;
             }
         }
@@ -50,17 +40,7 @@ bool verifica_obstaculo(bool contar_update = true)
             alinhar_angulo();
             mover_tempo(-150, 159);
             alinhar_linha();
-            if (ultra(0) > 35 && !pegou_kit)
-            {
-                abrir_atuador();
-                abaixar_atuador();
-                if (proximo(eixo_y(), 350, 3))
-                {
-                    fechar_atuador();
-                    levantar_atuador();
-                }
-                update_obstaculo = millis() + 100;
-            }
+            update_obstaculo = millis() + 100;
             ultima_correcao = millis();
             velocidade = velocidade_padrao;
         }

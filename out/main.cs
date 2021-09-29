@@ -1094,8 +1094,9 @@ bool verifica_curva()
                         return true;
                     }
                 }
-                delay(150);
+                delay(175);
                 parar();
+                alinhar_angulo();
                 mover_tempo(300, 181);
                 velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
@@ -1186,8 +1187,9 @@ bool verifica_curva()
                         return true;
                     }
                 }
-                delay(150);
+                delay(175);
                 parar();
+                alinhar_angulo();
                 mover_tempo(300, 181);
                 velocidade = (byte)(velocidade_padrao - 5);
                 ultima_correcao = millis();
@@ -1216,11 +1218,6 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         parar();
         mover_tempo(-200, 79);
-        if (!pegou_kit)
-        {
-            fechar_atuador();
-            levantar_atuador();
-        }
         console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
         timeout = millis() + 1500;
         while (ultra(0) > 12)
@@ -1231,11 +1228,6 @@ bool verifica_obstaculo(bool contar_update = true)
             {
                 console_led(1, "<:OBSTÁCULO FALSO:>", "vermelho");
                 parar();
-                if (!pegou_kit)
-                {
-                    abrir_atuador();
-                    abaixar_atuador();
-                }
                 return false;
             }
         }
@@ -1260,17 +1252,7 @@ bool verifica_obstaculo(bool contar_update = true)
             alinhar_angulo();
             mover_tempo(-150, 159);
             alinhar_linha();
-            if (ultra(0) > 35 && !pegou_kit)
-            {
-                abrir_atuador();
-                abaixar_atuador();
-                if (proximo(eixo_y(), 350, 3))
-                {
-                    fechar_atuador();
-                    levantar_atuador();
-                }
-                update_obstaculo = millis() + 100;
-            }
+            update_obstaculo = millis() + 100;
             ultima_correcao = millis();
             velocidade = velocidade_padrao;
         }
@@ -1384,11 +1366,6 @@ bool verifica_rampa()
     if (proximo(eixo_y(), 350))
     {
         parar();
-        if (!tem_kit())
-        {
-            fechar_atuador();
-            levantar_atuador();
-        }
         int tempo_subir = millis() + 2300;
         bool flag_subiu = false;
         int tempo_check_gangorra = millis() + 400;
@@ -1418,11 +1395,6 @@ bool verifica_rampa()
             }
         }
         parar();
-        if (!tem_kit())
-        {
-            abrir_atuador();
-            abaixar_atuador();
-        }
         update_rampa = millis() + 2000;
         return true;
     }
@@ -2032,22 +2004,15 @@ void Main()
         calibrar();
         ultima_correcao = millis();
         bot.ActuatorSpeed(150);
-        abaixar_atuador();
-        abrir_atuador();
+        levantar_atuador();
+        fechar_atuador();
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
-            if (pegou_kit == false && tem_kit())
+            if (kit_frente())
             {
-                timeout = millis() + 1000;
-                while (millis() < timeout)
-                {
-                    seguir_linha();
-                }
-                fechar_atuador();
-                levantar_atuador();
-                parar();
-                pegou_kit = true;
+                print(1, "identificou kit");
+                travar();
             }
             print_luz_marker();
             verifica_obstaculo();
