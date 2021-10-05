@@ -97,6 +97,21 @@ void rainbow_console(string word, string[] colors, int time = 5000)
     }
 
 }
+
+float coseno(float grau_degree)
+{
+    return (float)(Math.Cos(Math.PI * grau_degree / 180));
+}
+
+float seno(float grau_degree)
+{
+    return (float)(Math.Sin(Math.PI * grau_degree / 180));
+}
+
+void registrar(object texto)
+{
+    if (registro) bot.WriteText(texto.ToString());
+}
 // Métodos de leitura e outros
 
 int millis() => (int)(bot.Timer());
@@ -1513,28 +1528,6 @@ void check_subida_frente(bool alinhar = true)
     }
 }
 
-
-void pegar_vitima()
-{
-    parar();
-    girar_esquerda(90);
-    mover_tempo(-300, 511);
-    preparar_atuador();
-    timeout = millis() + 3000;
-    while (!tem_vitima() && millis() < timeout)
-    {
-        mover(300, 300);
-    }
-    fechar_atuador();
-    levantar_atuador();
-    parar();
-    if (direcao_triangulo == 2)
-    {
-        objetivo_esquerda(converter_graus(direcao_inicial + 45));
-        mover(300, 300);
-    }
-}
-
 void mover_travar_tempo(short velocidade = 300, short _timeout = 3000)
 {
     /*
@@ -1665,338 +1658,706 @@ void alcancar_saida()
     delay(300);
     lugar = 3;
 }
-void mover_para(int posI, int posF)
-{
-    float anguloObjetivo = 0,
-    distanciaAlinhamento = 0;
+//poss 0 = ultra de baixo 
+//poss 1 = ultra de cima
+//poss 2 = grau
+float[,] distancia_grau = new float[360, 3];
 
-    int posIx = 0,
-         posIy = 0,
-         posFx = 0,
-         posFy = 0,
-         objX = 0,
-         objY = 0;
+//poss 0 = x_baixo 
+//poss 1 = y_baixo
+//poss 2 = x_alto
+//poss 3 = y_alto
+//poss 4 = angulo
+float[,] xy_cru = new float[360, 5];
 
-    switch (posI)
-    {
-        case 0:
-            posIx = 3;
-            posIy = 1;
-            break;
-        case 1:
-            posIx = 3;
-            posIy = 2;
-            break;
-        case 2:
-            posIx = 3;
-            posIy = 3;
-            break;
-        case 3:
-            posIx = 3;
-            posIy = 4;
-            break;
-        case 4:
-            posIx = 2;
-            posIy = 4;
-            break;
-        case 5:
-            posIx = 1;
-            posIy = 4;
-            break;
-        case 6:
-            posIx = 1;
-            posIy = 3;
-            break;
-        case 7:
-            posIx = 1;
-            posIy = 2;
-            break;
-        case 8:
-            posIx = 1;
-            posIy = 1;
-            break;
-        case 9:
-            posIx = 2;
-            posIy = 1;
-            break;
-    }
-    switch (posF)
-    {
-        case 0:
-            posFx = 3;
-            posFy = 1;
-            break;
-        case 1:
-            posFx = 3;
-            posFy = 2;
-            break;
-        case 2:
-            posFx = 3;
-            posFy = 3;
-            break;
-        case 3:
-            posFx = 3;
-            posFy = 4;
-            break;
-        case 4:
-            posFx = 2;
-            posFy = 4;
-            break;
-        case 5:
-            posFx = 1;
-            posFy = 4;
-            break;
-        case 6:
-            posFx = 1;
-            posFy = 3;
-            break;
-        case 7:
-            posFx = 1;
-            posFy = 2;
-            break;
-        case 8:
-            posFx = 1;
-            posFy = 1;
-            break;
-        case 9:
-            posFx = 2;
-            posFy = 1;
-            break;
-    }
+//poss 0 = x_baixo 
+//poss 1 = y_baixo
+//poss 2 = x_alto
+//poss 3 = y_alto
+//poss 4 = objeto_baixo
+//poss 5 = objeto_alto
+float[,] xy_zerado = new float[360, 6];
 
-    objX = posFx - posIx;
-    objY = posFy - posIy;
+//poss 0 = x
+//poss 1 = y
+//poss 2 = x
+//poss 3 = y
+float[] xy_robo = new float[2];
+float[] xy_entrada = new float[2];
+float[] xy_saida = new float[2];
+float[] xy_parede = new float[4];
+float[] xy_triangulo = new float[2];
 
-    anguloObjetivo = (float)(Math.Atan2(objX, objY) * (180 / Math.PI));
-    anguloObjetivo = converter_graus(direcao_inicial + anguloObjetivo);
+float menor_valor = 0.0f,
+      maior_valor = 0.0f;
 
-    levantar_atuador();
+// referencias para xy_
+const byte x_baixo = 0,
+           y_baixo = 1,
+           x_alto = 2,
+           y_alto = 3,
+           angulo_xy = 4,
+// referencias para xy_zerado e seus objetos    
+           objeto_baixo = 4,
+           objeto_alto = 5,
+           parede = 1,
+           triangulo = 2,
+           saida = 4,
+// referencias para distancia_grau
+           medida_baixa = 0,
+           medida_alto = 1,
+           angulo_leitura = 2,
+//medidas do robô
+           raio_l = 18,
+           raio_c = 28;
 
-    if (((Math.Abs(eixo_x() - anguloObjetivo)) > 180))
-    {
-        objetivo_direita(anguloObjetivo);
-    }
-    else
-    {
-        objetivo_esquerda(anguloObjetivo);
-    }
+int qualidade_x = 0,
+    qualidade_y = 0,
+    parede_400 = 0,
+    parede_300 = 0,
+    inicio_saida = 0,
+    termino_saida = 0,
+    inicio_saida2 = 0,
+    termino_saida2 = 0,
+    tag_entrada = 0,
+    tag_vitima1 = 0,
+    tag_vitima2 = 0,
+    tag_vitima3 = 0,
+    vitima2 = 0,
+    vitima3 = 0,
+    vitima1 = 0,
+    proximidade_vitima = 12;
 
-    distanciaAlinhamento = (float)(50 / (Math.Cos((Math.Atan2(objX, objY)))));
-    alinhar_ultra(((float)Math.Abs(distanciaAlinhamento)) - 10);
-
-}
+float direcao_x;
+float direcao_y;
+float angulo_objetivo;
+float distancia_mover_xy;
 void varredura()
 {
-    
-    mover_para(1, 5);
-}
-byte pronto = 0;
+    bot.SetFileConsolePath("C:/Users/samoc/Desktop/VMRT-sBotics2021/leituras.txt");
 
-void posicionar_zero()
-{
-    alinhar_angulo();
-    mover_tempo(300, 1023); //se desloca para frente para identificar sua posição atual
-    ler_ultra(); //checa os ultrasonicos
-    if (ultra_frente < 250) // caso a distancia na frente seja menor que 250 o robo apraceu no lado de 4
-    {//LADO DE 4
-        lado4();
-        return;
-    }
-    else if ((ultra_esquerda + ultra_direita) > 270) // verifica se a soma das distancias é maior que o lado de 3 para ter certeza que esta no lado de 4
-    { //LADO DE 4
-        lado4();
-        return;
-    }
-    else
+    varrer_mapear();
+    definir_parede();
+    identificar_saida();
+    vitimas_centro();
+    verificar_salvamento();
+    bot.EraseConsoleFile();
+    //desenhar(3);
+
+    if (tem_kit())
     {
-        mover_tempo(300, 63);
-        ler_ultra();
-        if ((ultra_esquerda + ultra_direita) > 270) // efetua a mesma verificação para ter certeza que nenhuma bolinha atrapalhou
-        { //LADO DE 4
-            lado4();
-            return;
-        }
-        else  // após verificação das laterais do robo se ele não se encaixou em nenhuma é decidido que ele está do lado de 3
-        { //LADO DE 3
-
-            return;
-        }
+        mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
+        entregar_vitima();
+        mover_tempo(-300, 255);
+        varrer_mapear();
+        vitimas_centro();
+        bot.EraseConsoleFile();
+        // desenhar(3);
     }
-}
 
-void lado4()
-{
-    caso1_4();
-    caso2_4();
-    caso3_4();
-    caso4_4();
-}
-
-void caso1_4()
-{
-    ler_ultra();
-    if (ultra_esquerda < 40)
+    if (vitima1 != 0)
     {
-        mover_tempo(300, 63);
-        ler_ultra();
-        if (ultra_esquerda < 40)
+        pegar_vitima(xy_zerado[vitima1, x_baixo], xy_zerado[vitima1, y_baixo]);
+    }
+    else if (vitima2 != 0)
+    {
+        pegar_vitima(xy_zerado[vitima2, x_baixo], xy_zerado[vitima2, y_baixo]);
+    }
+    else if (vitima3 != 0)
+    {
+        pegar_vitima(xy_zerado[vitima3, x_baixo], xy_zerado[vitima3, y_baixo]);
+    }
+
+
+    bot.EraseConsoleFile();
+    desenhar();
+    print(2, $"{xy_robo[0]}; {xy_robo[1]}");
+}
+
+void desenhar(byte objeto = 0)
+{
+    if (objeto == 0)
+    {
+        //registrar($"{xy_entrada[0]}; {xy_entrada[1]}");
+        registrar($"{xy_saida[0]}; {xy_saida[1]}");
+        registrar($"{xy_robo[0]}; {xy_robo[1]}");
+
+        for (int i = 0; i < 360; i++)
         {
-            girar_direita(90);
-            alinhar_angulo();
-            mover_tempo(-300, 5000);
-            alinhar_angulo();
-            direcao_inicial = eixo_x();
-            direcao_entrada = 0;
-            print(2, "Pronto para varredura!");
-            pronto = 1;
-            return;
+            registrar($"{xy_zerado[i, x_baixo]}; {xy_zerado[i, y_baixo]}");
+            registrar($"{xy_zerado[i, x_alto]}; {xy_zerado[i, y_alto]}");
         }
     }
-}
-
-void caso2_4()
-{
-    if (pronto == 1) return;
-    ler_ultra();
-    if (ultra_esquerda < 240)
+    else if (objeto == parede)
     {
-        mover_tempo(300, 63);
-        ler_ultra();
-        if (ultra_esquerda < 240)
+        for (int i = 0; i < 360; i++)
         {
-            if (ultra_esquerda < 140) direcao_entrada = 1;
-            else direcao_entrada = 2;
-            girar_esquerda(90);
-            alinhar_angulo();
-            levantar_atuador();
-            alinhar_ultra(60); // alinhar proximo ao possivel triangulo 
-            alinhar_angulo();
-            if (luz(4) < 2)
+            if ((xy_zerado[i, objeto_alto] == parede))
             {
-                direcao_triangulo = 0;
-                print(2, "triangulo no ladrilho 0");
+                registrar($"{xy_zerado[i, x_alto]}; {xy_zerado[i, y_alto]}");
             }
-            mover_tempo(-300, 511);
-            girar_direita(180);
-            mover_tempo(-300, 5000);
-            alinhar_angulo();
-            direcao_inicial = eixo_x();
-            print(2, "Pronto para varredura!");
-            pronto = 1;
-            return;
+            if ((xy_zerado[i, objeto_baixo] == parede))
+            {
+                registrar($"{xy_zerado[i, x_baixo]}; {xy_zerado[i, y_baixo]}");
+            }
+        }
+    }
+    else if (objeto == saida)
+    {
+        for (int i = 0; i < 360; i++)
+        {
+            if ((xy_zerado[i, objeto_alto] == saida))
+            {
+                registrar($"{xy_zerado[i, x_alto]}; {xy_zerado[i, y_alto]}");
+            }
+            if ((xy_zerado[i, objeto_baixo] == saida))
+            {
+                registrar($"{xy_zerado[i, x_baixo]}; {xy_zerado[i, y_baixo]}");
+            }
+        }
+    }
+    else if (objeto == 3)
+    {
+
+        registrar($"{xy_triangulo[x_baixo]}; {xy_triangulo[y_baixo]}");
+
+        registrar($"{xy_zerado[vitima1, x_baixo]}; {xy_zerado[vitima1, y_baixo]}");
+        registrar($"{xy_zerado[vitima2, x_baixo]}; {xy_zerado[vitima2, y_baixo]}");
+        registrar($"{xy_zerado[vitima3, x_baixo]}; {xy_zerado[vitima3, y_baixo]}");
+
+        for (int i = 0; i < 360; i++)
+        {
+            if ((xy_zerado[i, objeto_alto] == parede))
+            {
+                registrar($"{xy_zerado[i, x_alto]}; {xy_zerado[i, y_alto]}");
+            }
+            if ((xy_zerado[i, objeto_baixo] == parede))
+            {
+                registrar($"{xy_zerado[i, x_baixo]}; {xy_zerado[i, y_baixo]}");
+            }
         }
     }
 }
 
-void caso3_4()
+void varrer_360()
 {
-    if (pronto == 1) return;
-    ler_ultra();
-    if (ultra_esquerda < 340)
+    print(2, "FAZENDO VARREDURA");
+    direcao_inicial = eixo_x();
+    for (int i = 0; i < 360; i++)
     {
-        mover_tempo(300, 63);
         ler_ultra();
-        if (ultra_esquerda < 340)
+        distancia_grau[(int)converter_graus(i - 90), medida_baixa] = ultra_esquerda + raio_l;
+        distancia_grau[i, medida_alto] = ultra_frente + raio_c;
+        distancia_grau[i, angulo_leitura] = eixo_x();
+
+        objetivo_direita(converter_graus(direcao_inicial + i));
+    }
+}
+
+void varrer_180()
+{
+    print(2, "FAZENDO VARREDURA");
+    direcao_inicial = eixo_x();
+    for (int i = 0; i < 180; i++)
+    {
+
+        ler_ultra(); // Tira leituras de distancia e salva no array
+        distancia_grau[(int)converter_graus(i - 90), medida_baixa] = ultra_esquerda + raio_l;
+        distancia_grau[(int)converter_graus(i + 90), medida_baixa] = ultra_direita + raio_l;
+        distancia_grau[i, angulo_leitura] = eixo_x();
+
+        objetivo_direita(converter_graus(direcao_inicial + i));
+    }
+}
+
+void gerar_xy()
+{
+    for (int i = 0; i < 360; i++)
+    {
+        // visão dos sensores laterais
+        xy_cru[i, x_baixo] = ((distancia_grau[i, medida_baixa]) * seno(distancia_grau[i, angulo_leitura]));
+        xy_cru[i, y_baixo] = ((distancia_grau[i, medida_baixa]) * coseno(distancia_grau[i, angulo_leitura]));
+        // visão do sensore superior 
+        xy_cru[i, x_alto] = ((distancia_grau[i, medida_alto]) * seno(distancia_grau[i, angulo_leitura]));
+        xy_cru[i, y_alto] = ((distancia_grau[i, medida_alto]) * coseno(distancia_grau[i, angulo_leitura]));
+
+        // salva o angulo 
+        xy_cru[i, angulo_xy] = distancia_grau[i, angulo_leitura];
+
+        //registrar($"{xy_cru[i, x_baixo]}; {xy_cru[i, y_baixo]}");
+        //registrar($"{xy_cru[i, x_alto]}; {xy_cru[i, y_alto]}");
+    }
+}
+
+void mapear_xy()
+{
+    for (int xy = 2; xy < 4; xy++) // acerta leituras 
+    {
+        menor_valor = 0;
+        for (int i = 0; i < 360; i++)
         {
-            if (ultra_frente < 250) // verifica se tem parede na frente
+            if (((xy_cru[i, xy] < menor_valor) && (distancia_grau[i, medida_alto] < 400)
+            && proximo(((Math.Abs(xy_cru[i, xy])) + (xy_cru[(int)converter_graus(i - 180), xy])), 300, 3))
+            || ((xy_cru[i, xy] < menor_valor) && (distancia_grau[i, medida_alto] < 400)
+            && proximo(((Math.Abs(xy_cru[i, xy])) + (xy_cru[(int)converter_graus(i - 180), xy])), 400, 3)))
             {
-                levantar_atuador();
-                alinhar_ultra(70); // alinhar proximo ao possivel triangulo 
-                if (luz(4) < 2)
+                menor_valor = xy_cru[i, xy];
+                //registrar($"{menor_valor} xy {xy} a {xy_cru[i, angulo_xy]}º ");
+            }
+        }
+        for (int i = 0; i < 360; i++)
+        {
+            xy_zerado[i, xy - 2] = (Math.Abs(menor_valor) + xy_cru[i, xy - 2]);
+            xy_zerado[i, xy] = (Math.Abs(menor_valor) + xy_cru[i, xy]);
+        }
+    }
+    for (int xy = 2; xy < 4; xy++) // acerta leituras 
+    {
+        for (int i = 0; i < 360; i++)
+        {
+            if ((xy_zerado[i, xy] < -100) || (xy_zerado[i, xy] > 430))
+            {
+                xy_zerado[i, x_alto] = 500;
+                xy_zerado[i, y_alto] = 500;
+            }
+            if ((xy_zerado[i, xy - 2] < -100) || (xy_zerado[i, xy - 2] > 430))
+            {
+                xy_zerado[i, x_baixo] = 500;
+                xy_zerado[i, y_baixo] = 500;
+            }
+        }
+    }
+}
+
+void identificar_robo()
+{
+    for (int xy = 2; xy < 4; xy++) // acerta leituras 
+    {
+        menor_valor = 0;
+        for (int i = 0; i < 360; i++)
+        {
+            if (((xy_cru[i, xy] < menor_valor) && (distancia_grau[i, medida_alto] < 400)
+            && proximo(((Math.Abs(xy_cru[i, xy])) + (xy_cru[(int)converter_graus(i - 180), xy])), 300, 3))
+            || ((xy_cru[i, xy] < menor_valor) && (distancia_grau[i, medida_alto] < 400)
+            && proximo(((Math.Abs(xy_cru[i, xy])) + (xy_cru[(int)converter_graus(i - 180), xy])), 400, 3)))
+            {
+                menor_valor = xy_cru[i, xy];
+                //registrar($"{menor_valor} xy {xy} a {xy_cru[i, angulo_xy]}º ");
+            }
+        }
+        xy_robo[xy - 2] = Math.Abs(menor_valor);
+    }
+}
+
+
+void definir_parede()
+{
+    for (int xy = 2; xy < 4; xy++)
+    {
+        parede_300 = 0;
+        parede_400 = 0;
+
+        for (int i = 0; i < 360; i++)
+        {
+            if (proximo(xy_zerado[i, xy], 300, 3))
+            {
+                parede_300++;
+            }
+            if (proximo(xy_zerado[i, xy], 400, 3))
+            {
+                parede_400++;
+            }
+        }
+
+        if (parede_300 > parede_400)
+        {
+            xy_parede[xy - 2] = 300;
+            xy_parede[xy] = 300;
+        }
+        else
+        {
+            xy_parede[xy - 2] = 400;
+            xy_parede[xy] = 400;
+        }
+    }
+
+    for (int xy = 2; xy < 4; xy++)
+    {
+        for (int i = 0; i < 360; i++)
+        {
+            if (proximo(xy_zerado[i, xy], xy_parede[xy], 6))
+            {
+                xy_zerado[i, objeto_alto] = parede;
+            }
+            if (proximo(xy_zerado[i, xy], 0, 6))
+            {
+                xy_zerado[i, objeto_alto] = parede;
+            }
+        }
+    }
+
+    for (int xy = 0; xy < 2; xy++)
+    {
+        for (int i = 0; i < 360; i++)
+        {
+            if (proximo(xy_zerado[i, xy], xy_parede[xy], 6))
+            {
+                xy_zerado[i, objeto_baixo] = parede;
+            }
+            if (proximo(xy_zerado[i, xy], 0, 6))
+            {
+                xy_zerado[i, objeto_baixo] = parede;
+            }
+        }
+    }
+}
+
+void identificar_saida()
+{
+    if (proximo(direcao_inicial, 90, 10))
+    {
+        xy_entrada[x_baixo] = 0;
+        xy_entrada[y_baixo] = xy_robo[y_baixo];
+    }
+    else if (proximo(direcao_inicial, 0, 10) || proximo(direcao_inicial, 360, 10))
+    {
+        xy_entrada[x_baixo] = xy_robo[x_baixo];
+        xy_entrada[y_baixo] = 0;
+    }
+    else if (proximo(direcao_inicial, 270, 10))
+    {
+        xy_entrada[x_baixo] = xy_parede[x_baixo];
+        xy_entrada[y_baixo] = xy_robo[y_baixo];
+    }
+    else if (proximo(direcao_inicial, 180, 10))
+    {
+        xy_entrada[x_baixo] = xy_robo[x_baixo];
+        xy_entrada[y_baixo] = xy_parede[y_baixo];
+    }
+
+    for (int i = 0; i < 360; i++)
+    {
+        if ((xy_zerado[i, x_alto] == 500) || (xy_zerado[i, y_alto] == 500))
+        {
+            xy_zerado[i, objeto_alto] = saida;
+        }
+    }
+    for (int i = 0; i < 360; i++)
+    {
+        if ((xy_zerado[i, x_baixo] == 500) || (xy_zerado[i, y_baixo] == 500))
+        {
+            xy_zerado[i, objeto_baixo] = saida;
+        }
+    }
+
+    for (int i = 0; i < 360; i++)
+    {
+        if (xy_zerado[i, objeto_alto] == saida && inicio_saida == 0)
+        {
+            if (i == 0)
+            {
+                for (int j = 359; j > 270; j--)
                 {
-                    direcao_triangulo = 0;
-                    print(2, "triangulo no ladrilho 0");
+                    if (xy_zerado[j, objeto_alto] == parede)
+                    {
+                        inicio_saida = j;
+                        if ((proximo(xy_entrada[x_baixo], xy_zerado[j, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[j, x_alto], 60))))
+                        {
+                            tag_entrada = 1;
+                        }
+                        break;
+                    }
                 }
-                alinhar_angulo();
-                alinhar_ultra(80);
-                girar_esquerda(45);
-                alinhar_ultra(45);
-                girar_esquerda(45);
-                alinhar_angulo();
-                mover_tempo(-300, 2047);
-                alinhar_angulo();
-                direcao_inicial = eixo_x();
-                direcao_entrada = 8;
-                print(2, "Pronto para varredura!");
-                pronto = 1;
-                return;
             }
             else
             {
-                direcao_saida = 0;
-                direcao_entrada = 8;
-                print(2, "saida no ladrilho 0");
-                alinhar_angulo();
-                ler_cor();
-                ler_ultra();
-                mover(300, 300);
-                while (!verde1 && !verde2 && !verde3 && !verde0 && ultra_esquerda < 400 && ultra_direita < 400)
+                inicio_saida = i - 1;
+                if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
                 {
-                    ler_cor();
-                    ler_ultra();
+                    tag_entrada = 1;
                 }
-                alinhar_angulo();
-                mover_tempo(-300, 511);
-                girar_esquerda(90);
-                alinhar_angulo();
-                mover_tempo(-300, 1023);
-                direcao_inicial = eixo_x();
-                print(2, "Pronto para varredura!");
-                pronto = 1;
-                return;
+            }
+        }
+        if (inicio_saida != 0 && (xy_zerado[i, objeto_alto] == parede) && (termino_saida == 0))
+        {
+            termino_saida = i;
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+            {
+                tag_entrada = 1;
+            }
+        }
+        if (xy_zerado[i, objeto_alto] == saida && (inicio_saida != 0) && (termino_saida != 0) && (inicio_saida2 == 0))
+        {
+            inicio_saida2 = i - 1;
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+            {
+                tag_entrada = 2;
+            }
+        }
+        if (xy_zerado[i, objeto_alto] == parede && (inicio_saida != 0)
+         && (termino_saida != 0) && (inicio_saida2 != 0) && (termino_saida2 == 0))
+        {
+            termino_saida2 = i;
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+            {
+                tag_entrada = 2;
+            }
+        }
+    }
+
+    if (tag_entrada == 2)
+    {
+        if (proximo(xy_zerado[inicio_saida, x_alto], xy_zerado[termino_saida, x_alto], 15))
+        {
+            xy_saida[y_baixo] = (Math.Min(xy_zerado[inicio_saida, y_alto], xy_zerado[termino_saida, y_alto])) + 50;
+            xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto];
+        }
+        else
+        {
+            xy_saida[x_baixo] = (Math.Min(xy_zerado[inicio_saida, x_alto], xy_zerado[termino_saida, x_alto])) + 50;
+            xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto];
+        }
+    }
+    else
+    {
+        if (proximo(xy_zerado[inicio_saida2, x_alto], xy_zerado[termino_saida2, x_alto], 15))
+        {
+            xy_saida[y_baixo] = (Math.Min(xy_zerado[inicio_saida2, y_alto], xy_zerado[termino_saida2, y_alto])) + 50;
+            xy_saida[x_baixo] = xy_zerado[inicio_saida2, x_alto];
+        }
+        else
+        {
+            xy_saida[x_baixo] = (Math.Min(xy_zerado[inicio_saida2, x_alto], xy_zerado[termino_saida2, x_alto])) + 50;
+            xy_saida[y_baixo] = xy_zerado[inicio_saida2, y_alto];
+        }
+    }
+
+    if (inicio_saida2 == 0)
+    {
+        if (proximo(xy_zerado[inicio_saida, x_alto], xy_zerado[termino_saida, x_alto], 15))
+        {
+            if ((proximo(xy_entrada[y_baixo], xy_zerado[inicio_saida, y_alto], 60)))
+            {
+                if (xy_zerado[inicio_saida, y_alto] > xy_zerado[termino_saida, y_alto])
+                {
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto] - 150;
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto];
+                }
+                else
+                {
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto] + 150;
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto];
+                }
+            }
+            else
+            {
+                if (xy_zerado[inicio_saida, y_alto] > xy_zerado[termino_saida, y_alto])
+                {
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto] - 50;
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto];
+                }
+                else
+                {
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto] + 50;
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto];
+                }
+            }
+        }
+        else
+        {
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[inicio_saida, x_alto], 60)))
+            {
+                if (xy_zerado[inicio_saida, x_alto] > xy_zerado[termino_saida, x_alto])
+                {
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto] - 150;
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto];
+                }
+                else
+                {
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto] + 150;
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto];
+                }
+            }
+            else
+            {
+                if (xy_zerado[inicio_saida, x_alto] > xy_zerado[termino_saida, x_alto])
+                {
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto] - 50;
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto];
+                }
+                else
+                {
+                    xy_saida[x_baixo] = xy_zerado[inicio_saida, x_alto] + 50;
+                    xy_saida[y_baixo] = xy_zerado[inicio_saida, y_alto];
+                }
+            }
+        }
+    }
+
+}
+
+void vitimas_centro()
+{
+    tag_vitima1 = 0;
+    tag_vitima2 = 0;
+    tag_vitima3 = 0;
+    for (int i = 0; i < 360; i++)
+    {
+        if ((xy_zerado[i, objeto_baixo] != parede) && (xy_zerado[i, objeto_baixo] != saida))
+        {
+            xy_zerado[i, objeto_baixo] = 0;
+        }
+    }
+
+    for (int i = 0; i < 360; i++)
+    {
+        if ((xy_zerado[i, x_baixo] > 55) && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 55)
+        && (xy_zerado[i, y_baixo] > 55) && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 55))
+        {
+            if (tag_vitima1 == 0)
+            {
+                vitima1 = i;
+                tag_vitima1 = 1;
+            }
+            else if ((tag_vitima2 == 0) && (!proximo(xy_zerado[vitima1, x_baixo], xy_zerado[i, x_baixo], proximidade_vitima))
+                                        && (!proximo(xy_zerado[vitima1, y_baixo], xy_zerado[i, y_baixo], proximidade_vitima)))
+            {
+                vitima2 = i;
+                tag_vitima2 = 1;
+            }
+            else if ((tag_vitima3 == 0)
+                  && (!proximo(xy_zerado[vitima1, x_baixo], xy_zerado[i, x_baixo], proximidade_vitima))
+                  && (!proximo(xy_zerado[vitima1, y_baixo], xy_zerado[i, y_baixo], proximidade_vitima))
+                  && (!proximo(xy_zerado[vitima2, x_baixo], xy_zerado[i, x_baixo], proximidade_vitima))
+                  && (!proximo(xy_zerado[vitima2, y_baixo], xy_zerado[i, y_baixo], proximidade_vitima)))
+            {
+                vitima3 = i;
+                tag_vitima3 = 1;
             }
         }
     }
 }
-void caso4_4()
+
+void verificar_salvamento()
 {
-    if (pronto == 1) return;
-    direcao_saida = 0;
-    direcao_entrada = 3;
-    print(2, "saida no ladrilho 0");
-    alinhar_angulo();
-    girar_esquerda(90);
-    alinhar_angulo();
-    mover_tempo(300, 1023);
-    ler_cor();
-    ler_ultra();
-    mover(300, 300);
-    while (!verde1 && !verde2 && !verde3 && !verde0 && ultra_esquerda < 400 && ultra_direita < 400)
+    for (int i = 0; i < 360; i++)
     {
-        ler_cor();
-        ler_ultra();
+        if ((xy_zerado[i, x_baixo] < 85) && (xy_zerado[i, y_baixo] < 85) && (xy_zerado[i, x_baixo] > 15) && (xy_zerado[i, y_baixo] > 15))
+        {
+            xy_triangulo[x_baixo] = 42;
+            xy_triangulo[y_baixo] = 42;
+        }
+        if ((xy_zerado[i, x_baixo] > xy_parede[x_baixo] - 85) && (xy_zerado[i, y_baixo] > xy_parede[y_baixo] - 85)
+         && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 15) && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 15))
+        {
+            xy_triangulo[x_baixo] = xy_parede[x_baixo] - 42;
+            xy_triangulo[y_baixo] = xy_parede[y_baixo] - 42;
+        }
+        if ((xy_zerado[i, x_baixo] < 85) && (xy_zerado[i, x_baixo] > 15) && (xy_zerado[i, y_baixo] > xy_parede[y_baixo] - 85)
+        && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 15))
+        {
+            xy_triangulo[x_baixo] = 42;
+            xy_triangulo[y_baixo] = xy_parede[y_baixo] - 42;
+        }
+        if ((xy_zerado[i, y_baixo] < 85) && (xy_zerado[i, y_baixo] > 15) && (xy_zerado[i, x_baixo] > xy_parede[x_baixo] - 85)
+        && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 15))
+        {
+            xy_triangulo[x_baixo] = xy_parede[x_baixo] - 42;
+            xy_triangulo[y_baixo] = 42;
+        }
     }
-    alinhar_angulo();
-    mover_tempo(-300, 511);
-    girar_direita(180);
-    alinhar_angulo();
-    mover_tempo(-300, 255);
-    direcao_inicial = eixo_x();
-    print(2, "Pronto para varredura!");
-    pronto = 1;
-    return;
 }
+
+void girar_objetivo(float angulo_para_ir)
+{
+    if (angulo_para_ir > eixo_x())
+    {
+        if (((float)Math.Abs(angulo_para_ir - eixo_x())) > 180) { objetivo_esquerda(angulo_para_ir); }
+        else { objetivo_direita(angulo_para_ir); }
+    }
+    else
+    {
+        if (((float)Math.Abs(angulo_para_ir - eixo_x())) > 180) { objetivo_direita(angulo_para_ir); }
+        else { objetivo_esquerda(angulo_para_ir); }
+    }
+}
+
+void mover_xy(float x2, float y2)
+{
+    direcao_x = x2 - xy_robo[x_baixo];
+    direcao_y = y2 - xy_robo[y_baixo];
+    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
+    girar_objetivo(converter_graus(angulo_objetivo));
+    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
+    mover_tempo(300, (int)(16 * distancia_mover_xy) - 1);
+    xy_robo[x_baixo] = x2;
+    xy_robo[y_baixo] = y2;
+}
+
+void varrer_mapear()
+{
+
+    qualidade_x = 0;
+    qualidade_y = 0;
+
+    varrer_360();
+    gerar_xy();
+
+    //checa qualidade do mapeamento
+    while (qualidade_x < 30 || qualidade_y < 30)
+    {
+        mapear_xy();
+        bot.EraseConsoleFile();
+        //desenhar();
+        qualidade_x = 0;
+        qualidade_y = 0;
+        for (int i = 0; i < 360; i++)
+        {
+            if (proximo(xy_zerado[i, x_alto], 0, 10)) qualidade_x++;
+            if (proximo(xy_zerado[i, y_alto], 0, 10)) qualidade_y++;
+        }
+        print(3, $"a qualidade da leitura foi de: {qualidade_x} em x e {qualidade_y} em y");
+        if (qualidade_x < 30 || qualidade_y < 30)
+        {
+            mover_tempo(300, 511);
+            varrer_360();
+            gerar_xy();
+        }
+
+        identificar_robo();
+        print(1, $"{xy_robo[0]}; {xy_robo[1]}");
+    }
+}
+
+void pegar_vitima(float x2, float y2)
+{
+    direcao_x = x2 - xy_robo[x_baixo];
+    direcao_y = y2 - xy_robo[y_baixo];
+    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
+    girar_objetivo(converter_graus(angulo_objetivo));
+    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
+    mover_tempo(300, (int)((16 * distancia_mover_xy)) - 1);
+    xy_robo[x_baixo] = x2;
+    xy_robo[y_baixo] = y2;
+}
+
 
 
 // Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
 bool console = true;
+bool registro = true;
 
 // Método principal
 void Main()
 {
     if (debug)
     {
-        for (; ; )
-        {
-            timeout = millis() + 5000;
-            while (timeout > millis() || !(toque()))
-            {
-                mover(-300, -300);
-            }
-            print(1, "bah");
-            travar();
-        }
+
+
+        mover_tempo(300, 1600);
+
+        travar();
     }
     else
     {
@@ -2023,7 +2384,8 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
-        posicionar_zero();
+        mover_tempo(300, 2043);
+        varredura();
         travar();
     }
 }

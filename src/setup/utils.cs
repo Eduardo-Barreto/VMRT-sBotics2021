@@ -51,3 +51,18 @@ void rainbow_console(string word, string[] colors, int time = 5000)
     }
 
 }
+
+float coseno(float grau_degree)
+{
+    return (float)(Math.Cos(Math.PI * grau_degree / 180));
+}
+
+float seno(float grau_degree)
+{
+    return (float)(Math.Sin(Math.PI * grau_degree / 180));
+}
+
+void registrar(object texto)
+{
+    if (registro) bot.WriteText(texto.ToString());
+}

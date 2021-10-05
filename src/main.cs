@@ -7,30 +7,26 @@ import("piso/encruzilhadas.cs");
 import("piso/obstaculo.cs");
 import("piso/elevados.cs");
 import("resgate/setup/movimentacao.cs");
-import("resgate/mover_para.cs");
+import("resgate/setup/variaveis.cs");
 import("resgate/varredura.cs");
-import("resgate/posicionar_zero.cs");
+
 
 
 // Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
 bool console = true;
+bool registro = true;
 
 // Método principal
 void Main()
 {
     if (debug)
     {
-        for (; ; )
-        {
-            timeout = millis() + 5000;
-            while (timeout > millis() || !(toque()))
-            {
-                mover(-300, -300);
-            }
-            print(1, "bah");
-            travar();
-        }
+
+
+        mover_tempo(300, 1600);
+
+        travar();
     }
     else
     {
@@ -57,7 +53,8 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
-        posicionar_zero();
+        mover_tempo(300, 2043);
+        varredura();
         travar();
     }
 }
