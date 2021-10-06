@@ -22,10 +22,7 @@ void Main()
 {
     if (debug)
     {
-
-
-        mover_tempo(300, 1600);
-
+        varredura();
         travar();
     }
     else

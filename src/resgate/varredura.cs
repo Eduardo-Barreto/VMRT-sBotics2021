@@ -1,6 +1,6 @@
 void varredura()
 {
-    bot.SetFileConsolePath("C:/Users/samoc/Desktop/VMRT-sBotics2021/leituras.txt");
+    bot.SetFileConsolePath("C:/Users/cesar/Desktop/VMRT-sBotics2021/leituras.txt");
 
     varrer_mapear();
     definir_parede();
@@ -10,7 +10,7 @@ void varredura()
     bot.EraseConsoleFile();
     //desenhar(3);
 
-    if (tem_kit())
+    if (!tem_kit())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
         entregar_vitima();
@@ -44,7 +44,7 @@ void desenhar(byte objeto = 0)
 {
     if (objeto == 0)
     {
-        //registrar($"{xy_entrada[0]}; {xy_entrada[1]}");
+        registrar($"{xy_entrada[0]}; {xy_entrada[1]}");
         registrar($"{xy_saida[0]}; {xy_saida[1]}");
         registrar($"{xy_robo[0]}; {xy_robo[1]}");
 
@@ -52,6 +52,7 @@ void desenhar(byte objeto = 0)
         {
             registrar($"{xy_zerado[i, x_baixo]}; {xy_zerado[i, y_baixo]}");
             registrar($"{xy_zerado[i, x_alto]}; {xy_zerado[i, y_alto]}");
+            // registrar($"{distancia_grau[i, x_baixo]}; {i}");
         }
     }
     else if (objeto == parede)
@@ -327,7 +328,7 @@ void identificar_saida()
                     if (xy_zerado[j, objeto_alto] == parede)
                     {
                         inicio_saida = j;
-                        if ((proximo(xy_entrada[x_baixo], xy_zerado[j, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[j, x_alto], 60))))
+                        if ((proximo(xy_entrada[x_baixo], xy_zerado[j, x_alto], 60) && (proximo(xy_entrada[y_baixo], xy_zerado[j, y_alto], 60))))
                         {
                             tag_entrada = 1;
                         }
@@ -338,7 +339,7 @@ void identificar_saida()
             else
             {
                 inicio_saida = i - 1;
-                if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+                if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[y_baixo], xy_zerado[i, y_alto], 60))))
                 {
                     tag_entrada = 1;
                 }
@@ -347,7 +348,7 @@ void identificar_saida()
         if (inicio_saida != 0 && (xy_zerado[i, objeto_alto] == parede) && (termino_saida == 0))
         {
             termino_saida = i;
-            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[y_baixo], xy_zerado[i, y_alto], 60))))
             {
                 tag_entrada = 1;
             }
@@ -355,7 +356,7 @@ void identificar_saida()
         if (xy_zerado[i, objeto_alto] == saida && (inicio_saida != 0) && (termino_saida != 0) && (inicio_saida2 == 0))
         {
             inicio_saida2 = i - 1;
-            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[y_baixo], xy_zerado[i, y_alto], 60))))
             {
                 tag_entrada = 2;
             }
@@ -364,7 +365,7 @@ void identificar_saida()
          && (termino_saida != 0) && (inicio_saida2 != 0) && (termino_saida2 == 0))
         {
             termino_saida2 = i;
-            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60))))
+            if ((proximo(xy_entrada[x_baixo], xy_zerado[i, x_alto], 60) && (proximo(xy_entrada[y_baixo], xy_zerado[i, y_alto], 60))))
             {
                 tag_entrada = 2;
             }
