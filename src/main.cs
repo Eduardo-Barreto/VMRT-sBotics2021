@@ -13,7 +13,7 @@ import("resgate/varredura.cs");
 
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = true;
+bool debug = false;
 bool console = true;
 bool registro = true;
 
@@ -22,7 +22,23 @@ void Main()
 {
     if (debug)
     {
-        travar();
+        short maior_diferenca = 0;
+        short ultimo_valor = 0;
+        for (short i = 0; i < 360; i++)
+        {
+            if (i > 0)
+            {
+                girar_direita(1);
+                short valor = ultra(2);
+                short diferenca = valor - ultimo_valor;
+                if (diferenca > maior_diferenca)
+                {
+                    maior_diferenca = diferenca;
+                }
+                ultimo_valor = valor;
+                print(1, maior_diferenca);
+            }
+        }
     }
     else
     {
