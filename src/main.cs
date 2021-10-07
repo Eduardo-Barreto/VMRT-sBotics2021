@@ -22,8 +22,7 @@ void Main()
 {
     if (debug)
     {
-        varredura();
-        travar();
+
     }
     else
     {
@@ -38,7 +37,20 @@ void Main()
             if (kit_frente())
             {
                 print(1, "identificou kit");
-                travar();
+                mover_tempo(-300, 500);
+                abrir_atuador();
+                abaixar_atuador();
+                while (!tem_kit())
+                {
+                    seguir_linha();
+                }
+                timeout = millis() + 1000;
+                while (millis() < timeout)
+                {
+                    seguir_linha();
+                }
+                fechar_atuador();
+                levantar_atuador();
             }
             print_luz_marker();
             verifica_obstaculo();

@@ -6,7 +6,7 @@ byte velocidade = 180,
         direcao_entrada = 255,
         lugar = 0;
 
-const byte velocidade_padrao = 185,
+const byte velocidade_padrao = 195,
         velocidade_max = 220,
         limite_branco = 55;
 
