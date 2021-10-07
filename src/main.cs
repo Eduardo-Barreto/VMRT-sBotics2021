@@ -22,22 +22,24 @@ void Main()
 {
     if (debug)
     {
-        short maior_diferenca = 0;
-        short ultimo_valor = 0;
-        for (short i = 0; i < 360; i++)
+        int maior_diferenca = 0;
+        int ultimo_valor = 0;
+        for (int i = 0; i < 999999999; i++)
         {
+            girar_direita(1);
+            int valor = ultra(2);
+            int diferenca = valor - ultimo_valor;
             if (i > 0)
             {
-                girar_direita(1);
-                short valor = ultra(2);
-                short diferenca = valor - ultimo_valor;
+
                 if (diferenca > maior_diferenca)
                 {
                     maior_diferenca = diferenca;
                 }
-                ultimo_valor = valor;
+
                 print(1, maior_diferenca);
             }
+            ultimo_valor = valor;
         }
     }
     else

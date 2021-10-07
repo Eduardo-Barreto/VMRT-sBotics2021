@@ -13,6 +13,7 @@ bool tem_vitima() => bot.HasVictim();
 bool tem_kit() => bot.HasRescueKit();
 void delay(int milissegundos) => bot.Wait(milissegundos);
 float forca_motor() => bot.RobotSpeed();
+float temperatura() => (short)bot.Heat();
 
 void som(string nota, short tempo) => bot.PlayNote(0, nota, tempo);
 

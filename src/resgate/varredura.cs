@@ -8,15 +8,16 @@ void varredura()
     vitimas_centro();
     verificar_salvamento();
     bot.EraseConsoleFile();
-    //desenhar(3);
+    //desenhar();
+    bot.EraseConsoleFile();
 
     if (!tem_kit())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
         entregar_vitima();
         procurar_vitima();
-        //varrer_180();
-
+        buscar_vitima();
+        travar();
     }
 
     if (vitima1 != 0)
@@ -34,7 +35,7 @@ void varredura()
 
 
     bot.EraseConsoleFile();
-    desenhar();
+    // desenhar();
     print(2, $"{xy_robo[0]}; {xy_robo[1]}");
 }
 
@@ -508,26 +509,26 @@ void verificar_salvamento()
     {
         if ((xy_zerado[i, x_baixo] < 85) && (xy_zerado[i, y_baixo] < 85) && (xy_zerado[i, x_baixo] > 15) && (xy_zerado[i, y_baixo] > 15))
         {
-            xy_triangulo[x_baixo] = 42;
-            xy_triangulo[y_baixo] = 42;
+            xy_triangulo[x_baixo] = 50;
+            xy_triangulo[y_baixo] = 50;
         }
         if ((xy_zerado[i, x_baixo] > xy_parede[x_baixo] - 85) && (xy_zerado[i, y_baixo] > xy_parede[y_baixo] - 85)
          && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 15) && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 15))
         {
-            xy_triangulo[x_baixo] = xy_parede[x_baixo] - 42;
-            xy_triangulo[y_baixo] = xy_parede[y_baixo] - 42;
+            xy_triangulo[x_baixo] = xy_parede[x_baixo] - 50;
+            xy_triangulo[y_baixo] = xy_parede[y_baixo] - 50;
         }
         if ((xy_zerado[i, x_baixo] < 85) && (xy_zerado[i, x_baixo] > 15) && (xy_zerado[i, y_baixo] > xy_parede[y_baixo] - 85)
         && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 15))
         {
-            xy_triangulo[x_baixo] = 42;
-            xy_triangulo[y_baixo] = xy_parede[y_baixo] - 42;
+            xy_triangulo[x_baixo] = 50;
+            xy_triangulo[y_baixo] = xy_parede[y_baixo] - 50;
         }
         if ((xy_zerado[i, y_baixo] < 85) && (xy_zerado[i, y_baixo] > 15) && (xy_zerado[i, x_baixo] > xy_parede[x_baixo] - 85)
         && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 15))
         {
-            xy_triangulo[x_baixo] = xy_parede[x_baixo] - 42;
-            xy_triangulo[y_baixo] = 42;
+            xy_triangulo[x_baixo] = xy_parede[x_baixo] - 50;
+            xy_triangulo[y_baixo] = 50;
         }
     }
 }
@@ -605,22 +606,36 @@ void pegar_vitima(float x2, float y2)
     xy_robo[y_baixo] = y2;
 }
 
+void buscar_vitima()
+{
+    while ((temperatura() < 37) && (luz(4) > 13))
+    {
+        mover(300, 300);
+    }
+    travar();
+}
+
 void procurar_vitima()
 {
     mover_tempo(-300, 255);
     print(2, "BUSCANDO VITIMAS");
-    direcao_inicial = eixo_x();
     for (int i = 0; i < 360; i++)
     {
         ler_ultra(); // Tira leituras de distancia e salva no array
         distancia_grau[(int)converter_graus(i + 90), medida_baixa] = ultra_direita + raio_l;
-        if ((!(proximo(possibilidades[(int)converter_graus(i + 90)], distancia_grau[(int)converter_graus(i + 90), medida_baixa], 5)))
-         && (distancia_grau[(int)converter_graus(i + 90), medida_baixa] < 400))
+        distancia_grau[i, medida_alto] = ultra_frente + raio_c;
+        if ((i > 90) && (i < 267))
         {
-            print(1, $"{possibilidades[(int)converter_graus(i + 90)]}; {distancia_grau[(int)converter_graus(i + 90), medida_baixa]}");
-            girar_objetivo(converter_graus(eixo_x() + 90));
-            travar();
+            // registrar($"{distancia_grau[i, medida_baixa]}; {distancia_grau[i, medida_alto]}");
+
+            if ((!(proximo(distancia_grau[i, medida_baixa], distancia_grau[i, medida_alto], 16))) // para de usar raio e pegar absoluto da diferença menos 9
+            && (distancia_grau[i, medida_baixa] < 400) && (distancia_grau[i, medida_alto] < 400))
+            {
+                print(1, $"{(int)distancia_grau[i, medida_baixa]}; {(int)distancia_grau[i, medida_alto]}");
+                direcao_vitima = i;
+                return;
+            }
         }
-        objetivo_direita(converter_graus(direcao_inicial + i));
+        girar_direita(1);
     }
 }
