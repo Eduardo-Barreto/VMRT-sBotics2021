@@ -5,7 +5,7 @@ void fechar_atuador() => bot.CloseActuator();
 void mover(int esquerda, int direita) => bot.MoveFrontal(direita, esquerda);
 void encoder(int velocidade, float rotacoes) => bot.MoveFrontalRotations(velocidade, rotacoes);
 void parar(int tempo = 10) { bot.MoveFrontal(0, 0); delay(tempo); }
-void travar() { bot.MoveFrontal(0, 0); delay(999999999); }
+void travar() { bot.MoveFrontal(0, 0); console_led(1, "<size=60><:ROBÔ TRAVADO!:></size>", "vermelho"); delay(999999999); }
 
 void mover_tempo(int velocidade, int tempo)
 {
@@ -183,4 +183,16 @@ void abaixar_atuador()
         bot.ActuatorSpeed(150);
         bot.ActuatorDown(600);
     }
+}
+
+void girar_baixo_atuador()
+{
+    bot.ActuatorSpeed(150);
+    bot.TurnActuatorDown(100);
+}
+
+void girar_cima_atuador()
+{
+    bot.ActuatorSpeed(150);
+    bot.TurnActuatorUp(100);
 }

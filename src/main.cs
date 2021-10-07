@@ -13,7 +13,7 @@ import("resgate/varredura.cs");
 
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = false;
+bool debug = true;
 bool console = true;
 bool registro = true;
 
@@ -22,7 +22,7 @@ void Main()
 {
     if (debug)
     {
-
+        travar();
     }
     else
     {
@@ -34,23 +34,34 @@ void Main()
         console_led(3, "<:Local atual: PISO:>", "cinza claro", false);
         while (lugar == 0)
         {
-            if (kit_frente())
+            if (!pegou_kit && kit_frente())
             {
-                print(1, "identificou kit");
+                parar();
+                limpar_console();
+                console_led(2, "<:KIT DE RESGATE IDENTIFICADO:>", "azul");
                 mover_tempo(-300, 500);
                 abrir_atuador();
+                girar_baixo_atuador();
                 abaixar_atuador();
+                int init_time = millis();
                 while (!tem_kit())
                 {
-                    seguir_linha();
+                    mover(300, 300);
                 }
-                timeout = millis() + 1000;
-                while (millis() < timeout)
-                {
-                    seguir_linha();
-                }
+                mover(300, 300);
+                delay(287);
                 fechar_atuador();
+                girar_cima_atuador();
                 levantar_atuador();
+                parar();
+                int kit_time = millis();
+                mover_tempo(-300, (kit_time - init_time) - 286);
+                limpar_console();
+                parar();
+                if (tem_kit())
+                {
+                    pegou_kit = true;
+                }
             }
             print_luz_marker();
             verifica_obstaculo();
