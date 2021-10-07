@@ -14,11 +14,9 @@ void varredura()
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
         entregar_vitima();
-        mover_tempo(-300, 255);
-        varrer_mapear();
-        vitimas_centro();
-        bot.EraseConsoleFile();
-        // desenhar(3);
+        procurar_vitima();
+        //varrer_180();
+
     }
 
     if (vitima1 != 0)
@@ -215,7 +213,6 @@ void identificar_robo()
         xy_robo[xy - 2] = Math.Abs(menor_valor);
     }
 }
-
 
 void definir_parede()
 {
@@ -606,4 +603,24 @@ void pegar_vitima(float x2, float y2)
     mover_tempo(300, (int)((16 * distancia_mover_xy)) - 1);
     xy_robo[x_baixo] = x2;
     xy_robo[y_baixo] = y2;
+}
+
+void procurar_vitima()
+{
+    mover_tempo(-300, 255);
+    print(2, "BUSCANDO VITIMAS");
+    direcao_inicial = eixo_x();
+    for (int i = 0; i < 360; i++)
+    {
+        ler_ultra(); // Tira leituras de distancia e salva no array
+        distancia_grau[(int)converter_graus(i + 90), medida_baixa] = ultra_direita + raio_l;
+        if ((!(proximo(possibilidades[(int)converter_graus(i + 90)], distancia_grau[(int)converter_graus(i + 90), medida_baixa], 5)))
+         && (distancia_grau[(int)converter_graus(i + 90), medida_baixa] < 400))
+        {
+            print(1, $"{possibilidades[(int)converter_graus(i + 90)]}; {distancia_grau[(int)converter_graus(i + 90), medida_baixa]}");
+            girar_objetivo(converter_graus(eixo_x() + 90));
+            travar();
+        }
+        objetivo_direita(converter_graus(direcao_inicial + i));
+    }
 }
