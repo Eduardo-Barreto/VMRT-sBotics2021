@@ -1,14 +1,16 @@
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
-byte velocidade = 180,
-        media_meio = 0,
+byte media_meio = 0,
         direcao_triangulo = 255,
         direcao_saida = 255,
         direcao_entrada = 255,
         lugar = 0;
 
-const byte velocidade_padrao = 195,
-        velocidade_max = 220,
-        limite_branco = 55;
+const byte limite_branco = 55;
+
+const short velocidade_max = 255,
+        velocidade_padrao = 185;
+
+short velocidade = 185;
 
 float saida1 = 0,
         saida2 = 0,
@@ -906,6 +908,7 @@ bool verifica_verde()
         {
             // Nova verificação do beco
             if (beco()) { return true; }
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:<b>CURVA VERDE</b>:> - Direita", "verde");
             som("F3", 100);
@@ -955,6 +958,7 @@ bool verifica_verde()
         {
             // Nova verificação do beco
             if (beco()) { return true; }
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:<b>CURVA VERDE</b>:> - Esquerda", "verde");
             som("F3", 100);

@@ -132,6 +132,7 @@ bool verifica_verde()
         {
             // Nova verificação do beco
             if (beco()) { return true; }
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:<b>CURVA VERDE</b>:> - Direita", "verde");
             som("F3", 100);
@@ -181,6 +182,7 @@ bool verifica_verde()
         {
             // Nova verificação do beco
             if (beco()) { return true; }
+            if (falso_verde()) { return false; }
             // Feedback visual e sonoro para indicar que entrou na condição e se alinhou
             console_led(1, "<:<b>CURVA VERDE</b>:> - Esquerda", "verde");
             som("F3", 100);
