@@ -159,7 +159,7 @@ void seguir_linha()
         delay(150);
         alinhar_linha(true);
         alinhar_linha();
-        velocidade = (byte)(velocidade - 15);
+        velocidade = (byte)(velocidade_padrao - 15);
         ultima_correcao = millis();
     }
 

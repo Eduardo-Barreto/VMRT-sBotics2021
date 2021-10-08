@@ -6,7 +6,7 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         parar();
         console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
-        timeout = millis() + 1500;
+        timeout = millis() + 1167;
         while (ultra(0) > 12)
         {
             ultima_correcao = millis();
@@ -22,7 +22,16 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();
-        alinhar_ultra(12);
+        parar();
+        while (ultra(0) > 12)
+        {
+            mover(-75, -75);
+        }
+        while (ultra(0) < 12)
+        {
+            mover(75, 75);
+        }
+        travar();
 
         void alinhar_pos_obstaculo()
         {
@@ -39,7 +48,7 @@ bool verifica_obstaculo(bool contar_update = true)
             alinhar_angulo();
             mover_tempo(-150, 159);
             alinhar_linha();
-            update_obstaculo = millis() + 100;
+            update_obstaculo = millis() + 50;
             ultima_correcao = millis();
             velocidade = velocidade_padrao;
         }

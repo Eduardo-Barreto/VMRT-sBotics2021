@@ -42,9 +42,9 @@ bool verifica_rampa()
     if (proximo(eixo_y(), 350))
     {
         parar();
-        int tempo_subir = millis() + 2300;
+        int tempo_subir = millis() + 1781;
         bool flag_subiu = false;
-        int tempo_check_gangorra = millis() + 400;
+        int tempo_check_gangorra = millis() + 303;
         while (millis() < tempo_subir)
         {
             if (millis() > tempo_check_gangorra && proximo(eixo_y(), 340))
@@ -58,7 +58,7 @@ bool verifica_rampa()
         parar();
         if (eixo_y() < 10 || eixo_y() > 40)
         {
-            timeout = millis() + 400;
+            timeout = millis() + 303;
             while (eixo_y() < 350 || eixo_y() > 5)
             {
                 ultima_correcao = millis();

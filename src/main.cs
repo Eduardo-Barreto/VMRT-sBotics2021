@@ -10,8 +10,6 @@ import("resgate/setup/movimentacao.cs");
 import("resgate/setup/variaveis.cs");
 import("resgate/varredura.cs");
 
-
-
 // Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
 bool console = true;

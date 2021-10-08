@@ -7,10 +7,10 @@ byte media_meio = 0,
 
 const byte limite_branco = 55;
 
-const short velocidade_max = 255,
-        velocidade_padrao = 185;
+const short velocidade_max = 275,
+        velocidade_padrao = 250;
 
-short velocidade = 185;
+short velocidade = 250;
 
 float saida1 = 0,
         saida2 = 0,

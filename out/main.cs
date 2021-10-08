@@ -7,10 +7,10 @@ byte media_meio = 0,
 
 const byte limite_branco = 55;
 
-const short velocidade_max = 255,
-        velocidade_padrao = 185;
+const short velocidade_max = 275,
+        velocidade_padrao = 250;
 
-short velocidade = 185;
+short velocidade = 250;
 
 float saida1 = 0,
         saida2 = 0,
@@ -182,7 +182,7 @@ void print(byte linha, object texto, string align = "center") { if (console) bot
 void limpar_console() => bot.ClearConsole();
 void limpar_linha(byte linha) => print((byte)(linha - 1), " ");
 
-bool tem_linha(byte sensor) => (bot.returnRed(sensor) < 24);
+bool tem_linha(byte sensor) => (bot.returnRed(sensor) < 33);
 
 bool colorido(byte sensor) => (bot.returnRed(sensor) != bot.ReturnBlue(sensor));
 
@@ -710,7 +710,7 @@ void seguir_linha()
         delay(150);
         alinhar_linha(true);
         alinhar_linha();
-        velocidade = (byte)(velocidade - 15);
+        velocidade = (byte)(velocidade_padrao - 15);
         ultima_correcao = millis();
     }
 
@@ -1258,7 +1258,7 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         parar();
         console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
-        timeout = millis() + 1500;
+        timeout = millis() + 1167;
         while (ultra(0) > 12)
         {
             ultima_correcao = millis();
@@ -1274,7 +1274,16 @@ bool verifica_obstaculo(bool contar_update = true)
         limpar_console();
         console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();
-        alinhar_ultra(12);
+        parar();
+        while (ultra(0) > 12)
+        {
+            mover(-75, -75);
+        }
+        while (ultra(0) < 12)
+        {
+            mover(75, 75);
+        }
+        travar();
 
         void alinhar_pos_obstaculo()
         {
@@ -1291,7 +1300,7 @@ bool verifica_obstaculo(bool contar_update = true)
             alinhar_angulo();
             mover_tempo(-150, 159);
             alinhar_linha();
-            update_obstaculo = millis() + 100;
+            update_obstaculo = millis() + 50;
             ultima_correcao = millis();
             velocidade = velocidade_padrao;
         }
@@ -1405,9 +1414,9 @@ bool verifica_rampa()
     if (proximo(eixo_y(), 350))
     {
         parar();
-        int tempo_subir = millis() + 2300;
+        int tempo_subir = millis() + 1781;
         bool flag_subiu = false;
-        int tempo_check_gangorra = millis() + 400;
+        int tempo_check_gangorra = millis() + 303;
         while (millis() < tempo_subir)
         {
             if (millis() > tempo_check_gangorra && proximo(eixo_y(), 340))
@@ -1421,7 +1430,7 @@ bool verifica_rampa()
         parar();
         if (eixo_y() < 10 || eixo_y() > 40)
         {
-            timeout = millis() + 400;
+            timeout = millis() + 303;
             while (eixo_y() < 350 || eixo_y() > 5)
             {
                 ultima_correcao = millis();
@@ -2395,8 +2404,6 @@ void procurar_parede_resgate()
 
     xy_resgate[y_baixo] = xy_parede[y_baixo] / 2;
 }
-
-
 
 
 // Variáveis de controle para ligar/desligar o debug e console

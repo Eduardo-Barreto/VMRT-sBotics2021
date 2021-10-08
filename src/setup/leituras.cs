@@ -66,7 +66,7 @@ void print(byte linha, object texto, string align = "center") { if (console) bot
 void limpar_console() => bot.ClearConsole();
 void limpar_linha(byte linha) => print((byte)(linha - 1), " ");
 
-bool tem_linha(byte sensor) => (bot.returnRed(sensor) < 24);
+bool tem_linha(byte sensor) => (bot.returnRed(sensor) < 33);
 
 bool colorido(byte sensor) => (bot.returnRed(sensor) != bot.ReturnBlue(sensor));
 
