@@ -22,7 +22,9 @@ void Main()
 {
     if (debug)
     {
-        print(2, 5/3);
+        mover_tempo(300, 20000);
+        print(1, "travou");
+        delay(60);
     }
     else
     {
@@ -39,7 +41,8 @@ void Main()
                 parar();
                 limpar_console();
                 console_led(2, "<:KIT DE RESGATE IDENTIFICADO:>", "azul");
-                while(kit_frente()){
+                while (kit_frente())
+                {
                     mover(-250, -250);
                 }
                 mover_tempo(-300, 100);
@@ -58,7 +61,7 @@ void Main()
                 levantar_atuador();
                 parar();
                 int kit_time = millis();
-                mover_tempo(-300, (kit_time - init_time)/2);
+                mover_tempo(-300, (kit_time - init_time) / 2);
                 limpar_console();
                 parar();
                 if (tem_kit())

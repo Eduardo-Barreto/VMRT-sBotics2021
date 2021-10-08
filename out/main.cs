@@ -352,16 +352,24 @@ void encoder(int velocidade, float rotacoes) => bot.MoveFrontalRotations(velocid
 void parar(int tempo = 10) { bot.MoveFrontal(0, 0); delay(tempo); }
 void travar() { bot.MoveFrontal(0, 0); delay(999999999); }
 
-void mover_tempo(int velocidade, int tempo)
+void mover_tempo(int velocidade, int tempo, bool usar_toque = true, bool usar_forca = true)
 {
     timeout = bot.Timer() + tempo;
+    int check_forca = millis() + 250;
     while (bot.Timer() < timeout)
     {
-        if (velocidade < 0 && toque())
+        mover(velocidade, velocidade);
+        if (usar_toque && velocidade < 0 && toque())
         {
             break;
         }
-        mover(velocidade, velocidade);
+        if (usar_forca)
+        {
+            if (millis() > check_forca && forca_motor() < 1)
+            {
+                break;
+            }
+        }
     }
     parar();
 }
@@ -1483,15 +1491,16 @@ void alinhar_ultra(float distancia, bool empinada = true)
 void entregar_vitima()
 {
     abrir_atuador();
+    girar_baixo_atuador();
     abaixar_atuador();
     int timeout_vitima = millis() + 2000;
-    while (tem_vitima())
+    while (tem_vitima() || tem_kit())
     {
         if (millis() > timeout_vitima)
         {
             fechar_atuador();
             levantar_atuador();
-            if (!tem_vitima()) { return; }
+            if (!tem_vitima() && !tem_kit()) { return; }
             abrir_atuador();
             abaixar_atuador();
             timeout_vitima = millis() + 2000;
@@ -1501,6 +1510,7 @@ void entregar_vitima()
     delay(350);
     fechar_atuador();
     levantar_atuador();
+    girar_cima_atuador();
 }
 
 void totozinho(byte vezes = 1)
@@ -1704,6 +1714,7 @@ float[] xy_entrada = new float[2];
 float[] xy_saida = new float[2];
 float[] xy_parede = new float[4];
 float[] xy_triangulo = new float[2];
+float[] xy_resgate = new float[2];
 
 float menor_valor = 0.0f,
       maior_valor = 0.0f;
@@ -1763,32 +1774,24 @@ void varredura()
     //desenhar();
     bot.EraseConsoleFile();
 
-    if (!tem_kit())
+    if (tem_kit())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
         entregar_vitima();
-        procurar_vitima();
-        buscar_vitima();
-        travar();
     }
-
-    if (vitima1 != 0)
+    procurar_parede_resgate();
+    mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]);
+    if (xy_resgate[x_baixo] == 0)
     {
-        pegar_vitima(xy_zerado[vitima1, x_baixo], xy_zerado[vitima1, y_baixo]);
+        girar_objetivo(converter_graus(direcao_inicial - 90));
     }
-    else if (vitima2 != 0)
+    else
     {
-        pegar_vitima(xy_zerado[vitima2, x_baixo], xy_zerado[vitima2, y_baixo]);
+        girar_objetivo(converter_graus(direcao_inicial + 90));
     }
-    else if (vitima3 != 0)
-    {
-        pegar_vitima(xy_zerado[vitima3, x_baixo], xy_zerado[vitima3, y_baixo]);
-    }
-
-
-    bot.EraseConsoleFile();
-    // desenhar();
-    print(2, $"{xy_robo[0]}; {xy_robo[1]}");
+    alinhar_angulo();
+    mover_tempo(-300, 255);
+    alinhar_angulo();
 }
 
 void desenhar(byte objeto = 0)
@@ -2311,6 +2314,18 @@ void mover_xy(float x2, float y2)
     xy_robo[y_baixo] = y2;
 }
 
+void mover_xy_costas(float x2, float y2)
+{
+    direcao_x = x2 - xy_robo[x_baixo];
+    direcao_y = y2 - xy_robo[y_baixo];
+    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
+    girar_objetivo(converter_graus(angulo_objetivo + 180));
+    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
+    mover_tempo(-300, (int)(16 * (int)distancia_mover_xy) - 1, false);
+    xy_robo[x_baixo] = x2;
+    xy_robo[y_baixo] = y2;
+}
+
 void varrer_mapear()
 {
 
@@ -2367,30 +2382,20 @@ void buscar_vitima()
     travar();
 }
 
-void procurar_vitima()
+void procurar_parede_resgate()
 {
-    mover_tempo(-300, 255);
-    print(2, "BUSCANDO VITIMAS");
-    for (int i = 0; i < 360; i++)
+    if (proximo(xy_entrada[x_baixo], xy_parede[x_baixo], 160))
     {
-        ler_ultra(); // Tira leituras de distancia e salva no array
-        distancia_grau[(int)converter_graus(i + 90), medida_baixa] = ultra_direita + raio_l;
-        distancia_grau[i, medida_alto] = ultra_frente + raio_c;
-        if ((i > 90) && (i < 267))
-        {
-            // registrar($"{distancia_grau[i, medida_baixa]}; {distancia_grau[i, medida_alto]}");
-
-            if ((!(proximo(distancia_grau[i, medida_baixa], distancia_grau[i, medida_alto], 16))) // para de usar raio e pegar absoluto da diferença menos 9
-            && (distancia_grau[i, medida_baixa] < 400) && (distancia_grau[i, medida_alto] < 400))
-            {
-                print(1, $"{(int)distancia_grau[i, medida_baixa]}; {(int)distancia_grau[i, medida_alto]}");
-                direcao_vitima = i;
-                return;
-            }
-        }
-        girar_direita(1);
+        xy_resgate[x_baixo] = xy_parede[x_baixo];
     }
+    else
+    {
+        xy_resgate[x_baixo] = 0;
+    }
+
+    xy_resgate[y_baixo] = xy_parede[y_baixo] / 2;
 }
+
 
 
 
@@ -2404,7 +2409,9 @@ void Main()
 {
     if (debug)
     {
-        print(2, 5/3);
+        mover_tempo(300, 20000);
+        print(1, "travou");
+        delay(60);
     }
     else
     {
@@ -2421,7 +2428,8 @@ void Main()
                 parar();
                 limpar_console();
                 console_led(2, "<:KIT DE RESGATE IDENTIFICADO:>", "azul");
-                while(kit_frente()){
+                while (kit_frente())
+                {
                     mover(-250, -250);
                 }
                 mover_tempo(-300, 100);
@@ -2440,7 +2448,7 @@ void Main()
                 levantar_atuador();
                 parar();
                 int kit_time = millis();
-                mover_tempo(-300, (kit_time - init_time)/2);
+                mover_tempo(-300, (kit_time - init_time) / 2);
                 limpar_console();
                 parar();
                 if (tem_kit())

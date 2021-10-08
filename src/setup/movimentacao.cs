@@ -7,16 +7,24 @@ void encoder(int velocidade, float rotacoes) => bot.MoveFrontalRotations(velocid
 void parar(int tempo = 10) { bot.MoveFrontal(0, 0); delay(tempo); }
 void travar() { bot.MoveFrontal(0, 0); delay(999999999); }
 
-void mover_tempo(int velocidade, int tempo)
+void mover_tempo(int velocidade, int tempo, bool usar_toque = true, bool usar_forca = true)
 {
     timeout = bot.Timer() + tempo;
+    int check_forca = millis() + 250;
     while (bot.Timer() < timeout)
     {
-        if (velocidade < 0 && toque())
+        mover(velocidade, velocidade);
+        if (usar_toque && velocidade < 0 && toque())
         {
             break;
         }
-        mover(velocidade, velocidade);
+        if (usar_forca)
+        {
+            if (millis() > check_forca && forca_motor() < 1)
+            {
+                break;
+            }
+        }
     }
     parar();
 }

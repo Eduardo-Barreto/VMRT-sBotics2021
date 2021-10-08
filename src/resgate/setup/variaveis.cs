@@ -27,6 +27,7 @@ float[] xy_entrada = new float[2];
 float[] xy_saida = new float[2];
 float[] xy_parede = new float[4];
 float[] xy_triangulo = new float[2];
+float[] xy_resgate = new float[2];
 
 float menor_valor = 0.0f,
       maior_valor = 0.0f;

@@ -49,15 +49,16 @@ void alinhar_ultra(float distancia, bool empinada = true)
 void entregar_vitima()
 {
     abrir_atuador();
+    girar_baixo_atuador();
     abaixar_atuador();
     int timeout_vitima = millis() + 2000;
-    while (tem_vitima())
+    while (tem_vitima() || tem_kit())
     {
         if (millis() > timeout_vitima)
         {
             fechar_atuador();
             levantar_atuador();
-            if (!tem_vitima()) { return; }
+            if (!tem_vitima() && !tem_kit()) { return; }
             abrir_atuador();
             abaixar_atuador();
             timeout_vitima = millis() + 2000;
@@ -67,6 +68,7 @@ void entregar_vitima()
     delay(350);
     fechar_atuador();
     levantar_atuador();
+    girar_cima_atuador();
 }
 
 void totozinho(byte vezes = 1)
