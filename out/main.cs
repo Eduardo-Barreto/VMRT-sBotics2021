@@ -2404,25 +2404,7 @@ void Main()
 {
     if (debug)
     {
-        int maior_diferenca = 0;
-        int ultimo_valor = 0;
-        for (int i = 0; i < 999999999; i++)
-        {
-            girar_direita(1);
-            int valor = ultra(2);
-            int diferenca = valor - ultimo_valor;
-            if (i > 0)
-            {
-
-                if (diferenca > maior_diferenca)
-                {
-                    maior_diferenca = diferenca;
-                }
-
-                print(1, maior_diferenca);
-            }
-            ultimo_valor = valor;
-        }
+        print(2, 5/3);
     }
     else
     {
@@ -2439,7 +2421,10 @@ void Main()
                 parar();
                 limpar_console();
                 console_led(2, "<:KIT DE RESGATE IDENTIFICADO:>", "azul");
-                mover_tempo(-300, 500);
+                while(kit_frente()){
+                    mover(-250, -250);
+                }
+                mover_tempo(-300, 100);
                 abrir_atuador();
                 girar_baixo_atuador();
                 abaixar_atuador();
@@ -2449,13 +2434,13 @@ void Main()
                     mover(300, 300);
                 }
                 mover(300, 300);
-                delay(287);
+                delay(192);
                 fechar_atuador();
                 girar_cima_atuador();
                 levantar_atuador();
                 parar();
                 int kit_time = millis();
-                mover_tempo(-300, (kit_time - init_time) - 286);
+                mover_tempo(-300, (kit_time - init_time)/2);
                 limpar_console();
                 parar();
                 if (tem_kit())
