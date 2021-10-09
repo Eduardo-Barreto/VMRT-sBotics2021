@@ -20,8 +20,7 @@ void Main()
 {
     if (debug)
     {
-        mover_tempo(300, 20000);
-        print(1, "travou");
+        print(1, (int)(99 * 0.7));
         delay(60);
     }
     else
@@ -52,14 +51,12 @@ void Main()
                 {
                     mover(300, 300);
                 }
-                mover(300, 300);
-                delay(192);
                 fechar_atuador();
                 girar_cima_atuador();
                 levantar_atuador();
                 parar();
                 int kit_time = millis();
-                mover_tempo(-300, (kit_time - init_time) / 2);
+                mover_tempo(-300, (int)((kit_time - init_time) * 0.8));
                 limpar_console();
                 parar();
                 if (tem_kit())

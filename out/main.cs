@@ -7,8 +7,8 @@ byte media_meio = 0,
 
 const byte limite_branco = 55;
 
-const short velocidade_max = 275,
-        velocidade_padrao = 250;
+const short velocidade_max = 250,
+        velocidade_padrao = 230;
 
 short velocidade = 250;
 
@@ -1277,13 +1277,21 @@ bool verifica_obstaculo(bool contar_update = true)
         parar();
         while (ultra(0) > 12)
         {
-            mover(-75, -75);
+            mover(75, 75);
         }
         while (ultra(0) < 12)
         {
+            mover(-75, -75);
+        }
+        while (ultra(0) > 12)
+        {
             mover(75, 75);
         }
-        travar();
+        while (ultra(0) < 12)
+        {
+            mover(-75, -75);
+        }
+        parar();
 
         void alinhar_pos_obstaculo()
         {
@@ -2416,8 +2424,7 @@ void Main()
 {
     if (debug)
     {
-        mover_tempo(300, 20000);
-        print(1, "travou");
+        print(1, (int)(99 * 0.7));
         delay(60);
     }
     else
@@ -2448,14 +2455,12 @@ void Main()
                 {
                     mover(300, 300);
                 }
-                mover(300, 300);
-                delay(192);
                 fechar_atuador();
                 girar_cima_atuador();
                 levantar_atuador();
                 parar();
                 int kit_time = millis();
-                mover_tempo(-300, (kit_time - init_time) / 2);
+                mover_tempo(-300, (int)((kit_time - init_time) * 0.8));
                 limpar_console();
                 parar();
                 if (tem_kit())
