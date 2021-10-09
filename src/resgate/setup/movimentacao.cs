@@ -1,5 +1,5 @@
 // metodos de movimentação para a area de resgate
-//;
+
 void alinhar_ultra(float distancia, bool empinada = true)
 {
     if (ultra(0) > distancia)
@@ -100,7 +100,6 @@ void preparar_atuador(bool apenas_sem_vitima = false)
     }
 }
 
-
 void check_subida_frente(bool alinhar = true)
 {
     if (eixo_y() > 330 && eixo_y() < 340)
@@ -190,34 +189,6 @@ void mover_travar_ultra(short velocidade = 300, short alvo = 25)
     alinhar_angulo();
 }
 
-void meio_triangulo()
-{
-    print(2, "Alinhando para o triângulo");
-    girar_direita(90);
-    alinhar_ultra(124);
-    print(2, "Girando para o triângulo");
-    girar_direita(45);
-    print(2, "Indo para o triângulo");
-    while (ultra(0) > 80)
-    {
-        mover(300, 300);
-    }
-    mover_tempo(250, 500);
-    print(2, "Entregando vítima");
-    entregar_vitima();
-    print(1, "Voltando à busca");
-    print(2, "Indo ao meio");
-    while (ultra(0) < 175)
-    {
-        mover(-300, -300);
-    }
-    print(2, "Alinhando...");
-    girar_esquerda(45);
-    alinhar_angulo();
-    alinhar_ultra(124);
-    girar_esquerda(90);
-}
-
 void alcancar_saida()
 {
     mover_tempo(300, 500);
@@ -242,4 +213,51 @@ void alcancar_saida()
     parar();
     delay(300);
     lugar = 3;
+}
+
+void girar_objetivo(float angulo_para_ir)
+{
+    if (angulo_para_ir > eixo_x())
+    {
+        if (((float)Math.Abs(angulo_para_ir - eixo_x())) > 180) { objetivo_esquerda(angulo_para_ir); }
+        else { objetivo_direita(angulo_para_ir); }
+    }
+    else
+    {
+        if (((float)Math.Abs(angulo_para_ir - eixo_x())) > 180) { objetivo_direita(angulo_para_ir); }
+        else { objetivo_esquerda(angulo_para_ir); }
+    }
+}
+
+void mover_xy(float x2, float y2)
+{
+    direcao_x = x2 - xy_robo[x_baixo];
+    direcao_y = y2 - xy_robo[y_baixo];
+    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
+    girar_objetivo(converter_graus(angulo_objetivo));
+    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
+    mover_tempo(300, (int)(16 * distancia_mover_xy) - 1);
+    xy_robo[x_baixo] = x2;
+    xy_robo[y_baixo] = y2;
+}
+
+void mover_xy_costas(float x2, float y2)
+{
+    direcao_x = x2 - xy_robo[x_baixo];
+    direcao_y = y2 - xy_robo[y_baixo];
+    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
+    girar_objetivo(converter_graus(angulo_objetivo + 180));
+    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
+    mover_tempo(-300, (int)(16 * (int)distancia_mover_xy) - 1, false);
+    xy_robo[x_baixo] = x2;
+    xy_robo[y_baixo] = y2;
+}
+
+void buscar_vitima()
+{
+    while ((temperatura() < 37) && (luz(4) > 13))
+    {
+        mover(300, 300);
+    }
+    travar();
 }

@@ -1,30 +1,33 @@
 void varredura()
 {
-    bot.SetFileConsolePath("C:/Users/cesar/Desktop/VMRT-sBotics2021/leituras.txt");
+    bot.SetFileConsolePath("C:/Users/samoc/Desktop/VMRT-sBotics2021/leituras.txt");
 
-    varrer_mapear();
-    definir_parede();
-    identificar_saida();
-    vitimas_centro();
-    verificar_salvamento();
-    bot.EraseConsoleFile();
+    varrer_mapear(); // varre em 360° e gera o mapa em xy
+
+    identificar_robo(); // identifica a cordenada do robô 
+    definir_parede(); // identifica as paredes
+    identificar_saida(); // identifica a saida e a entrada
+    verificar_salvamento(); // identifica onde está o triangulo 
+    procurar_parede_resgate(); // define em qual parede o robo iniciara o resgate
+
+    //bot.EraseConsoleFile();
     //desenhar();
-    bot.EraseConsoleFile();
 
-    if (tem_kit())
+    if (tem_kit()) // caso o robô tenha entrado com o kit de resgate ele ira entregalo
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
         entregar_vitima();
     }
-    procurar_parede_resgate();
-    mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]);
-    if (xy_resgate[x_baixo] == 0)
+
+    mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
+
+    if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
     {
-        girar_objetivo(converter_graus(direcao_inicial - 90));
+        girar_objetivo(90);
     }
     else
     {
-        girar_objetivo(converter_graus(direcao_inicial + 90));
+        girar_objetivo(270);
     }
     alinhar_angulo();
     mover_tempo(-300, 255);
@@ -74,27 +77,6 @@ void desenhar(byte objeto = 0)
             }
         }
     }
-    else if (objeto == 3)
-    {
-
-        registrar($"{xy_triangulo[x_baixo]}; {xy_triangulo[y_baixo]}");
-
-        registrar($"{xy_zerado[vitima1, x_baixo]}; {xy_zerado[vitima1, y_baixo]}");
-        registrar($"{xy_zerado[vitima2, x_baixo]}; {xy_zerado[vitima2, y_baixo]}");
-        registrar($"{xy_zerado[vitima3, x_baixo]}; {xy_zerado[vitima3, y_baixo]}");
-
-        for (int i = 0; i < 360; i++)
-        {
-            if ((xy_zerado[i, objeto_alto] == parede))
-            {
-                registrar($"{xy_zerado[i, x_alto]}; {xy_zerado[i, y_alto]}");
-            }
-            if ((xy_zerado[i, objeto_baixo] == parede))
-            {
-                registrar($"{xy_zerado[i, x_baixo]}; {xy_zerado[i, y_baixo]}");
-            }
-        }
-    }
 }
 
 void varrer_360()
@@ -106,22 +88,6 @@ void varrer_360()
         ler_ultra();
         distancia_grau[(int)converter_graus(i - 90), medida_baixa] = ultra_esquerda + raio_l;
         distancia_grau[i, medida_alto] = ultra_frente + raio_c;
-        distancia_grau[i, angulo_leitura] = eixo_x();
-
-        objetivo_direita(converter_graus(direcao_inicial + i));
-    }
-}
-
-void varrer_180()
-{
-    print(2, "FAZENDO VARREDURA");
-    direcao_inicial = eixo_x();
-    for (int i = 0; i < 180; i++)
-    {
-
-        ler_ultra(); // Tira leituras de distancia e salva no array
-        distancia_grau[(int)converter_graus(i - 90), medida_baixa] = ultra_esquerda + raio_l;
-        distancia_grau[(int)converter_graus(i + 90), medida_baixa] = ultra_direita + raio_l;
         distancia_grau[i, angulo_leitura] = eixo_x();
 
         objetivo_direita(converter_graus(direcao_inicial + i));
@@ -183,6 +149,38 @@ void mapear_xy()
                 xy_zerado[i, x_baixo] = 500;
                 xy_zerado[i, y_baixo] = 500;
             }
+        }
+    }
+}
+
+void varrer_mapear()
+{
+
+    qualidade_x = 0;
+    qualidade_y = 0;
+
+    varrer_360();
+    gerar_xy();
+
+    //checa qualidade do mapeamento
+    while (qualidade_x < 30 || qualidade_y < 30)
+    {
+        mapear_xy();
+        bot.EraseConsoleFile();
+        //desenhar();
+        qualidade_x = 0;
+        qualidade_y = 0;
+        for (int i = 0; i < 360; i++)
+        {
+            if (proximo(xy_zerado[i, x_alto], 0, 10)) qualidade_x++;
+            if (proximo(xy_zerado[i, y_alto], 0, 10)) qualidade_y++;
+        }
+        print(3, $"a qualidade da leitura foi de: {qualidade_x} em x e {qualidade_y} em y");
+        if (qualidade_x < 30 || qualidade_y < 30)
+        {
+            mover_tempo(300, 511);
+            varrer_360();
+            gerar_xy();
         }
     }
 }
@@ -453,48 +451,6 @@ void identificar_saida()
 
 }
 
-void vitimas_centro()
-{
-    tag_vitima1 = 0;
-    tag_vitima2 = 0;
-    tag_vitima3 = 0;
-    for (int i = 0; i < 360; i++)
-    {
-        if ((xy_zerado[i, objeto_baixo] != parede) && (xy_zerado[i, objeto_baixo] != saida))
-        {
-            xy_zerado[i, objeto_baixo] = 0;
-        }
-    }
-
-    for (int i = 0; i < 360; i++)
-    {
-        if ((xy_zerado[i, x_baixo] > 55) && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 55)
-        && (xy_zerado[i, y_baixo] > 55) && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 55))
-        {
-            if (tag_vitima1 == 0)
-            {
-                vitima1 = i;
-                tag_vitima1 = 1;
-            }
-            else if ((tag_vitima2 == 0) && (!proximo(xy_zerado[vitima1, x_baixo], xy_zerado[i, x_baixo], proximidade_vitima))
-                                        && (!proximo(xy_zerado[vitima1, y_baixo], xy_zerado[i, y_baixo], proximidade_vitima)))
-            {
-                vitima2 = i;
-                tag_vitima2 = 1;
-            }
-            else if ((tag_vitima3 == 0)
-                  && (!proximo(xy_zerado[vitima1, x_baixo], xy_zerado[i, x_baixo], proximidade_vitima))
-                  && (!proximo(xy_zerado[vitima1, y_baixo], xy_zerado[i, y_baixo], proximidade_vitima))
-                  && (!proximo(xy_zerado[vitima2, x_baixo], xy_zerado[i, x_baixo], proximidade_vitima))
-                  && (!proximo(xy_zerado[vitima2, y_baixo], xy_zerado[i, y_baixo], proximidade_vitima)))
-            {
-                vitima3 = i;
-                tag_vitima3 = 1;
-            }
-        }
-    }
-}
-
 void verificar_salvamento()
 {
     for (int i = 0; i < 360; i++)
@@ -523,100 +479,6 @@ void verificar_salvamento()
             xy_triangulo[y_baixo] = 50;
         }
     }
-}
-
-void girar_objetivo(float angulo_para_ir)
-{
-    if (angulo_para_ir > eixo_x())
-    {
-        if (((float)Math.Abs(angulo_para_ir - eixo_x())) > 180) { objetivo_esquerda(angulo_para_ir); }
-        else { objetivo_direita(angulo_para_ir); }
-    }
-    else
-    {
-        if (((float)Math.Abs(angulo_para_ir - eixo_x())) > 180) { objetivo_direita(angulo_para_ir); }
-        else { objetivo_esquerda(angulo_para_ir); }
-    }
-}
-
-void mover_xy(float x2, float y2)
-{
-    direcao_x = x2 - xy_robo[x_baixo];
-    direcao_y = y2 - xy_robo[y_baixo];
-    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
-    girar_objetivo(converter_graus(angulo_objetivo));
-    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
-    mover_tempo(300, (int)(16 * distancia_mover_xy) - 1);
-    xy_robo[x_baixo] = x2;
-    xy_robo[y_baixo] = y2;
-}
-
-void mover_xy_costas(float x2, float y2)
-{
-    direcao_x = x2 - xy_robo[x_baixo];
-    direcao_y = y2 - xy_robo[y_baixo];
-    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
-    girar_objetivo(converter_graus(angulo_objetivo + 180));
-    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
-    mover_tempo(-300, (int)(16 * (int)distancia_mover_xy) - 1, false);
-    xy_robo[x_baixo] = x2;
-    xy_robo[y_baixo] = y2;
-}
-
-void varrer_mapear()
-{
-
-    qualidade_x = 0;
-    qualidade_y = 0;
-
-    varrer_360();
-    gerar_xy();
-
-    //checa qualidade do mapeamento
-    while (qualidade_x < 30 || qualidade_y < 30)
-    {
-        mapear_xy();
-        bot.EraseConsoleFile();
-        //desenhar();
-        qualidade_x = 0;
-        qualidade_y = 0;
-        for (int i = 0; i < 360; i++)
-        {
-            if (proximo(xy_zerado[i, x_alto], 0, 10)) qualidade_x++;
-            if (proximo(xy_zerado[i, y_alto], 0, 10)) qualidade_y++;
-        }
-        print(3, $"a qualidade da leitura foi de: {qualidade_x} em x e {qualidade_y} em y");
-        if (qualidade_x < 30 || qualidade_y < 30)
-        {
-            mover_tempo(300, 511);
-            varrer_360();
-            gerar_xy();
-        }
-
-        identificar_robo();
-        print(1, $"{xy_robo[0]}; {xy_robo[1]}");
-    }
-}
-
-void pegar_vitima(float x2, float y2)
-{
-    direcao_x = x2 - xy_robo[x_baixo];
-    direcao_y = y2 - xy_robo[y_baixo];
-    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
-    girar_objetivo(converter_graus(angulo_objetivo));
-    distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
-    mover_tempo(300, (int)((16 * distancia_mover_xy)) - 1);
-    xy_robo[x_baixo] = x2;
-    xy_robo[y_baixo] = y2;
-}
-
-void buscar_vitima()
-{
-    while ((temperatura() < 37) && (luz(4) > 13))
-    {
-        mover(300, 300);
-    }
-    travar();
 }
 
 void procurar_parede_resgate()

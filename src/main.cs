@@ -6,8 +6,8 @@ import("piso/seguir_linha.cs");
 import("piso/encruzilhadas.cs");
 import("piso/obstaculo.cs");
 import("piso/elevados.cs");
-import("resgate/setup/movimentacao.cs");
 import("resgate/setup/variaveis.cs");
+import("resgate/setup/movimentacao.cs");
 import("resgate/varredura.cs");
 
 // Variáveis de controle para ligar/desligar o debug e console
