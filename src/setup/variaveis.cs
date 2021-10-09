@@ -7,8 +7,8 @@ byte media_meio = 0,
 
 const byte limite_branco = 55;
 
-const short velocidade_max = 275,
-        velocidade_padrao = 250;
+const short velocidade_max = 250,
+        velocidade_padrao = 230;
 
 short velocidade = 250;
 

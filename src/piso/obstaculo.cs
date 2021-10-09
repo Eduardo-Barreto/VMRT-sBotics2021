@@ -25,13 +25,21 @@ bool verifica_obstaculo(bool contar_update = true)
         parar();
         while (ultra(0) > 12)
         {
-            mover(-75, -75);
+            mover(75, 75);
         }
         while (ultra(0) < 12)
         {
+            mover(-75, -75);
+        }
+        while (ultra(0) > 12)
+        {
             mover(75, 75);
         }
-        travar();
+        while (ultra(0) < 12)
+        {
+            mover(-75, -75);
+        }
+        parar();
 
         void alinhar_pos_obstaculo()
         {
