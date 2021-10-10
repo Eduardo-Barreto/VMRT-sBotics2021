@@ -62,7 +62,8 @@ int qualidade_x = 0,
     termino_saida = 0,
     inicio_saida2 = 0,
     termino_saida2 = 0,
-    tag_entrada = 0;
+    tag_entrada = 0,
+    tempo_varredura = 0;
 
 // variaveis para mover_xy e mover_xy_costas
 float direcao_x,
@@ -70,4 +71,10 @@ float direcao_x,
       angulo_objetivo,
       distancia_mover_xy,
 // variavel para as varreduras
-      menor_valor = 0;
+      menor_valor = 0,
+// variaveis para check_vitima
+      dir_anterior,
+      esq_anterior,
+      medida_max;
+
+bool flag_vitima_m = false;

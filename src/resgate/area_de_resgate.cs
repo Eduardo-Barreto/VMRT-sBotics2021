@@ -1,7 +1,8 @@
-void varredura()
+void area_de_resgate()
 {
     bot.SetFileConsolePath("C:/Users/samoc/Desktop/VMRT-sBotics2021/leituras.txt");
 
+    mover_tempo(300, 2043); // entra na sala
     varrer_mapear(); // varre em 360° e gera o mapa em xy
 
     identificar_robo(); // identifica a cordenada do robô 
@@ -20,7 +21,6 @@ void varredura()
     }
 
     mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
-
     if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
     {
         girar_objetivo(90);
@@ -30,8 +30,10 @@ void varredura()
         girar_objetivo(270);
     }
     alinhar_angulo();
-    mover_tempo(-300, 255);
+    mover_tempo(-300, 191);
     alinhar_angulo();
+
+    varredura_linear();
 }
 
 void desenhar(byte objeto = 0)
@@ -493,5 +495,57 @@ void procurar_parede_resgate()
     }
 
     xy_resgate[y_baixo] = xy_parede[y_baixo] / 2;
+    medida_max = (xy_parede[y_baixo] / 2) + 50;
 }
 
+void achar_robo()
+{
+
+}
+
+void check_vitima()
+{
+    ultra_direita = ultra(1);
+    ultra_esquerda = ultra(2);
+
+    if (ultra_direita < medida_max && dir_anterior < medida_max && !proximo(ultra_direita, dir_anterior, 5))
+    {
+        mover_tempo(300, 95);
+        girar_objetivo(converter_graus(eixo_x() + 90));
+        buscar_vitima();
+        travar();
+    }
+
+    if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 5))
+    {
+        mover_tempo(300, 95);
+        girar_objetivo(converter_graus(eixo_x() - 90));
+        buscar_vitima();
+        travar();
+    }
+
+    dir_anterior = ultra_direita;
+    esq_anterior = ultra_esquerda;
+}
+
+void varredura_linear()
+{
+
+    dir_anterior = ultra(1);
+    esq_anterior = ultra(2);
+
+    if (xy_parede[x_baixo] == 400) // define o tempo que o robô procurara por vitimas com base na distancia
+    {
+        tempo_varredura = millis() + 5500;
+    }
+    else
+    {
+        tempo_varredura = millis() + 4125;
+    }
+
+    while (millis() < tempo_varredura)
+    {
+        check_vitima();
+        mover(300, 300);
+    }
+}

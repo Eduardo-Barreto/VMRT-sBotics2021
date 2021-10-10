@@ -1521,7 +1521,8 @@ int qualidade_x = 0,
     termino_saida = 0,
     inicio_saida2 = 0,
     termino_saida2 = 0,
-    tag_entrada = 0;
+    tag_entrada = 0,
+    tempo_varredura = 0;
 
 // variaveis para mover_xy e mover_xy_costas
 float direcao_x,
@@ -1529,7 +1530,13 @@ float direcao_x,
       angulo_objetivo,
       distancia_mover_xy,
 // variavel para as varreduras
-      menor_valor = 0;
+      menor_valor = 0,
+// variaveis para check_vitima
+      dir_anterior,
+      esq_anterior,
+      medida_max;
+
+bool flag_vitima_m = false;
 // metodos de movimentação para a area de resgate
 
 void alinhar_ultra(float distancia, bool empinada = true)
@@ -1619,16 +1626,16 @@ void preparar_atuador(bool apenas_sem_vitima = false)
     {
         if (!tem_vitima())
         {
-            totozinho();
-            abrir_atuador();
+            mover_tempo(-300, 399);
             abaixar_atuador();
+            abrir_atuador();
         }
     }
     else
     {
-        totozinho();
-        abrir_atuador();
+        mover_tempo(-300, 399);
         abaixar_atuador();
+        abrir_atuador();
     }
 }
 
@@ -1787,16 +1794,49 @@ void mover_xy_costas(float x2, float y2)
 
 void buscar_vitima()
 {
-    while ((temperatura() < 37) && (luz(4) > 13))
+    if (flag_vitima_m) // caso tenha visto vitima morta anteriormente vai direto com aatuador abaixado
     {
-        mover(300, 300);
+        preparar_atuador();
+        timeout = millis() + 4000;
+        while (!tem_vitima() && millis() < timeout)
+        {
+            mover(300, 300);
+        }
+        levantar_atuador();
+        fechar_atuador();
+        mover_tempo(-300, 399);
     }
-    travar();
+    else
+    {
+        timeout = millis() + 4000;
+        while ((luz(4) < 52) && (luz(4) > 18) && (millis() < timeout))
+        {
+            mover(300, 300);
+        }
+        if (luz(4) >= 52)
+        {
+            preparar_atuador();
+            mover(300, 300);
+            delay(703);
+            levantar_atuador();
+            fechar_atuador();
+            mover_tempo(-300, 399);
+        }
+        else if (luz(4) <= 19)
+        {
+            flag_vitima_m = true;
+        }
+        else
+        {
+            mover_tempo(-300, 399);
+        }
+    }
 }
-void varredura()
+void area_de_resgate()
 {
     bot.SetFileConsolePath("C:/Users/samoc/Desktop/VMRT-sBotics2021/leituras.txt");
 
+    mover_tempo(300, 2043); // entra na sala
     varrer_mapear(); // varre em 360° e gera o mapa em xy
 
     identificar_robo(); // identifica a cordenada do robô 
@@ -1815,7 +1855,6 @@ void varredura()
     }
 
     mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
-
     if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
     {
         girar_objetivo(90);
@@ -1825,8 +1864,10 @@ void varredura()
         girar_objetivo(270);
     }
     alinhar_angulo();
-    mover_tempo(-300, 255);
+    mover_tempo(-300, 191);
     alinhar_angulo();
+
+    varredura_linear();
 }
 
 void desenhar(byte objeto = 0)
@@ -2288,8 +2329,60 @@ void procurar_parede_resgate()
     }
 
     xy_resgate[y_baixo] = xy_parede[y_baixo] / 2;
+    medida_max = (xy_parede[y_baixo] / 2) + 50;
 }
 
+void achar_robo()
+{
+
+}
+
+void check_vitima()
+{
+    ultra_direita = ultra(1);
+    ultra_esquerda = ultra(2);
+
+    if (ultra_direita < medida_max && dir_anterior < medida_max && !proximo(ultra_direita, dir_anterior, 5))
+    {
+        mover_tempo(300, 95);
+        girar_objetivo(converter_graus(eixo_x() + 90));
+        buscar_vitima();
+        travar();
+    }
+
+    if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 5))
+    {
+        mover_tempo(300, 95);
+        girar_objetivo(converter_graus(eixo_x() - 90));
+        buscar_vitima();
+        travar();
+    }
+
+    dir_anterior = ultra_direita;
+    esq_anterior = ultra_esquerda;
+}
+
+void varredura_linear()
+{
+
+    dir_anterior = ultra(1);
+    esq_anterior = ultra(2);
+
+    if (xy_parede[x_baixo] == 400) // define o tempo que o robô procurara por vitimas com base na distancia
+    {
+        tempo_varredura = millis() + 5500;
+    }
+    else
+    {
+        tempo_varredura = millis() + 4125;
+    }
+
+    while (millis() < tempo_varredura)
+    {
+        check_vitima();
+        mover(300, 300);
+    }
+}
 
 // Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
@@ -2301,8 +2394,9 @@ void Main()
 {
     if (debug)
     {
-        print(1, (int)(99 * 0.7));
-        delay(60);
+        alinhar_angulo();
+        mover_tempo(300, 3800);
+        travar();
     }
     else
     {
@@ -2355,8 +2449,7 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
-        mover_tempo(300, 2043);
-        varredura();
+        area_de_resgate();
         travar();
     }
 }

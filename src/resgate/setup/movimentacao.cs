@@ -87,16 +87,16 @@ void preparar_atuador(bool apenas_sem_vitima = false)
     {
         if (!tem_vitima())
         {
-            totozinho();
-            abrir_atuador();
+            mover_tempo(-300, 399);
             abaixar_atuador();
+            abrir_atuador();
         }
     }
     else
     {
-        totozinho();
-        abrir_atuador();
+        mover_tempo(-300, 399);
         abaixar_atuador();
+        abrir_atuador();
     }
 }
 
@@ -255,9 +255,41 @@ void mover_xy_costas(float x2, float y2)
 
 void buscar_vitima()
 {
-    while ((temperatura() < 37) && (luz(4) > 13))
+    if (flag_vitima_m) // caso tenha visto vitima morta anteriormente vai direto com aatuador abaixado
     {
-        mover(300, 300);
+        preparar_atuador();
+        timeout = millis() + 4000;
+        while (!tem_vitima() && millis() < timeout)
+        {
+            mover(300, 300);
+        }
+        levantar_atuador();
+        fechar_atuador();
+        mover_tempo(-300, 399);
     }
-    travar();
+    else
+    {
+        timeout = millis() + 4000;
+        while ((luz(4) < 52) && (luz(4) > 18) && (millis() < timeout))
+        {
+            mover(300, 300);
+        }
+        if (luz(4) >= 52)
+        {
+            preparar_atuador();
+            mover(300, 300);
+            delay(703);
+            levantar_atuador();
+            fechar_atuador();
+            mover_tempo(-300, 399);
+        }
+        else if (luz(4) <= 19)
+        {
+            flag_vitima_m = true;
+        }
+        else
+        {
+            mover_tempo(-300, 399);
+        }
+    }
 }

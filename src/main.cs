@@ -8,7 +8,7 @@ import("piso/obstaculo.cs");
 import("piso/elevados.cs");
 import("resgate/setup/variaveis.cs");
 import("resgate/setup/movimentacao.cs");
-import("resgate/varredura.cs");
+import("resgate/area_de_resgate.cs");
 
 // Variáveis de controle para ligar/desligar o debug e console
 bool debug = false;
@@ -20,8 +20,9 @@ void Main()
 {
     if (debug)
     {
-        print(1, (int)(99 * 0.7));
-        delay(60);
+        alinhar_angulo();
+        mover_tempo(300, 3800);
+        travar();
     }
     else
     {
@@ -74,8 +75,7 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
-        mover_tempo(300, 2043);
-        varredura();
+        area_de_resgate();
         travar();
     }
 }
