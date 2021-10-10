@@ -33,7 +33,10 @@ void area_de_resgate()
     mover_tempo(-300, 191);
     alinhar_angulo();
 
-    varredura_linear();
+    while (true)
+    {
+        varredura_linear();
+    }
 }
 
 void desenhar(byte objeto = 0)
@@ -110,8 +113,6 @@ void gerar_xy()
         // salva o angulo 
         xy_cru[i, angulo_xy] = distancia_grau[i, angulo_leitura];
 
-        //registrar($"{xy_cru[i, x_baixo]}; {xy_cru[i, y_baixo]}");
-        //registrar($"{xy_cru[i, x_alto]}; {xy_cru[i, y_alto]}");
     }
 }
 
@@ -532,7 +533,7 @@ void achar_robo()
     }
 }
 
-void check_vitima()
+void check_vitima_lateral()
 {
     ultra_direita = ultra(1);
     ultra_esquerda = ultra(2);
@@ -542,7 +543,6 @@ void check_vitima()
         mover_tempo(300, 95);
         girar_objetivo(converter_graus(eixo_x() + 90));
         buscar_vitima();
-        achar_robo();
     }
 
     if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 5))
@@ -550,11 +550,27 @@ void check_vitima()
         mover_tempo(300, 95);
         girar_objetivo(converter_graus(eixo_x() - 90));
         buscar_vitima();
-        achar_robo();
     }
 
     dir_anterior = ultra_direita;
     esq_anterior = ultra_esquerda;
+}
+
+void check_vitima_frente()
+{
+    if (luz(4) >= 52)
+    {
+        preparar_atuador();
+        mover(300, 300);
+        delay(703);
+        levantar_atuador();
+        fechar_atuador();
+        mover_tempo(-300, 399);
+    }
+    else if (luz(4) <= 19)
+    {
+        flag_vitima_m = true;
+    }
 }
 
 void varredura_linear()
@@ -574,13 +590,26 @@ void varredura_linear()
 
     while (millis() < tempo_varredura)
     {
-        check_vitima();
+        check_vitima_lateral();
+        check_vitima_frente();
         mover(300, 300);
     }
+
+    achar_robo();
 
     if (tem_vitima())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
-        entregar_vitima(); // preciso fazer a repetição do ciclo o contagem das vitimas pegas 
+        entregar_vitima(); // preciso fazer a contagem das vitimas pegas 
+    }
+
+    mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
+    if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
+    {
+        girar_objetivo(90);
+    }
+    else
+    {
+        girar_objetivo(270);
     }
 }

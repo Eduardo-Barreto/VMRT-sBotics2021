@@ -1,3 +1,4 @@
+
 // Declaração das variáveis principais de todo o projeto, separadas por tipos
 byte media_meio = 0,
         direcao_triangulo = 255,
@@ -46,6 +47,7 @@ bool preto0 = false,
 short[] angulos_retos = { 0, 90, 180, 270 };
 
 char lado_ajuste = '0';
+
 // Comandos úteis para todo o código
 
 float map(float val, float minimo, float maximo, float minimoSaida, float maximoSaida)
@@ -114,6 +116,7 @@ void registrar(object texto)
 {
     if (registro) bot.WriteText(texto.ToString());
 }
+
 // Métodos de leitura e outros
 
 int millis() => (int)(bot.Timer());
@@ -343,6 +346,7 @@ void print_luz_marker()
     print(3, $"{marker3} | {marker2} | {marker1} | {marker0}");
     print(4, "");
 }
+
 // Métodos de movimentação e outros
 
 void abrir_atuador() => bot.OpenActuator();
@@ -549,6 +553,7 @@ void girar_cima_atuador()
     bot.ActuatorSpeed(150);
     bot.TurnActuatorUp(100);
 }
+
 bool verifica_saida()
 {
     if (lugar == 3)
@@ -782,6 +787,7 @@ void seguir_linha()
         mover(velocidade, velocidade);
     }
 }
+
 bool falso_verde()
 {
     /*
@@ -1250,6 +1256,7 @@ bool verifica_curva()
         return false;
     }
 }
+
 bool verifica_obstaculo(bool contar_update = true)
 {
     if (contar_update && millis() < update_obstaculo) { return false; }
@@ -1378,6 +1385,7 @@ bool verifica_obstaculo(bool contar_update = true)
     }
     return false;
 }
+
 bool verifica_gangorra()
 {
     /*
@@ -1457,6 +1465,7 @@ bool verifica_rampa()
     return false;
 
 }
+
 // Variaveis utilizadas no resgate
 
 float[,] distancia_grau = new float[360, 3];
@@ -1541,6 +1550,7 @@ float direcao_x,
       medida_max;
 
 bool flag_vitima_m = false;
+
 // metodos de movimentação para a area de resgate
 
 void alinhar_ultra(float distancia, bool empinada = true)
@@ -1806,8 +1816,8 @@ void buscar_vitima()
         {
             mover(300, 300);
         }
-        levantar_atuador();
         fechar_atuador();
+        levantar_atuador();
         mover_tempo(-300, 399);
     }
     else
@@ -1822,8 +1832,8 @@ void buscar_vitima()
             preparar_atuador();
             mover(300, 300);
             delay(703);
-            levantar_atuador();
             fechar_atuador();
+            levantar_atuador();
             mover_tempo(-300, 399);
         }
         else if (luz(4) <= 19)
@@ -1836,6 +1846,7 @@ void buscar_vitima()
         }
     }
 }
+
 void area_de_resgate()
 {
     bot.SetFileConsolePath("C:/Users/samoc/Desktop/VMRT-sBotics2021/leituras.txt");
@@ -1871,7 +1882,10 @@ void area_de_resgate()
     mover_tempo(-300, 191);
     alinhar_angulo();
 
-    varredura_linear();
+    while (true)
+    {
+        varredura_linear();
+    }
 }
 
 void desenhar(byte objeto = 0)
@@ -1948,8 +1962,6 @@ void gerar_xy()
         // salva o angulo 
         xy_cru[i, angulo_xy] = distancia_grau[i, angulo_leitura];
 
-        //registrar($"{xy_cru[i, x_baixo]}; {xy_cru[i, y_baixo]}");
-        //registrar($"{xy_cru[i, x_alto]}; {xy_cru[i, y_alto]}");
     }
 }
 
@@ -2370,7 +2382,7 @@ void achar_robo()
     }
 }
 
-void check_vitima()
+void check_vitima_lateral()
 {
     ultra_direita = ultra(1);
     ultra_esquerda = ultra(2);
@@ -2380,7 +2392,6 @@ void check_vitima()
         mover_tempo(300, 95);
         girar_objetivo(converter_graus(eixo_x() + 90));
         buscar_vitima();
-        achar_robo();
     }
 
     if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 5))
@@ -2388,11 +2399,27 @@ void check_vitima()
         mover_tempo(300, 95);
         girar_objetivo(converter_graus(eixo_x() - 90));
         buscar_vitima();
-        achar_robo();
     }
 
     dir_anterior = ultra_direita;
     esq_anterior = ultra_esquerda;
+}
+
+void check_vitima_frente()
+{
+    if (luz(4) >= 52)
+    {
+        preparar_atuador();
+        mover(300, 300);
+        delay(703);
+        levantar_atuador();
+        fechar_atuador();
+        mover_tempo(-300, 399);
+    }
+    else if (luz(4) <= 19)
+    {
+        flag_vitima_m = true;
+    }
 }
 
 void varredura_linear()
@@ -2412,14 +2439,27 @@ void varredura_linear()
 
     while (millis() < tempo_varredura)
     {
-        check_vitima();
+        check_vitima_lateral();
+        check_vitima_frente();
         mover(300, 300);
     }
+
+    achar_robo();
 
     if (tem_vitima())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
-        entregar_vitima(); // preciso fazer a repetição do ciclo o contagem das vitimas pegas 
+        entregar_vitima(); // preciso fazer a contagem das vitimas pegas 
+    }
+
+    mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
+    if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
+    {
+        girar_objetivo(90);
+    }
+    else
+    {
+        girar_objetivo(270);
     }
 }
 

@@ -263,8 +263,8 @@ void buscar_vitima()
         {
             mover(300, 300);
         }
-        levantar_atuador();
         fechar_atuador();
+        levantar_atuador();
         mover_tempo(-300, 399);
     }
     else
@@ -279,8 +279,8 @@ void buscar_vitima()
             preparar_atuador();
             mover(300, 300);
             delay(703);
-            levantar_atuador();
             fechar_atuador();
+            levantar_atuador();
             mover_tempo(-300, 399);
         }
         else if (luz(4) <= 19)
