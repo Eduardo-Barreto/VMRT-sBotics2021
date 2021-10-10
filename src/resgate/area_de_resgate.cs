@@ -500,7 +500,36 @@ void procurar_parede_resgate()
 
 void achar_robo()
 {
+    alinhar_angulo();
+    leitura_frente = ultra(0);
+    angulo_leitura_frente = eixo_x();
 
+    girar_objetivo(270);
+    leitura_lateral = ultra(0);
+    xy_robo[x_baixo] = leitura_lateral + raio_c;
+
+    if (leitura_frente >= medida_max)
+    {
+        girar_objetivo(converter_graus(angulo_leitura_frente + 180));
+        leitura_frente = ultra(0);
+        angulo_leitura_frente = eixo_x();
+    }
+
+    if (proximo(angulo_leitura_frente, 180, 10))
+    {
+        xy_robo[y_baixo] = leitura_frente + raio_c;
+    }
+    else
+    {
+        xy_robo[y_baixo] = xy_parede[y_baixo] - (leitura_frente + raio_c);
+    }
+
+    if (leitura_lateral >= xy_parede[x_baixo])
+    {
+        girar_objetivo(90);
+        leitura_lateral = ultra(0);
+        xy_robo[x_baixo] = xy_parede[x_baixo] - (leitura_lateral + raio_c);
+    }
 }
 
 void check_vitima()
@@ -513,7 +542,7 @@ void check_vitima()
         mover_tempo(300, 95);
         girar_objetivo(converter_graus(eixo_x() + 90));
         buscar_vitima();
-        travar();
+        achar_robo();
     }
 
     if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 5))
@@ -521,7 +550,7 @@ void check_vitima()
         mover_tempo(300, 95);
         girar_objetivo(converter_graus(eixo_x() - 90));
         buscar_vitima();
-        travar();
+        achar_robo();
     }
 
     dir_anterior = ultra_direita;
@@ -547,5 +576,11 @@ void varredura_linear()
     {
         check_vitima();
         mover(300, 300);
+    }
+
+    if (tem_vitima())
+    {
+        mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
+        entregar_vitima(); // preciso fazer a repetição do ciclo o contagem das vitimas pegas 
     }
 }

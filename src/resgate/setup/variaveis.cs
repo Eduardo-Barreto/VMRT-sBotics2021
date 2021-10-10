@@ -72,6 +72,10 @@ float direcao_x,
       distancia_mover_xy,
 // variavel para as varreduras
       menor_valor = 0,
+// variaveis achar robô
+      leitura_frente,
+      leitura_lateral,
+      angulo_leitura_frente,
 // variaveis para check_vitima
       dir_anterior,
       esq_anterior,
