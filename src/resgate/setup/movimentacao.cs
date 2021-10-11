@@ -253,43 +253,36 @@ void mover_xy_costas(float x2, float y2)
     xy_robo[y_baixo] = y2;
 }
 
-void buscar_vitima()
+void alinhar_angulo_45()
 {
-    if (flag_vitima_m) // caso tenha visto vitima morta anteriormente vai direto com aatuador abaixado
+    led("amarelo");
+
+    int alinhamento = 0;
+    float angulo = eixo_x();
+
+    if (angulo_reto())
     {
-        preparar_atuador();
-        timeout = millis() + 4000;
-        while (!tem_vitima() && millis() < timeout)
-        {
-            mover(300, 300);
-        }
-        fechar_atuador();
-        levantar_atuador();
-        mover_tempo(-300, 399);
+        return;
     }
-    else
+
+    if ((angulo > 0) && (angulo <= 90))
     {
-        timeout = millis() + 4000;
-        while ((luz(4) < 52) && (luz(4) > 18) && (millis() < timeout))
-        {
-            mover(300, 300);
-        }
-        if (luz(4) >= 52)
-        {
-            preparar_atuador();
-            mover(300, 300);
-            delay(703);
-            fechar_atuador();
-            levantar_atuador();
-            mover_tempo(-300, 399);
-        }
-        else if (luz(4) <= 19)
-        {
-            flag_vitima_m = true;
-        }
-        else
-        {
-            mover_tempo(-300, 399);
-        }
+        alinhamento = 45;
     }
+    else if ((angulo > 90) && (angulo <= 180))
+    {
+        alinhamento = 135;
+    }
+    else if ((angulo > 180) && (angulo <= 270))
+    {
+        alinhamento = 225;
+    }
+    else if ((angulo > 270) && (angulo <= 360))
+    {
+        alinhamento = 315;
+    }
+
+    girar_objetivo(alinhamento);
+
+    led("desligado");
 }

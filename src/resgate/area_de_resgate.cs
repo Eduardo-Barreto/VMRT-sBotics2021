@@ -17,6 +17,9 @@ void area_de_resgate()
     if (tem_kit()) // caso o robô tenha entrado com o kit de resgate ele ira entregalo
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
+        alinhar_angulo_45();
+        mover_tempo(300, 255);
+        alinhar_angulo_45();
         entregar_vitima();
     }
 
@@ -32,7 +35,8 @@ void area_de_resgate()
     alinhar_angulo();
     mover_tempo(-300, 191);
     alinhar_angulo();
-
+    mover_tempo(300, 191);
+    alinhar_angulo();
     while (true)
     {
         varredura_linear();
@@ -538,17 +542,35 @@ void check_vitima_lateral()
     ultra_direita = ultra(1);
     ultra_esquerda = ultra(2);
 
-    if (ultra_direita < medida_max && dir_anterior < medida_max && !proximo(ultra_direita, dir_anterior, 5))
+    if (ultra_direita < medida_max && dir_anterior < medida_max && !proximo(ultra_direita, dir_anterior, 8))
     {
-        mover_tempo(300, 95);
+        if (dir_anterior > ultra_direita)
+        {
+            mover_tempo(300, 111);
+        }
+        else
+        {
+            mover_tempo(-300, 255);
+        }
+
         girar_objetivo(converter_graus(eixo_x() + 90));
+        viu_vitima = true;
         buscar_vitima();
     }
 
-    if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 5))
+    if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 8))
     {
-        mover_tempo(300, 95);
+        if (esq_anterior > ultra_esquerda)
+        {
+            mover_tempo(300, 111);
+        }
+        else
+        {
+            mover_tempo(-300, 255);
+        }
+
         girar_objetivo(converter_graus(eixo_x() - 90));
+        viu_vitima = true;
         buscar_vitima();
     }
 
@@ -556,20 +578,83 @@ void check_vitima_lateral()
     esq_anterior = ultra_esquerda;
 }
 
-void check_vitima_frente()
+void buscar_vitima()
 {
+    timeout = millis() + 4000;
+    while ((luz(4) < 52) && (luz(4) > 18) && (millis() < timeout))
+    {
+        mover(300, 300);
+    }
     if (luz(4) >= 52)
     {
         preparar_atuador();
         mover(300, 300);
-        delay(703);
-        levantar_atuador();
+        delay(799);
         fechar_atuador();
+        levantar_atuador();
         mover_tempo(-300, 399);
     }
     else if (luz(4) <= 19)
     {
         flag_vitima_m = true;
+        if (contador_vitima >= 2)
+        {
+            preparar_atuador();
+            mover(300, 300);
+            delay(799);
+            fechar_atuador();
+            levantar_atuador();
+            mover_tempo(-300, 399);
+        }
+    }
+    else
+    {
+        mover_tempo(-300, 399);
+    }
+}
+
+void check_vitima_frente()
+{
+    if (luz(4) >= 52)
+    {
+        viu_vitima = true;
+        preparar_atuador();
+        mover(300, 300);
+        delay(799);
+        fechar_atuador();
+        levantar_atuador();
+        mover_tempo(-300, 399);
+    }
+    else if (luz(4) <= 19)
+    {
+        flag_vitima_m = true;
+
+        if (contador_vitima >= 2)
+        {
+            viu_vitima = true;
+            preparar_atuador();
+            mover(300, 300);
+            delay(799);
+            fechar_atuador();
+            levantar_atuador();
+            mover_tempo(-300, 399);
+        }
+        else
+        {
+            preparar_atuador();
+            mover(300, 300);
+            delay(799);
+            fechar_atuador();
+            levantar_atuador();
+            mover_tempo(-300, 399);
+            girar_direita(90);
+            abaixar_atuador();
+            mover_tempo(300, 255);
+            mover_tempo(-300, 255);
+            levantar_atuador();
+            girar_esquerda(90);
+            alinhar_angulo();
+        }
     }
 }
 
@@ -590,8 +675,11 @@ void varredura_linear()
 
     while (millis() < tempo_varredura)
     {
+        viu_vitima = false;
         check_vitima_lateral();
+        if (viu_vitima) { break; }
         check_vitima_frente();
+        if (viu_vitima) { break; }
         mover(300, 300);
     }
 
@@ -600,7 +688,11 @@ void varredura_linear()
     if (tem_vitima())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
-        entregar_vitima(); // preciso fazer a contagem das vitimas pegas 
+        alinhar_angulo_45();
+        mover_tempo(300, 255);
+        alinhar_angulo_45();
+        entregar_vitima();
+        contador_vitima++;
     }
 
     mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
