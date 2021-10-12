@@ -83,8 +83,19 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
+        lugar = 2;
         alinhar_angulo();
         area_de_resgate();
+        lugar = 3;
+        while (lugar == 3)
+        {
+            print_luz_marker();
+            verifica_obstaculo();
+            verifica_saida();
+            seguir_linha();
+            verifica_calibrar();
+            verifica_rampa();
+        }
         travar();
     }
 }
