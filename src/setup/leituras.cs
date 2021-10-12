@@ -51,7 +51,7 @@ void console_led(byte linha, object texto, string cor, bool ligar_led = true)
     string texto_aux = texto.ToString();
     texto_aux = texto_aux.Replace("<:", $"<color={cor}>");
     texto_aux = texto_aux.Replace(":>", "</color>");
-    print(linha, "<align=center>" + texto_aux.ToString() + "</align>");
+    print(linha, texto_aux.ToString());
     if (!ligar_led)
     {
         bot.TurnLedOff();

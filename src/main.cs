@@ -20,9 +20,8 @@ void Main()
 {
     if (debug)
     {
-        alinhar_angulo();
-        mover_tempo(300, 3800);
-        travar();
+        som("B2", 64);
+        som("E3", 64);
     }
     else
     {
@@ -43,15 +42,24 @@ void Main()
                 {
                     mover(-250, -250);
                 }
-                mover_tempo(-300, 100);
+                parar();
+                mover_tempo(-300, 239);
                 abrir_atuador();
                 girar_baixo_atuador();
                 abaixar_atuador();
                 int init_time = millis();
+                timeout = millis() + 479;
                 while (!tem_kit())
                 {
                     mover(300, 300);
+                    if (millis() > timeout)
+                    {
+                        print(1, "timeout");
+                        break;
+                    }
                 }
+                mover(300, 300);
+                delay(192);
                 fechar_atuador();
                 girar_cima_atuador();
                 levantar_atuador();
@@ -75,6 +83,7 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
+        alinhar_angulo();
         area_de_resgate();
         travar();
     }

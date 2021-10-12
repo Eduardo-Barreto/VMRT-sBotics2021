@@ -170,7 +170,7 @@ void console_led(byte linha, object texto, string cor, bool ligar_led = true)
     string texto_aux = texto.ToString();
     texto_aux = texto_aux.Replace("<:", $"<color={cor}>");
     texto_aux = texto_aux.Replace(":>", "</color>");
-    print(linha, "<align=center>" + texto_aux.ToString() + "</align>");
+    print(linha, texto_aux.ToString());
     if (!ligar_led)
     {
         bot.TurnLedOff();
@@ -1262,9 +1262,10 @@ bool verifica_obstaculo(bool contar_update = true)
     if (contar_update && millis() < update_obstaculo) { return false; }
     if (ultra(0) < 35)
     {
-        limpar_console();
         parar();
-        console_led(2, "<:POSSÍVEL OBSTÁCULO:>", "azul");
+        som("B1", 64);
+        som("D2", 64);
+        console_led(2, "<:POSSÍVEL OBSTÁCULO:>\n\n", "azul");
         timeout = millis() + 1167;
         while (ultra(0) > 12)
         {
@@ -1278,9 +1279,10 @@ bool verifica_obstaculo(bool contar_update = true)
             }
         }
         parar();
-        limpar_console();
-        console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         alinhar_angulo();
+        limpar_console();
+        som("G2", 64);
+        console_led(1, "<:OBSTÁCULO CONFIRMADO:>", "azul");
         parar();
         while (ultra(0) > 12)
         {
@@ -1313,76 +1315,148 @@ bool verifica_obstaculo(bool contar_update = true)
                 }
             }
             alinhar_angulo();
-            mover_tempo(-150, 159);
+            mover_tempo(-150, 1000);
             alinhar_linha();
+            som("D2", 64);
             update_obstaculo = millis() + 50;
             ultima_correcao = millis();
             velocidade = velocidade_padrao;
         }
 
+        void finalizar_desvio_direita()
+        {
+            som("F#2", 64);
+            print(2, "Desvio à direita confirmado!");
+            girar_direita(15);
+            som("E2", 128);
+            mover_tempo(300, 191);
+            alinhar_pos_obstaculo();
+        }
+
+        void finalizar_desvio_reto()
+        {
+            som("D2", 64);
+            print(2, "Desvio reto confirmado!");
+            mover_tempo(300, 127);
+            alinhar_pos_obstaculo();
+        }
+
+        void finalizar_desvio_esquerda()
+        {
+            print(2, "Desvio à esquerda confirmado!");
+            mover_tempo(300, 127);
+            alinhar_pos_obstaculo();
+        }
+
+
         print(2, "Verificando desvio à direita...");
-        girar_direita(45);
-        mover_tempo(300, 383);
-        girar_esquerda(15);
+        girar_direita(50);
+        mover_tempo(300, 319);
 
-        timeout = millis() + 239;
-        while (millis() < timeout)
+        int objetivo = 0;
+        for (int i = 0; i < 5; i++)
         {
-            mover(250, 250);
-            if (preto(1) || preto(2))
+            objetivo = (int)(converter_graus(eixo_x() - 10));
+            while (!proximo(eixo_x(), objetivo))
             {
-                parar();
-                print(2, "Desvio à direita confirmado");
-                girar_direita(15);
-                mover_tempo(300, 159);
-                alinhar_pos_obstaculo();
-                return true;
+                mover(-1000, 1000); ;
+                if (preto(1) || preto(2))
+                {
+                    finalizar_desvio_direita();
+                    return true;
+                }
             }
+            parar();
+            objetivo = millis() + 159;
+            while (millis() < objetivo)
+            {
+                mover(300, 300);
+                if (preto(1) || preto(2))
+                {
+                    finalizar_desvio_direita();
+                    return true;
+                }
+            }
+            parar();
         }
-        parar();
+
+
         print(2, "Verificando desvio reto...");
-        girar_esquerda(5);
-        mover_tempo(300, 303);
-        girar_esquerda(25);
-        alinhar_angulo();
-        mover_tempo(300, 399);
-        girar_esquerda(60);
+        som("F#2", 64);
 
-        timeout = millis() + 399;
-        while (millis() < timeout)
+        for (int i = 0; i < 3; i++)
         {
-            mover(250, 250);
-            if (preto(1) || preto(2))
+            objetivo = (int)(converter_graus(eixo_x() - 15));
+            while (!proximo(eixo_x(), objetivo))
             {
-                parar();
-                print(2, "Desvio reto confirmado");
-                alinhar_pos_obstaculo();
-                return true;
+                mover(-1000, 1000); ;
+                if (preto(1) || preto(2))
+                {
+                    finalizar_desvio_reto();
+                    return true;
+                }
             }
+            parar();
+            objetivo = millis() + 159;
+            while (millis() < objetivo)
+            {
+                mover(300, 300);
+                if (preto(1) || preto(2))
+                {
+                    finalizar_desvio_reto();
+                    return true;
+                }
+            }
+            parar();
         }
-        parar();
 
-        print(2, "Desvio à esquerda");
-        girar_esquerda(30);
-        alinhar_angulo();
-        mover_tempo(300, 399);
-        girar_esquerda(45);
-        timeout = millis() + 399;
-        while (!(preto(1) || preto(2)))
+        for (int i = 0; i < 3; i++)
         {
-            mover(250, 250);
-            if (millis() > timeout)
+            objetivo = (int)(converter_graus(eixo_x() - 10));
+            while (!proximo(eixo_x(), objetivo))
+            {
+                mover(-1000, 1000); ;
+                if (preto(1) || preto(2))
+                {
+                    finalizar_desvio_reto();
+                    return true;
+                }
+            }
+            parar();
+            objetivo = millis() + 159;
+            while (millis() < objetivo)
+            {
+                mover(300, 300);
+                if (preto(1) || preto(2))
+                {
+                    finalizar_desvio_reto();
+                    return true;
+                }
+            }
+            parar();
+        }
+
+        print(2, "Verificando desvio à esquerda...");
+        som("E2", 64);
+        alinhar_angulo();
+        mover_tempo(300, 239);
+        girar_esquerda(45);
+
+        objetivo = millis() + 271;
+        while (millis() < objetivo)
+        {
+            mover(300, 300);
+            if (preto(1) || preto(2))
             {
                 break;
             }
         }
+        finalizar_desvio_esquerda();
         parar();
-        mover_tempo(300, 127);
-        alinhar_pos_obstaculo();
         return true;
 
-        travar();
     }
+
     return false;
 }
 
@@ -2616,9 +2690,8 @@ void Main()
 {
     if (debug)
     {
-        alinhar_angulo();
-        mover_tempo(300, 3800);
-        travar();
+        som("B2", 64);
+        som("E3", 64);
     }
     else
     {
@@ -2639,15 +2712,24 @@ void Main()
                 {
                     mover(-250, -250);
                 }
-                mover_tempo(-300, 100);
+                parar();
+                mover_tempo(-300, 239);
                 abrir_atuador();
                 girar_baixo_atuador();
                 abaixar_atuador();
                 int init_time = millis();
+                timeout = millis() + 479;
                 while (!tem_kit())
                 {
                     mover(300, 300);
+                    if (millis() > timeout)
+                    {
+                        print(1, "timeout");
+                        break;
+                    }
                 }
+                mover(300, 300);
+                delay(192);
                 fechar_atuador();
                 girar_cima_atuador();
                 levantar_atuador();
@@ -2671,6 +2753,7 @@ void Main()
         }
         limpar_console();
         print(2, "Sala de salvamento identificada");
+        alinhar_angulo();
         area_de_resgate();
         travar();
     }
