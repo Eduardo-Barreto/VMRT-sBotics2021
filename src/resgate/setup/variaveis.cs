@@ -64,7 +64,9 @@ int qualidade_x = 0,
     termino_saida2 = 0,
     tag_entrada = 0,
     tempo_varredura = 0,
-    contador_vitima = 0;
+    contador_vitima = 0,
+    ignorar_morta = 0,
+    ciclos = 0;
 
 // variaveis para mover_xy e mover_xy_costas
 float direcao_x,

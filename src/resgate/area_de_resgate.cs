@@ -37,10 +37,15 @@ void area_de_resgate()
     alinhar_angulo();
     mover_tempo(300, 191);
     alinhar_angulo();
-    while (true)
+
+    ciclos = 0;
+    while (ciclos < 5 && contador_vitima < 3)
     {
         varredura_linear();
+        ciclos++;
     }
+    mover_xy(xy_saida[x_baixo], xy_saida[y_baixo]);
+    alinhar_angulo();
 }
 
 void desenhar(byte objeto = 0)
@@ -552,10 +557,29 @@ void check_vitima_lateral()
         {
             mover_tempo(-300, 255);
         }
-
-        girar_objetivo(converter_graus(eixo_x() + 90));
-        viu_vitima = true;
-        buscar_vitima();
+        if (!flag_vitima_m)
+        {
+            girar_objetivo(converter_graus(eixo_x() + 90));
+            viu_vitima = true;
+            buscar_vitima();
+        }
+        else if (contador_vitima >= 2 || ciclos > 2)
+        {
+            girar_objetivo(converter_graus(eixo_x() + 90));
+            viu_vitima = true;
+            buscar_vitima();
+        }
+        else if (ignorar_morta >= 2)
+        {
+            girar_objetivo(converter_graus(eixo_x() + 90));
+            viu_vitima = true;
+            buscar_vitima();
+        }
+        else
+        {
+            mover_tempo(300, 399);
+            ignorar_morta++;
+        }
     }
 
     if (ultra_esquerda < medida_max && esq_anterior < medida_max && !proximo(ultra_esquerda, esq_anterior, 8))
@@ -568,10 +592,29 @@ void check_vitima_lateral()
         {
             mover_tempo(-300, 255);
         }
-
-        girar_objetivo(converter_graus(eixo_x() - 90));
-        viu_vitima = true;
-        buscar_vitima();
+        if (!flag_vitima_m)
+        {
+            girar_objetivo(converter_graus(eixo_x() - 90));
+            viu_vitima = true;
+            buscar_vitima();
+        }
+        else if (contador_vitima >= 2 || ciclos > 2)
+        {
+            girar_objetivo(converter_graus(eixo_x() - 90));
+            viu_vitima = true;
+            buscar_vitima();
+        }
+        else if (ignorar_morta >= 2)
+        {
+            girar_objetivo(converter_graus(eixo_x() - 90));
+            viu_vitima = true;
+            buscar_vitima();
+        }
+        else //colocar contador maior q 2 vitimas
+        {
+            mover_tempo(300, 399);
+            ignorar_morta++;
+        }
     }
 
     dir_anterior = ultra_direita;
@@ -587,24 +630,14 @@ void buscar_vitima()
     }
     if (luz(4) >= 52)
     {
-        preparar_atuador();
-        mover(300, 300);
-        delay(799);
-        fechar_atuador();
-        levantar_atuador();
-        mover_tempo(-300, 399);
+        pegar_vitima();
     }
     else if (luz(4) <= 19)
     {
         flag_vitima_m = true;
-        if (contador_vitima >= 2)
+        if (contador_vitima >= 2 || ciclos > 2)
         {
-            preparar_atuador();
-            mover(300, 300);
-            delay(799);
-            fechar_atuador();
-            levantar_atuador();
-            mover_tempo(-300, 399);
+            pegar_vitima();
         }
     }
     else
@@ -615,45 +648,28 @@ void buscar_vitima()
 
 void check_vitima_frente()
 {
-    if (luz(4) >= 52)
+    if (luz(4) >= 52 && temperatura() > 29)
     {
         viu_vitima = true;
-        preparar_atuador();
-        mover(300, 300);
-        delay(799);
-        fechar_atuador();
-        levantar_atuador();
-        mover_tempo(-300, 399);
+        pegar_vitima();
     }
     else if (luz(4) <= 19)
     {
         flag_vitima_m = true;
+        viu_vitima = true;
 
         if (contador_vitima >= 2)
         {
-            viu_vitima = true;
-            preparar_atuador();
-            mover(300, 300);
-            delay(799);
-            fechar_atuador();
-            levantar_atuador();
-            mover_tempo(-300, 399);
+            pegar_vitima();
         }
         else
         {
-            preparar_atuador();
-            mover(300, 300);
-            delay(799);
-            fechar_atuador();
-            levantar_atuador();
-            mover_tempo(-300, 399);
+            pegar_vitima();
             girar_direita(90);
             abaixar_atuador();
             mover_tempo(300, 255);
             mover_tempo(-300, 255);
             levantar_atuador();
-            girar_esquerda(90);
-            alinhar_angulo();
         }
     }
 }
@@ -666,13 +682,14 @@ void varredura_linear()
 
     if (xy_parede[x_baixo] == 400) // define o tempo que o robô procurara por vitimas com base na distancia
     {
-        tempo_varredura = millis() + 5500;
+        tempo_varredura = millis() + 5700;
     }
     else
     {
-        tempo_varredura = millis() + 4125;
+        tempo_varredura = millis() + 4400;
     }
 
+    ignorar_morta = 0;
     while (millis() < tempo_varredura)
     {
         viu_vitima = false;
@@ -681,8 +698,10 @@ void varredura_linear()
         check_vitima_frente();
         if (viu_vitima) { break; }
         mover(300, 300);
+        alinhar_angulo();
     }
 
+    alinhar_angulo_90();
     achar_robo();
 
     if (tem_vitima())

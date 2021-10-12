@@ -248,7 +248,7 @@ void mover_xy_costas(float x2, float y2)
     angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
     girar_objetivo(converter_graus(angulo_objetivo + 180));
     distancia_mover_xy = (float)(Math.Sqrt((Math.Pow(direcao_x, 2)) + (Math.Pow(direcao_y, 2))));
-    mover_tempo(-300, (int)(16 * (int)distancia_mover_xy) - 1, false);
+    mover_tempo(-300, (int)(16 * (int)distancia_mover_xy) - 257, false);
     xy_robo[x_baixo] = x2;
     xy_robo[y_baixo] = y2;
 }
@@ -259,11 +259,6 @@ void alinhar_angulo_45()
 
     int alinhamento = 0;
     float angulo = eixo_x();
-
-    if (angulo_reto())
-    {
-        return;
-    }
 
     if ((angulo > 0) && (angulo <= 90))
     {
@@ -280,6 +275,46 @@ void alinhar_angulo_45()
     else if ((angulo > 270) && (angulo <= 360))
     {
         alinhamento = 315;
+    }
+
+    girar_objetivo(alinhamento);
+
+    led("desligado");
+}
+
+void pegar_vitima()
+{
+    preparar_atuador();
+    timeout = millis() + 2000;
+    while (millis() < timeout && !tem_vitima())
+        mover(300, 300);
+    fechar_atuador();
+    levantar_atuador();
+    mover_tempo(-300, 399);
+}
+
+void alinhar_angulo_90()
+{
+    led("amarelo");
+
+    int alinhamento = 0;
+    float angulo = eixo_x();
+
+    if ((angulo > 0) && (angulo <= 90))
+    {
+        alinhamento = 0;
+    }
+    else if ((angulo > 90) && (angulo <= 180))
+    {
+        alinhamento = 180;
+    }
+    else if ((angulo > 180) && (angulo <= 270))
+    {
+        alinhamento = 180;
+    }
+    else if ((angulo > 270) && (angulo <= 360))
+    {
+        alinhamento = 0;
     }
 
     girar_objetivo(alinhamento);
