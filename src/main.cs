@@ -9,10 +9,10 @@ import("piso/elevados.cs");
 import("resgate/setup/variaveis.cs");
 import("resgate/setup/movimentacao.cs");
 import("resgate/area_de_resgate.cs");
-import("debug.cs");
+
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = true;
+bool debug = false;
 bool console = true;
 bool registro = true;
 

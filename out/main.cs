@@ -1611,7 +1611,8 @@ int qualidade_x = 0,
     ignorar_morta = 0,
     ciclos = 0,
     angulo_triangulo,
-    angulo_saida;
+    angulo_saida,
+    contador_timeout=0;
 
 // variaveis para mover_xy e mover_xy_costas
 float direcao_x,
@@ -1630,7 +1631,8 @@ float direcao_x,
       medida_max;
 
 bool flag_vitima_m = false,
-     viu_vitima = false;
+     viu_vitima = false,
+     flag_timeout = false;
 
 // metodos de movimentação para a area de resgate
 
@@ -1834,11 +1836,18 @@ void alcancar_saida()
         mover(300, 300);
     }
     limpar_console();
-    print(2, "Saindo!");
+    print(2, "Saindo! Vazando!");
     som("C2", 100);
+    timeout = millis() + 1500;
     while (verde(0) || verde(1) || verde(2) || verde(3))
     {
         mover(200, 200);
+        if (millis() > timeout)
+        {
+            levantar_atuador();
+            mover_tempo(300, 191);
+            break;
+        }
     }
     delay(159);
     parar();
@@ -1957,7 +1966,21 @@ void pegar_vitima()
     preparar_atuador();
     timeout = millis() + 2000;
     while (millis() < timeout && !tem_vitima())
+    {
         mover(300, 300);
+        if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
+        {
+            // Se identificar a fita cinza
+            // Para o loop
+            break;
+        }
+        if (verde(0) || verde(1) || verde(2) || verde(3))
+        {
+            // Se identificar a fita verde
+            // Para o loop
+            break;
+        }
+    }
     fechar_atuador();
     girar_cima_atuador();
     levantar_atuador();
@@ -2009,6 +2032,8 @@ void area_de_resgate()
     //bot.EraseConsoleFile();
     //desenhar();
 
+    print(1, $"triangulo esta em: {(int)xy_triangulo[x_baixo]}x; {(int)xy_triangulo[y_baixo]}y");
+
     if (tem_kit()) // caso o robô tenha entrado com o kit de resgate ele ira entregalo
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
@@ -2019,7 +2044,7 @@ void area_de_resgate()
     }
 
     mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
-    if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
+    if (xy_resgate[x_baixo] == raio_c) // condição para se alinhar para o lado correto conforme a parede escolhida
     {
         girar_objetivo(90);
     }
@@ -2028,16 +2053,37 @@ void area_de_resgate()
         girar_objetivo(270);
     }
     alinhar_angulo();
-    mover_tempo(-300, 191);
+    mover_tempo(-300, 207);
     alinhar_angulo();
-    mover_tempo(300, 191);
+    mover_tempo(300, 207);
     alinhar_angulo();
 
     ciclos = 0;
-    while (ciclos < 5 && contador_vitima < 3)
+    contador_timeout = 0;
+
+    while (ciclos < 5 && contador_vitima < 3 && contador_timeout < 2)
     {
+        print(2, $"ciclos de varredura: {ciclos}");
+        print(3, $"timeouts: {contador_timeout}");
         varredura_linear();
         ciclos++;
+    }
+    limpar_console();
+
+    if (contador_vitima < 3)
+    {
+        passar_vassoura();
+
+        if (tem_vitima())
+        {
+            achar_robo();
+            mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
+            girar_objetivo(angulo_triangulo);
+            mover_tempo(300, 255);
+            girar_objetivo(angulo_triangulo);
+            entregar_vitima();
+            mover_tempo(-300, 399);
+        }
     }
 
     achar_robo();
@@ -2516,11 +2562,11 @@ void procurar_parede_resgate()
 {
     if (proximo(xy_entrada[x_baixo], xy_parede[x_baixo], 160))
     {
-        xy_resgate[x_baixo] = xy_parede[x_baixo];
+        xy_resgate[x_baixo] = xy_parede[x_baixo] - raio_c;
     }
     else
     {
-        xy_resgate[x_baixo] = 0;
+        xy_resgate[x_baixo] = raio_c;
     }
 
     xy_resgate[y_baixo] = xy_parede[y_baixo] / 2;
@@ -2582,7 +2628,7 @@ void check_vitima_lateral()
             viu_vitima = true;
             buscar_vitima();
         }
-        else if (contador_vitima >= 2 || ciclos > 2)
+        else if (contador_vitima >= 2)
         {
             girar_objetivo(converter_graus(eixo_x() + 90));
             viu_vitima = true;
@@ -2617,7 +2663,7 @@ void check_vitima_lateral()
             viu_vitima = true;
             buscar_vitima();
         }
-        else if (contador_vitima >= 2 || ciclos > 2)
+        else if (contador_vitima >= 2)
         {
             girar_objetivo(converter_graus(eixo_x() - 90));
             viu_vitima = true;
@@ -2636,8 +2682,8 @@ void check_vitima_lateral()
         }
     }
 
-    if ((!proximo((ultra_esquerda - ultra_direita), 0, 50) && esq_anterior > medida_max && ultra_esquerda < medida_max)
-    || (!proximo((ultra_esquerda - ultra_direita), 0, 50) && dir_anterior > medida_max && ultra_direita < medida_max))
+    if ((!proximo((ultra_esquerda + ultra_direita), xy_parede[y_baixo], 50) && esq_anterior > medida_max && ultra_esquerda < medida_max)
+    || (!proximo((ultra_esquerda + ultra_direita), xy_parede[y_baixo], 50) && dir_anterior > medida_max && ultra_direita < medida_max))
     {
         mover_tempo(300, 111);
         if (ultra_direita < ultra_esquerda)
@@ -2704,6 +2750,18 @@ void buscar_vitima()
     while ((luz(4) < 52) && (luz(4) > 18) && (millis() < timeout))
     {
         mover(300, 300);
+        if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
+        {
+            // Se identificar a fita cinza
+            // Para o loop
+            break;
+        }
+        if (verde(0) || verde(1) || verde(2) || verde(3))
+        {
+            // Se identificar a fita verde
+            // Para o loop
+            break;
+        }
     }
     if (luz(4) >= 52)
     {
@@ -2753,7 +2811,7 @@ void check_vitima_frente()
 
 void varredura_linear()
 {
-
+    alinhar_angulo();
     dir_anterior = ultra(1);
     esq_anterior = ultra(2);
 
@@ -2767,7 +2825,9 @@ void varredura_linear()
     }
 
     ignorar_morta = 0;
-    while (millis() < tempo_varredura)
+    flag_timeout = false;
+
+    while (true)
     {
         viu_vitima = false;
         check_vitima_lateral();
@@ -2775,14 +2835,35 @@ void varredura_linear()
         check_vitima_frente();
         if (viu_vitima) { break; }
         mover(300, 300);
-        alinhar_angulo();
+
+        if (millis() > tempo_varredura)
+        {
+            flag_timeout = true;
+            contador_timeout++;
+            break;
+        }
+        if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
+        {
+            mover_tempo(-300, 111);
+            // Se identificar a fita cinza
+            // Para o loop
+            break;
+        }
+        if (verde(0) || verde(1) || verde(2) || verde(3))
+        {
+            mover_tempo(-300, 111);
+            // Se identificar a fita verde
+            // Para o loop
+            break;
+        }
     }
 
-    alinhar_angulo_90();
-    achar_robo();
+
 
     if (tem_vitima())
     {
+        alinhar_angulo_90();
+        achar_robo();
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
         girar_objetivo(angulo_triangulo);
         mover_tempo(300, 255);
@@ -2791,8 +2872,78 @@ void varredura_linear()
         contador_vitima++;
     }
 
-    mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
-    if (xy_resgate[x_baixo] == 0) // condição para se alinhar para o lado correto conforme a parede escolhida
+    if (!flag_timeout)
+    {
+        alinhar_angulo_90();
+        achar_robo();
+        mover_xy_costas(xy_resgate[x_baixo], xy_resgate[y_baixo]); // o robô vai até a parede inicial do resgate 
+    }
+    else
+    {
+        short angulo_inicial = eixo_x();
+        // Seta o tempo inicial como 200ms, esse é o tempo destinado para o robô sair da inércia
+        int tempo_check = millis() + 200;
+        // Flag de verificações configurada como falso, quando ele passar do tempo_check será verdadeiro
+        bool flag_check = false;
+
+        timeout = millis() + 5200;
+        while (millis() < timeout)
+        {
+            mover(-300, -300);
+            if (!flag_check && millis() > tempo_check)
+            {
+                // Se a flag era falsa e já passou o tempo inicial
+                // Seta a flag como verdadeiro e ele ja começa a verificar o travamento
+                flag_check = true;
+            }
+
+            if (flag_check && forca_motor() < 0.3)
+            {
+                // Se a flag ja for verdadeira e a força atual for menor que 0.3
+                // Para o loop
+                break;
+            }
+            if (flag_check && !((eixo_x() < converter_graus(angulo_inicial + 10)) || (eixo_x() > converter_graus(angulo_inicial - 10))))
+            {
+                // Se a flag ja for verdadeira e o angulo atual for muito diferente do angulo inicial
+                break;
+            }
+            if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
+            {
+                // Se identificar a fita cinza
+                while ((!fita_cinza(0) && !fita_cinza(1) && !fita_cinza(2) && !fita_cinza(3)))
+                {
+                    mover(-250, -250);
+                }
+                while ((fita_cinza(0) || fita_cinza(1) || fita_cinza(2) || fita_cinza(3)))
+                {
+                    mover(-250, -250);
+                }
+                delay(239);
+                // Para o loop
+                break;
+            }
+            if (verde(0) || verde(1) || verde(2) || verde(3))
+            {
+                // Se identificar a fita cinza
+                while ((!verde(0) && !verde(1) && !verde(2) && !verde(3)))
+                {
+                    mover(-250, -250);
+                }
+                while ((verde(0) || verde(1) || verde(2) || verde(3)))
+                {
+                    mover(-250, -250);
+                }
+                delay(239);
+                // Para o loop
+                break;
+            }
+        }
+        parar();
+    }
+
+
+    if (xy_resgate[x_baixo] == raio_c) // condição para se alinhar para o lado correto conforme a parede escolhida
     {
         girar_objetivo(90);
     }
@@ -2800,6 +2951,11 @@ void varredura_linear()
     {
         girar_objetivo(270);
     }
+    alinhar_angulo();
+    mover_tempo(-300, 207);
+    alinhar_angulo();
+    mover_tempo(300, 207);
+    alinhar_angulo();
 }
 
 void sair(float x2, float y2)
@@ -2809,6 +2965,7 @@ void sair(float x2, float y2)
     angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
     girar_objetivo(converter_graus(angulo_objetivo));
     alcancar_saida();
+    print(2, "Vazei!");
 }
 
 void passar_vassoura()
@@ -2848,12 +3005,15 @@ void passar_vassoura()
                 motivo = "forca";
                 break;
             }
-            if (flag_check && !proximo(eixo_x(), angulo_inicial, 3))
+
+            if (flag_check && !((eixo_x() < converter_graus(angulo_inicial + 10)) || (eixo_x() > converter_graus(angulo_inicial - 10))))
             {
                 // Se a flag ja for verdadeira e o angulo atual for muito diferente do angulo inicial
                 motivo = "direcao";
+                alinhar_angulo();
                 break;
             }
+
             if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
             {
                 // Se identificar a fita cinza
@@ -2908,8 +3068,9 @@ void passar_vassoura()
     }
 
     // Alinha para começar a varredura
+    mover_tempo(-300, 239);
     objetivo_direita(converter_graus(eixo_x() + 90));
-    preparar_atuador();
+    preparar_atuador(true);
     chegar_final();
     // Após ir até o fim da direita, se alinha para começar o loop
     objetivo_esquerda(converter_graus(eixo_x() - 90));
@@ -2919,11 +3080,15 @@ void passar_vassoura()
     // Loop para varrer os cantos
     for (int i = 0; i < 3; i++)
     {
-        preparar_atuador();
+        preparar_atuador(true);
         alinhar_angulo();
         chegar_final();
         mover_tempo(300, 191);
         alinhar_angulo();
+        if (tem_vitima())
+        {
+            break;
+        }
         if (luz(4) < 5)
         {
             alinhar_angulo();
@@ -2937,15 +3102,16 @@ void passar_vassoura()
         }
         else
         {
-            objetivo_direita(converter_graus(eixo_x() + 90));
-            preparar_atuador();
+            objetivo_direita(converter_graus(eixo_x() + 60));
+            mover_tempo(300, 191);
+            objetivo_direita(converter_graus(eixo_x() + 30));
         }
     }
-    travar();
 }
 
+
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = true;
+bool debug = false;
 bool console = true;
 bool registro = true;
 

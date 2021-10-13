@@ -200,11 +200,18 @@ void alcancar_saida()
         mover(300, 300);
     }
     limpar_console();
-    print(2, "Saindo!");
+    print(2, "Saindo! Vazando!");
     som("C2", 100);
+    timeout = millis() + 1500;
     while (verde(0) || verde(1) || verde(2) || verde(3))
     {
         mover(200, 200);
+        if (millis() > timeout)
+        {
+            levantar_atuador();
+            mover_tempo(300, 191);
+            break;
+        }
     }
     delay(159);
     parar();
@@ -323,7 +330,21 @@ void pegar_vitima()
     preparar_atuador();
     timeout = millis() + 2000;
     while (millis() < timeout && !tem_vitima())
+    {
         mover(300, 300);
+        if (fita_cinza(0) && fita_cinza(1) && fita_cinza(2) && fita_cinza(3))
+        {
+            // Se identificar a fita cinza
+            // Para o loop
+            break;
+        }
+        if (verde(0) || verde(1) || verde(2) || verde(3))
+        {
+            // Se identificar a fita verde
+            // Para o loop
+            break;
+        }
+    }
     fechar_atuador();
     girar_cima_atuador();
     levantar_atuador();

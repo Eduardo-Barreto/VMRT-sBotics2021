@@ -68,7 +68,8 @@ int qualidade_x = 0,
     ignorar_morta = 0,
     ciclos = 0,
     angulo_triangulo,
-    angulo_saida;
+    angulo_saida,
+    contador_timeout=0;
 
 // variaveis para mover_xy e mover_xy_costas
 float direcao_x,
@@ -87,4 +88,5 @@ float direcao_x,
       medida_max;
 
 bool flag_vitima_m = false,
-     viu_vitima = false;
+     viu_vitima = false,
+     flag_timeout = false;
