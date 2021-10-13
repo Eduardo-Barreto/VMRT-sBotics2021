@@ -9,9 +9,10 @@ import("piso/elevados.cs");
 import("resgate/setup/variaveis.cs");
 import("resgate/setup/movimentacao.cs");
 import("resgate/area_de_resgate.cs");
+import("debug.cs");
 
 // Variáveis de controle para ligar/desligar o debug e console
-bool debug = false;
+bool debug = true;
 bool console = true;
 bool registro = true;
 
@@ -20,8 +21,11 @@ void Main()
 {
     if (debug)
     {
-        som("B2", 64);
-        som("E3", 64);
+        levantar_atuador();
+        alinhar_ultra(122);
+        girar_direita(90);
+        mover_tempo(-300, 300);
+        passar_vassoura();
     }
     else
     {

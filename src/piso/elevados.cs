@@ -44,7 +44,7 @@ bool verifica_rampa()
         parar();
         int tempo_subir = millis() + 1781;
         bool flag_subiu = false;
-        int tempo_check_gangorra = millis() + 303;
+        int tempo_check_gangorra = millis() + 191;
         while (millis() < tempo_subir)
         {
             if (millis() > tempo_check_gangorra && proximo(eixo_y(), 340))

@@ -109,6 +109,19 @@ bool verde(byte sensor)
     return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)) || cor(sensor) == "VERDE");
 }
 
+bool fita_cinza(int sensor)
+{
+    float val_vermelho = bot.ReturnRed(sensor);
+    float val_verde = bot.ReturnGreen(sensor);
+    float val_azul = bot.ReturnBlue(sensor);
+    byte media_vermelho = 30, media_verde = 32, media_azul = 37;
+    int RGB = (int)(val_vermelho + val_verde + val_azul);
+    sbyte vermelho = (sbyte)(map(val_vermelho, 0, RGB, 0, 100));
+    sbyte verde = (sbyte)(map(val_verde, 0, RGB, 0, 100));
+    sbyte azul = (sbyte)(map(val_azul, 0, RGB, 0, 100));
+    return ((proximo(vermelho, media_vermelho, 2) && proximo(verde, media_verde, 2) && proximo(azul, media_azul, 2)));
+}
+
 bool preto(byte sensor)
 {
     if (sensor == 1 || sensor == 2)
