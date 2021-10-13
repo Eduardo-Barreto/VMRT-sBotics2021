@@ -44,8 +44,11 @@ void area_de_resgate()
         varredura_linear();
         ciclos++;
     }
-    mover_xy(xy_saida[x_baixo], xy_saida[y_baixo]);
-    alinhar_angulo();
+
+    achar_robo();
+    sair(xy_saida[x_baixo], xy_saida[y_baixo]);
+    mover_tempo(-300, 63);
+    alinhar_linha();
 }
 
 void desenhar(byte objeto = 0)
@@ -175,7 +178,7 @@ void varrer_mapear()
     gerar_xy();
 
     //checa qualidade do mapeamento
-    while (qualidade_x < 30 || qualidade_y < 30)
+    while (qualidade_x < 27 || qualidade_y < 30)
     {
         mapear_xy();
         bot.EraseConsoleFile();
@@ -461,6 +464,23 @@ void identificar_saida()
         }
     }
 
+    if (xy_saida[x_baixo] == 0)
+    {
+        angulo_saida = 270;
+    }
+    else if (xy_saida[x_baixo] == xy_parede[x_baixo])
+    {
+        angulo_saida = 90;
+    }
+    else if (xy_saida[y_baixo] == 0)
+    {
+        angulo_saida = 180;
+    }
+    else
+    {
+        angulo_saida = 0;
+    }
+
 }
 
 void verificar_salvamento()
@@ -471,24 +491,28 @@ void verificar_salvamento()
         {
             xy_triangulo[x_baixo] = 50;
             xy_triangulo[y_baixo] = 50;
+            angulo_triangulo = 225;
         }
         if ((xy_zerado[i, x_baixo] > xy_parede[x_baixo] - 85) && (xy_zerado[i, y_baixo] > xy_parede[y_baixo] - 85)
          && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 15) && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 15))
         {
             xy_triangulo[x_baixo] = xy_parede[x_baixo] - 50;
             xy_triangulo[y_baixo] = xy_parede[y_baixo] - 50;
+            angulo_triangulo = 45;
         }
         if ((xy_zerado[i, x_baixo] < 85) && (xy_zerado[i, x_baixo] > 15) && (xy_zerado[i, y_baixo] > xy_parede[y_baixo] - 85)
         && (xy_zerado[i, y_baixo] < xy_parede[y_baixo] - 15))
         {
             xy_triangulo[x_baixo] = 50;
             xy_triangulo[y_baixo] = xy_parede[y_baixo] - 50;
+            angulo_triangulo = 315;
         }
         if ((xy_zerado[i, y_baixo] < 85) && (xy_zerado[i, y_baixo] > 15) && (xy_zerado[i, x_baixo] > xy_parede[x_baixo] - 85)
         && (xy_zerado[i, x_baixo] < xy_parede[x_baixo] - 15))
         {
             xy_triangulo[x_baixo] = xy_parede[x_baixo] - 50;
             xy_triangulo[y_baixo] = 50;
+            angulo_triangulo = 135;
         }
     }
 }
@@ -510,7 +534,7 @@ void procurar_parede_resgate()
 
 void achar_robo()
 {
-    alinhar_angulo();
+    alinhar_angulo_90();
     leitura_frente = ultra(0);
     angulo_leitura_frente = eixo_x();
 
@@ -617,6 +641,64 @@ void check_vitima_lateral()
         }
     }
 
+    if ((!proximo((ultra_esquerda - ultra_direita), 0, 50) && esq_anterior > medida_max && ultra_esquerda < medida_max)
+    || (!proximo((ultra_esquerda - ultra_direita), 0, 50) && dir_anterior > medida_max && ultra_direita < medida_max))
+    {
+        mover_tempo(300, 111);
+        if (ultra_direita < ultra_esquerda)
+        {
+            if (!flag_vitima_m)
+            {
+                girar_objetivo(converter_graus(eixo_x() + 90));
+                viu_vitima = true;
+                buscar_vitima();
+            }
+            else if (contador_vitima >= 2 || ciclos > 2)
+            {
+                girar_objetivo(converter_graus(eixo_x() + 90));
+                viu_vitima = true;
+                buscar_vitima();
+            }
+            else if (ignorar_morta >= 2)
+            {
+                girar_objetivo(converter_graus(eixo_x() + 90));
+                viu_vitima = true;
+                buscar_vitima();
+            }
+            else
+            {
+                mover_tempo(300, 399);
+                ignorar_morta++;
+            }
+        }
+        else
+        {
+            if (!flag_vitima_m)
+            {
+                girar_objetivo(converter_graus(eixo_x() - 90));
+                viu_vitima = true;
+                buscar_vitima();
+            }
+            else if (contador_vitima >= 2 || ciclos > 2)
+            {
+                girar_objetivo(converter_graus(eixo_x() - 90));
+                viu_vitima = true;
+                buscar_vitima();
+            }
+            else if (ignorar_morta >= 2)
+            {
+                girar_objetivo(converter_graus(eixo_x() - 90));
+                viu_vitima = true;
+                buscar_vitima();
+            }
+            else //colocar contador maior q 2 vitimas
+            {
+                mover_tempo(300, 399);
+                ignorar_morta++;
+            }
+        }
+    }
+
     dir_anterior = ultra_direita;
     esq_anterior = ultra_esquerda;
 }
@@ -707,9 +789,9 @@ void varredura_linear()
     if (tem_vitima())
     {
         mover_xy(xy_triangulo[x_baixo], xy_triangulo[y_baixo]);
-        alinhar_angulo_45();
+        girar_objetivo(angulo_triangulo);
         mover_tempo(300, 255);
-        alinhar_angulo_45();
+        girar_objetivo(angulo_triangulo);
         entregar_vitima();
         contador_vitima++;
     }
@@ -723,4 +805,13 @@ void varredura_linear()
     {
         girar_objetivo(270);
     }
+}
+
+void sair(float x2, float y2)
+{
+    direcao_x = x2 - xy_robo[x_baixo];
+    direcao_y = y2 - xy_robo[y_baixo];
+    angulo_objetivo = (float)((Math.Atan2(direcao_x, direcao_y)) * (180 / Math.PI));
+    girar_objetivo(converter_graus(angulo_objetivo));
+    alcancar_saida();
 }

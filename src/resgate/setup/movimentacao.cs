@@ -87,16 +87,18 @@ void preparar_atuador(bool apenas_sem_vitima = false)
     {
         if (!tem_vitima())
         {
-            mover_tempo(-300, 399);
-            abaixar_atuador();
+            mover_tempo(-300, 639);
             abrir_atuador();
+            girar_baixo_atuador();
+            abaixar_atuador();
         }
     }
     else
     {
-        mover_tempo(-300, 399);
-        abaixar_atuador();
+        mover_tempo(-300, 639);
+        girar_baixo_atuador();
         abrir_atuador();
+        abaixar_atuador();
     }
 }
 
@@ -191,11 +193,8 @@ void mover_travar_ultra(short velocidade = 300, short alvo = 25)
 
 void alcancar_saida()
 {
-    mover_tempo(300, 500);
-    mover_tempo(-300, 500);
-    parar();
+
     abaixar_atuador();
-    delay(300);
     while (!verde(0) && !verde(1) && !verde(2) && !verde(3))
     {
         mover(300, 300);
@@ -203,16 +202,53 @@ void alcancar_saida()
     limpar_console();
     print(2, "Saindo!");
     som("C2", 100);
-
     while (verde(0) || verde(1) || verde(2) || verde(3))
+    {
         mover(200, 200);
-    delay(150);
+    }
+    delay(159);
     parar();
-    mover(200, 200);
-    delay(16);
-    parar();
-    delay(300);
-    lugar = 3;
+
+    levantar_atuador();
+
+    if (angulo_saida > eixo_x())
+    {
+        if (((float)Math.Abs(angulo_saida - eixo_x())) > 180)
+        {
+            while (!preto(1) && !preto(2))
+            {
+                mover(-1000, 1000);
+            }
+            parar();
+        }
+        else
+        {
+            while (!preto(1) && !preto(2))
+            {
+                mover(1000, -1000);
+            }
+            parar();
+        }
+    }
+    else
+    {
+        if (((float)Math.Abs(angulo_saida - eixo_x())) > 180)
+        {
+            while (!preto(1) && !preto(2))
+            {
+                mover(1000, -1000);
+            }
+            parar();
+        }
+        else
+        {
+            while (!preto(1) && !preto(2))
+            {
+                mover(-1000, 1000);
+            }
+            parar();
+        }
+    }
 }
 
 void girar_objetivo(float angulo_para_ir)
@@ -289,6 +325,7 @@ void pegar_vitima()
     while (millis() < timeout && !tem_vitima())
         mover(300, 300);
     fechar_atuador();
+    girar_cima_atuador();
     levantar_atuador();
     mover_tempo(-300, 399);
 }
